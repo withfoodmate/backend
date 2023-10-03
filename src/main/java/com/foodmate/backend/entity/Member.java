@@ -1,25 +1,56 @@
 package com.foodmate.backend.entity;
 
-import lombok.Getter;
+import com.foodmate.backend.enums.MemberLoginType;
+import com.foodmate.backend.enums.MemberRole;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
-
-@Getter
 @Entity
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String email;
+
     private String nickname;
+
+    private String password;
 
     private String image;
 
     private long likes;
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole memberRole;
+
+    @Enumerated(EnumType.STRING)
+    private MemberLoginType memberLoginType;
+
+    private LocalDateTime registeredDate;
+
+    private LocalDateTime updatedDate;
+
+    private LocalDateTime isDeleted;
+
+    private LocalDateTime banDate;
+
+    private String emailAuthKey;
+
+    private LocalDateTime emailAuthDate;
+
+    private Boolean isEmailAuth;
+
+    private String refreshToken;
 
 }

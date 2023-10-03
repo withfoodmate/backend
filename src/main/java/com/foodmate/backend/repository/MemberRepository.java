@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -14,6 +15,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // RankingServiceImpl - 좋아요 랭킹
     List<Member> findTop10ByOrderByLikesDesc();
 
+    // 이메일을 통해 회원 찾기
+    Optional<Member> findByEmail(String email);
+  
     // RankingServiceImpl - 모임왕 랭킹
     @Query("SELECT m.id, m.nickname, m.image, COUNT(fg.member) AS count " +
             "FROM Member m " +
@@ -23,5 +27,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "GROUP BY m.id, m.nickname, m.image " +
             "ORDER BY COUNT(fg.member) DESC")
     List<Object[]> findTop10MemberWithCount(Pageable pageable);
+
 
 }
