@@ -37,13 +37,10 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public String patchProfileImage(Authentication authentication, MultipartFile imageFile) throws IOException {
         /* 사용자가 없을 시 예외 처리 */
-//        Member member = memberRepository.findByEmail(authentication.getName())
-//                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
-
-        Member member = memberRepository.findByEmail("ckgus254@naver.com")
+        Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
 
-        /* 기존 이미지가 null이 아니면,
+       /* 기존 이미지가 null이 아니면,
        있던 프로필 정보를 삭제하기 위한 s3 삭제 */
         if (isProfileImage(member.getImage())) {
             s3Deleter.deleteObject(getImageObjectKey(member.getImage()));
@@ -53,6 +50,8 @@ public class MemberServiceImpl implements MemberService {
         uploadProfileImage(member, imageFile);
         return "프로필 사진 수정 완료";
     }
+
+
 
     /**
      *
