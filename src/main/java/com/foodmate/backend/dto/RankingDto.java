@@ -14,4 +14,13 @@ public class RankingDto {
         private long likesCount;
     }
 
+    @Getter
+    @Builder
+    public static class Meeting {
+        private Long memberId;
+        private String nickname;
+        private String image;
+        private long count;
+    }
+
 }

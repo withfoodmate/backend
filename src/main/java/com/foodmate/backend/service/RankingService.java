@@ -9,4 +9,7 @@ public interface RankingService {
     // 좋아요 랭킹
     List<RankingDto.Likes> showLikesRanking();
 
+    // 모임왕 랭킹
+    List<RankingDto.Meeting> showMeetingRanking();
+
 }
