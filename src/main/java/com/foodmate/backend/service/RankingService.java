@@ -15,4 +15,7 @@ public interface RankingService {
     // 많이찾는 식당 랭킹
     List<RankingDto.Store> showStoreRanking();
 
+    // 음식 카테고리 랭킹
+    List<RankingDto.Food> showFoodRanking();
+
 }
