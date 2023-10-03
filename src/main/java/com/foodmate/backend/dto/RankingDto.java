@@ -23,4 +23,12 @@ public class RankingDto {
         private long count;
     }
 
+    @Getter
+    @Builder
+    public static class Store {
+        private String storeName;
+        private String address;
+        private long count;
+    }
+
 }
