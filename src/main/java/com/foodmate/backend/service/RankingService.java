@@ -12,4 +12,7 @@ public interface RankingService {
     // 모임왕 랭킹
     List<RankingDto.Meeting> showMeetingRanking();
 
+    // 많이찾는 식당 랭킹
+    List<RankingDto.Store> showStoreRanking();
+
 }
