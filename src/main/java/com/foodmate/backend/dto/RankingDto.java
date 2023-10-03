@@ -31,4 +31,12 @@ public class RankingDto {
         private long count;
     }
 
+    @Getter
+    @Builder
+    public static class Food {
+        private String foodName;
+        private String image;
+        private long count;
+    }
+
 }
