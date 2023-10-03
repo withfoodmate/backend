@@ -29,9 +29,10 @@ public class RankingController {
         return ResponseEntity.ok(rankingService.showMeetingRanking());
     }
 
+    // 많이찾는 식당 랭킹
     @GetMapping("/store")
-    public ResponseEntity<?> showStoreRanking() {
-        return ResponseEntity.ok("");
+    public ResponseEntity<List<RankingDto.Store>> showStoreRanking() {
+        return ResponseEntity.ok(rankingService.showStoreRanking());
     }
 
     @GetMapping("/food")
