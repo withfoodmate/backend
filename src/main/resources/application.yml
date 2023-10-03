@@ -1,0 +1,82 @@
+spring:
+  datasource:
+    url: jdbc:mysql://3.37.207.7/foodmate
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${AWS_DB_USER}
+    password: ${AWS_DB_PASSWORD}
+
+    servlet:
+      multipart:
+        max-file-size: 10MB
+        max-request-size: 10MB
+      main:
+        allow-bean-definition-overriding: true
+
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_ID}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            scope:
+              - account_email
+              - profile_nickname
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            client-name: Kakao
+            client-authentication-method: POST
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+  redis:
+    host: localhost
+    port: 6379
+
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace
+    org.springframework.security: debug
+
+jwt:
+  secret: ${JWT_SECRET}
+
+  access:
+    header: Authorization
+
+  refresh:
+    header: Authorization-refresh
+
+
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_S3_NAME}
+    stack.auto: false
+    region.static: ${AWS_REGION}
+    credentials:
+      accessKey: ${AWS_S3_ACCESS_KEY}
+      secretKey: ${AWS_S3_SECRET_KEY}
