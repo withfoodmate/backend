@@ -23,9 +23,10 @@ public class RankingController {
         return ResponseEntity.ok(rankingService.showLikesRanking());
     }
 
+    // 모임왕 랭킹
     @GetMapping("/meeting")
-    public ResponseEntity<?> showMeetingRanking() {
-        return ResponseEntity.ok("");
+    public ResponseEntity<List<RankingDto.Meeting>> showMeetingRanking() {
+        return ResponseEntity.ok(rankingService.showMeetingRanking());
     }
 
     @GetMapping("/store")
