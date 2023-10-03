@@ -3,6 +3,7 @@ package com.foodmate.backend.service.impl;
 import com.foodmate.backend.dto.RankingDto;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.repository.FoodGroupRepository;
+import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.service.RankingService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class RankingServiceImpl implements RankingService {
 
     private final MemberRepository memberRepository;
     private final FoodGroupRepository foodGroupRepository;
+    private final FoodRepository foodRepository;
 
     // 좋아요 랭킹
     @Override
@@ -71,6 +73,25 @@ public class RankingServiceImpl implements RankingService {
             result.add(RankingDto.Store.builder()
                     .storeName((String) item[0])
                     .address((String) item[1])
+                    .count((long) item[2])
+                    .build());
+        }
+
+        return result;
+    }
+
+    // 음식 카테고리 랭킹
+    @Override
+    public List<RankingDto.Food> showFoodRanking() {
+
+        List<RankingDto.Food> result = new ArrayList<>();
+
+        List<Object[]> list = foodRepository.findTop10FoodWithCount(PageRequest.of(0, 10));
+
+        for (Object[] item : list) {
+            result.add(RankingDto.Food.builder()
+                    .foodName((String) item[0])
+                    .image((String) item[1])
                     .count((long) item[2])
                     .build());
         }
