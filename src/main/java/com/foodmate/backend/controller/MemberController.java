@@ -24,7 +24,6 @@ public class MemberController {
      */
     @GetMapping("/email")
     public ResponseEntity<Boolean> checkDuplicateEmail(@RequestBody MemberDto.request request){
-        log.error(request.getEmail());
         return ResponseEntity.ok(memberService.checkDuplicateEmail(request.getEmail()));
     }
 }
