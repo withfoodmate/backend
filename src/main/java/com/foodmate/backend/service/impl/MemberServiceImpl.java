@@ -67,11 +67,11 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
-     * @param imgUrl
+     * @param imageUrl
      * @return s3에 있는 objectKey를 찾기위한 메서드
      */
-    private String getImageObjectKey(String imgUrl){
-        StringTokenizer st = new StringTokenizer(imgUrl,"/");
+    private String getImageObjectKey(String imageUrl){
+        StringTokenizer st = new StringTokenizer(imageUrl,"/");
         StringBuilder objectKey = new StringBuilder(s3BucketFolderName);
         String str = "";
         while(st.hasMoreTokens()){
