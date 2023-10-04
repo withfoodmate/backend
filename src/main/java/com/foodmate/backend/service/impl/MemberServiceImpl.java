@@ -4,6 +4,7 @@ import com.foodmate.backend.dto.MemberDto;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
+import com.foodmate.backend.enums.EmailContents;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.MemberException;
@@ -271,5 +272,18 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.save(member);
 
         return true;
+    }
+
+    /**
+     * 인증 메일 전송 메서드
+     * @param request
+     * @param uuid
+     */
+    private void sendMail(MemberDto.CreateMemberRequest request, String uuid){
+        mailComponents.sendMail(
+                request.getEmail(),
+                EmailContents.WELCOME.getSubject(),
+                EmailContents.WELCOME.getText().replace("{uuid}", uuid)
+        );
     }
 }
