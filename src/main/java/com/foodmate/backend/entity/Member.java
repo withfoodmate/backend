@@ -51,4 +51,9 @@ public class Member {
 
     private String refreshToken;
 
+
+    public void updateRefreshToken(String updateRefreshToken) {
+        this.refreshToken = updateRefreshToken;
+    }
+
 }
