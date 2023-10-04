@@ -11,4 +11,6 @@ public interface GroupService {
 
     String updateGroup(Long groupId, Authentication authentication, GroupDto.Request request);
 
+    String deleteGroup(Long groupId, Authentication authentication);
+
 }
