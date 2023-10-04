@@ -19,6 +19,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -122,6 +123,33 @@ public class GroupServiceImpl implements GroupService {
         foodGroupRepository.save(group);
 
         return "모임 수정 완료";
+    }
+
+    // TODO 삭제된 모임의 댓글 대댓글 일괄삭제 - 스케쥴링으로 하루에 한번?
+    // 특정 모임 삭제
+    @Transactional
+    @Override
+    public String deleteGroup(Long groupId, Authentication authentication) {
+
+        FoodGroup group = validateGroupId(groupId);
+
+        Member member = getMember(authentication);
+
+        // 해당 모임 생성자만 삭제 가능
+        if (group.getMember().getId() != member.getId()) {
+            throw new GroupException(Error.NO_DELETE_PERMISSION_GROUP);
+        }
+
+        group.setIsDeleted(LocalDateTime.now());
+        foodGroupRepository.save(group);
+
+        // 해당 모임에 신청한 모임신청목록들의 상태를 모임취소로 일괄 변경
+        enrollmentRepository.changeStatusByGroupId(groupId, EnrollmentStatus.GROUP_CANCEL);
+
+        // TODO 채팅방 삭제 - 그룹 채팅 기능 구현 후 보완할 것
+        chatRoomRepository.deleteByFoodGroupId(groupId);
+
+        return "모임 삭제 완료";
     }
 
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
