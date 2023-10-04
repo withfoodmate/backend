@@ -44,19 +44,6 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
-     * @param email
-     * @return 현재 사용중인 email 이면 false 리턴
-     *         아니면 true
-     */
-    @Override
-    public Boolean checkDuplicateEmail(String email) {
-        if(memberRepository.findByEmail(email).isPresent()){
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * @param authentication
      * @param imageFile
      * 사용자에게 사진파일을 받아와 프로필 이미지 변경
