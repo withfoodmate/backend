@@ -29,4 +29,12 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroupDetail(groupId));
     }
 
+    // 특정 모임 수정
+    @PutMapping("/{groupId}")
+    public ResponseEntity<String> updateGroup(@PathVariable Long groupId,
+                                              Authentication authentication,
+                                              @RequestBody @Valid GroupDto.Request request) {
+        return ResponseEntity.ok(groupService.updateGroup(groupId, authentication, request));
+    }
+
 }

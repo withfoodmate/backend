@@ -41,22 +41,14 @@ public class GroupServiceImpl implements GroupService {
 
         Member member = getMember(authentication);
 
-        // 푸드 카테고리 체크
-        Food food = foodRepository.findByType(request.getFood())
-                .orElseThrow(() -> new FoodException(Error.FOOD_NOT_FOUND));
+        // 입력된 음식 정보 올바른지 체크
+        Food food = validateFood(request.getFood());
 
-        // 모임일시
-        LocalDateTime groupDateTime = request.getDate().atTime(request.getTime());
-
-        // 현재시간으로부터 한시간 이후 ~ 한달 이내의 모임만 생성 가능
-        if (groupDateTime.isBefore(LocalDateTime.now().plusHours(RESERVATION_INTERVAL_HOUR)) ||
-                groupDateTime.isAfter(LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH))) {
-            throw new GroupException(Error.OUT_OF_DATE_RANGE);
-        }
+        // 입력된 모임일시 올바른지 체크
+        LocalDateTime groupDateTime = validateDateTime(request);
 
         // 좌표 생성
-        Point storeLocation = new GeometryFactory().createPoint(
-                new Coordinate(Double.parseDouble(request.getLongitude()), Double.parseDouble(request.getLatitude())));
+        Point storeLocation = getPoint(request.getLatitude(), request.getLongitude());
 
         FoodGroup foodGroup = FoodGroup.builder()
                 .member(member)
@@ -95,6 +87,43 @@ public class GroupServiceImpl implements GroupService {
         return GroupDto.DetailResponse.fromEntity(group, current, chatRoom);
     }
 
+    // 특정 모임 수정
+    @Override
+    public String updateGroup(Long groupId, Authentication authentication, GroupDto.Request request) {
+
+        FoodGroup group = validateGroupId(groupId);
+
+        Member member = getMember(authentication);
+
+        // 해당 모임 생성자만 수정 가능
+        if (group.getMember().getId() != member.getId()) {
+            throw new GroupException(Error.NO_MODIFY_PERMISSION_GROUP);
+        }
+
+        // 입력된 음식 정보 올바른지 체크
+        Food food = validateFood(request.getFood());
+
+        // 입력된 모임일시 올바른지 체크
+        LocalDateTime groupDateTime = validateDateTime(request);
+
+        // 좌표 생성
+        Point storeLocation = getPoint(request.getLatitude(), request.getLongitude());
+
+        group.setTitle(request.getTitle());
+        group.setName(request.getName());
+        group.setContent(request.getContent());
+        group.setFood(food);
+        group.setGroupDateTime(groupDateTime);
+        group.setMaximum(request.getMaximum());
+        group.setStoreName(request.getStoreName());
+        group.setStoreAddress(request.getStoreAddress());
+        group.setLocation(storeLocation);
+
+        foodGroupRepository.save(group);
+
+        return "모임 수정 완료";
+    }
+
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
     private FoodGroup validateGroupId(Long groupId) {
 
@@ -111,6 +140,30 @@ public class GroupServiceImpl implements GroupService {
     private Member getMember(Authentication authentication) {
         return memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+    }
+
+    private Food validateFood(String foodName) {
+        return foodRepository.findByType(foodName)
+                .orElseThrow(() -> new FoodException(Error.FOOD_NOT_FOUND));
+    }
+
+    private LocalDateTime validateDateTime(GroupDto.Request request) {
+
+        // 입력된 모임일시
+        LocalDateTime groupDateTime = request.getDate().atTime(request.getTime());
+
+        // 현재시간으로부터 한시간 이후 ~ 한달 이내의 모임만 생성 가능
+        if (groupDateTime.isBefore(LocalDateTime.now().plusHours(RESERVATION_INTERVAL_HOUR)) ||
+                groupDateTime.isAfter(LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH))) {
+            throw new GroupException(Error.OUT_OF_DATE_RANGE);
+        }
+
+        return groupDateTime;
+    }
+
+    private Point getPoint(String latitude, String longitude) {
+        return new GeometryFactory().createPoint(
+                new Coordinate(Double.parseDouble(latitude), Double.parseDouble(longitude)));
     }
 
 }
