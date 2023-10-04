@@ -20,4 +20,10 @@ public interface MemberService {
     String logoutMember(HttpServletRequest request, HttpServletResponse response);
 
     MemberDto.Response getMemberInfoByNickname(String nickname);
+
+    String createMember(MemberDto.CreateMemberRequest request, MultipartFile imageFile) throws IOException;
+
+    String createDefaultImageMember(MemberDto.CreateMemberRequest request);
+
+    boolean emailAuth(String emailAuthKey);
 }
