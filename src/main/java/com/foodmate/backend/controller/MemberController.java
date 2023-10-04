@@ -31,6 +31,7 @@ public class MemberController {
         return ResponseEntity.ok(memberService.patchProfileImage(authentication, imageFile));
     }
 
+
     /**
      * @param request 사용자가 입력한 email
      * @return 현재 사용중인 email이면 false
@@ -40,5 +41,4 @@ public class MemberController {
     public ResponseEntity<Boolean> checkDuplicateEmail(@RequestBody MemberDto.Request request){
         return ResponseEntity.ok(memberService.checkDuplicateEmail(request.getEmail()));
     }
-
 }
