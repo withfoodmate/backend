@@ -17,6 +17,14 @@ public class MemberDto {
         private String email;
         private String nickname;
     }
+    @Builder
+    @Getter
+    public static class CreateMemberRequest{
+        private String email;
+        private String nickname;
+        private String password;
+        private List<String> food;
+    }
 
     @Getter
     @Builder
