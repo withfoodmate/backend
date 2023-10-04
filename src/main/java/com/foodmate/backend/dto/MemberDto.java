@@ -15,6 +15,7 @@ public class MemberDto {
     @AllArgsConstructor
     public static class Request{
         private String email;
+        private String nickname;
     }
 
     @Getter
