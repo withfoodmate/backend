@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 public class MemberDto {
 
+
     @Getter
     @Builder
     @AllArgsConstructor
