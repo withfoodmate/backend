@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FoodRepository extends JpaRepository<Food, Long> {
@@ -20,5 +21,8 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
             "GROUP BY f.type, f.image " +
             "ORDER BY COUNT(fg.food) DESC")
     List<Object[]> findTop10FoodWithCount(Pageable pageable);
+
+    // 음식 이름으로 푸드 엔티티 찾기
+    Optional<Food> findByType(String foodName);
 
 }
