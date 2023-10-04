@@ -27,7 +27,11 @@ public enum Error {
     NO_DELETE_PERMISSION_GROUP("해당 모임을 삭제할 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
     // ChatException
-    CHATROOM_NOT_FOUND("해당 모임 아이디의 채팅룸은 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+    CHATROOM_NOT_FOUND("해당 모임 아이디의 채팅룸은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+
+    // EnrollmentException
+    ENROLLMENT_HISTORY_EXISTS("해당 모임에 신청 이력이 존재합니다.", HttpStatus.BAD_REQUEST),
+    GROUP_FULL("해당 모임의 정원이 다 찼습니다.", HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final HttpStatus httpStatus;
