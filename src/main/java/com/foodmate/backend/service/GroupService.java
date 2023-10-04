@@ -13,4 +13,6 @@ public interface GroupService {
 
     String deleteGroup(Long groupId, Authentication authentication);
 
+    String enrollInGroup(Long groupId, Authentication authentication);
+
 }
