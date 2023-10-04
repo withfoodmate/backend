@@ -33,4 +33,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Object[]> findTop10MemberWithCount(Pageable pageable);
 
 
+    Optional<Member> findByEmailAuthKey(String emailAuthKey);
 }

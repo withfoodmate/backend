@@ -1,5 +1,6 @@
 package com.foodmate.backend.service.impl;
 
+import com.foodmate.backend.component.MailComponents;
 import com.foodmate.backend.dto.MemberDto;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.Member;
@@ -47,6 +48,7 @@ public class MemberServiceImpl implements MemberService {
     private final String s3BucketFolderName = "profile-images/";
     @Value("${S3_GENERAL_IMAGE_PATH}")
     private String defaultProfileImage;
+    private final MailComponents mailComponents;
 
     /**
      * @param authentication 로그인한 사용자의 정보
@@ -285,5 +287,28 @@ public class MemberServiceImpl implements MemberService {
                 EmailContents.WELCOME.getSubject(),
                 EmailContents.WELCOME.getText().replace("{uuid}", uuid)
         );
+    }
+
+    /**
+     * 선호음식 넣는 메서드
+     * @param member
+     * @param foodNames
+     */
+    private void processFoodPreferences(Member member, List<String> foodNames){
+        if (foodNames != null && !foodNames.isEmpty()) {
+            for (String foodName : foodNames) {
+                Food food = foodRepository.findByType(foodName) // 음식 이름으로 음식 엔티티 찾기
+                        .orElseThrow(() -> new FoodException(Error.FOOD_NOT_FOUND));
+                log.error(foodName);
+                if (food == null) {
+                    throw new FoodException(Error.FOOD_NOT_FOUND);
+                }
+                Preference preference = new Preference();
+                preference.updateMember(member);
+                preference.updateFood(food);
+                preferenceRepository.save(preference); // Preference 테이블에 저장
+
+            }
+        }
     }
 }
