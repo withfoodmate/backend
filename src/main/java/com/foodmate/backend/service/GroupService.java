@@ -9,4 +9,6 @@ public interface GroupService {
 
     GroupDto.DetailResponse getGroupDetail(Long groupId);
 
+    String updateGroup(Long groupId, Authentication authentication, GroupDto.Request request);
+
 }
