@@ -20,4 +20,12 @@ public class Preference {
 
     @ManyToOne
     Food food;
+
+    public void updateFood(Food newFood) {
+        this.food = newFood;
+    }
+
+    public void updateMember(Member member) {
+        this.member = member;
+    }
 }
