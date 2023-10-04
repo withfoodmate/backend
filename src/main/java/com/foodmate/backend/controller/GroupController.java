@@ -5,10 +5,7 @@ import com.foodmate.backend.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -24,6 +21,12 @@ public class GroupController {
     public ResponseEntity<String> addGroup(Authentication authentication,
                                            @RequestBody @Valid GroupDto.Request request) {
         return ResponseEntity.ok(groupService.addGroup(authentication, request));
+    }
+
+    // 특정 모임 상세 조회
+    @GetMapping("/{groupId}")
+    public ResponseEntity<GroupDto.DetailResponse> getGroupDetail(@PathVariable Long groupId) {
+        return ResponseEntity.ok(groupService.getGroupDetail(groupId));
     }
 
 }
