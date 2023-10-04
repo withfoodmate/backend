@@ -7,4 +7,6 @@ public interface GroupService {
 
     String addGroup(Authentication authentication, GroupDto.Request request);
 
+    GroupDto.DetailResponse getGroupDetail(Long groupId);
+
 }

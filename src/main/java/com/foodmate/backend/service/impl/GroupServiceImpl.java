@@ -5,14 +5,13 @@ import com.foodmate.backend.entity.ChatRoom;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
+import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.exception.ChatException;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.exception.MemberException;
-import com.foodmate.backend.repository.ChatRoomRepository;
-import com.foodmate.backend.repository.FoodGroupRepository;
-import com.foodmate.backend.repository.FoodRepository;
-import com.foodmate.backend.repository.MemberRepository;
+import com.foodmate.backend.repository.*;
 import com.foodmate.backend.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -34,6 +33,7 @@ public class GroupServiceImpl implements GroupService {
     private final FoodRepository foodRepository;
     private final FoodGroupRepository foodGroupRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     // 모임 생성
     @Override
@@ -78,6 +78,34 @@ public class GroupServiceImpl implements GroupService {
         chatRoomRepository.save(new ChatRoom(foodGroup));
 
         return "모임 생성 완료";
+    }
+
+    // 특정 모임 상세 조회
+    @Override
+    public GroupDto.DetailResponse getGroupDetail(Long groupId) {
+
+        FoodGroup group = validateGroupId(groupId);
+
+        // 현재 인원은 모임 생성자 포함이니까 +1 해줘야
+        int current = enrollmentRepository.countByFoodGroupIdAndStatus(groupId, EnrollmentStatus.ACCEPT) + 1;
+
+        ChatRoom chatRoom = chatRoomRepository.findByFoodGroupId(groupId)
+                .orElseThrow(() -> new ChatException(Error.CHATROOM_NOT_FOUND));
+
+        return GroupDto.DetailResponse.fromEntity(group, current, chatRoom);
+    }
+
+    // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
+    private FoodGroup validateGroupId(Long groupId) {
+
+        FoodGroup group = foodGroupRepository.findById(groupId)
+                .orElseThrow(() -> new GroupException(Error.GROUP_NOT_FOUND));
+
+        if (group.getIsDeleted() != null) {
+            throw new GroupException(Error.GROUP_DELETED);
+        }
+
+        return group;
     }
 
     private Member getMember(Authentication authentication) {
