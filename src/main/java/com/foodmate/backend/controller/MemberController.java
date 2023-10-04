@@ -74,5 +74,12 @@ public class MemberController {
         return ResponseEntity.ok(memberService.logoutMember(request, response));
     }
 
-
+    /**
+     * @param nickname
+     * @return 다른 사람의 사용자 정보 가져오기
+     */
+    @GetMapping("/{nickname}")
+    public ResponseEntity<MemberDto.Response> getMemberInfoByNickname(@PathVariable String nickname){
+        return ResponseEntity.ok(memberService.getMemberInfoByNickname(nickname));
+    }
 }

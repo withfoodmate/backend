@@ -57,20 +57,10 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
 
-        List<Preference> preferences = preferenceRepository.findAllByMember(member);
-        List<String> foods = new ArrayList<>();
-
-        for (Preference preference : preferences){
-            Food food = foodRepository.findById(preference.getFood().getId()).orElseThrow(
-                    () -> new FoodException(Error.FOOD_NOT_FOUND)
-            );
-            foods.add(food.getType());
-        }
-
         if(member.getImage() == null){
-            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLikedMember(member), foods, defaultProfileImage);
+            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLikedMember(member), findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLikedMember(member), foods);
+        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLikedMember(member), findPreferences(member));
     }
 
     /**
@@ -190,5 +180,40 @@ public class MemberServiceImpl implements MemberService {
         // 로그아웃 처리
         SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
         logoutHandler.logout(request, response, authentication);
+    }
+
+    /**
+     * @param nickname
+     * @return 입력받은 email 회원 조회
+     */
+    @Override
+    public MemberDto.Response getMemberInfoByNickname(String nickname) {
+        Member member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+        if(member.getIsDeleted() != null){ // 정지 당한 유저
+            throw new MemberException(Error.DELETED_USER);
+        }
+        if(member.getImage() == null){
+            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLikedMember(member), findPreferences(member) , defaultProfileImage);
+        }
+        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLikedMember(member), findPreferences(member));
+    }
+
+    /**
+     * 유저의 선호음식 찾는 메서드
+     * @param member
+     * @return 선호음식의 종류 리스트
+     */
+    private List<String> findPreferences(Member member){
+        List<String> foods = new ArrayList<>();
+        List<Preference> preferences = preferenceRepository.findAllByMember(member);
+        for (Preference preference : preferences){
+            Food food = foodRepository.findById(preference.getFood().getId()).orElseThrow(
+                    () -> new FoodException(Error.FOOD_NOT_FOUND)
+            );
+            foods.add(food.getType());
+        }
+        return foods;
+
     }
 }

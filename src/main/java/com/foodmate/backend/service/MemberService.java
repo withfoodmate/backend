@@ -18,4 +18,6 @@ public interface MemberService {
     Boolean checkDuplicateNickname(String nickname);
 
     String logoutMember(HttpServletRequest request, HttpServletResponse response);
+
+    MemberDto.Response getMemberInfoByNickname(String nickname);
 }
