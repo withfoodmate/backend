@@ -1,6 +1,8 @@
 package com.foodmate.backend.service.impl;
 
+import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
+import com.foodmate.backend.dto.ReplyDto;
 import com.foodmate.backend.entity.*;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
@@ -29,6 +31,8 @@ public class GroupServiceImpl implements GroupService {
     private final FoodGroupRepository foodGroupRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final CommentRepository commentRepository;
+    private final ReplyRepository replyRepository;
 
     // 모임 생성
     @Override
@@ -177,6 +181,41 @@ public class GroupServiceImpl implements GroupService {
         return "신청 완료";
     }
 
+    // 댓글 작성
+    @Override
+    public String addComment(Long groupId, Authentication authentication, CommentDto.Request request) {
+
+        FoodGroup group = validateGroupId(groupId);
+
+        Member member = getMember(authentication);
+
+        commentRepository.save(Comment.builder()
+                .foodGroup(group)
+                .member(member)
+                .content(request.getContent())
+                .build());
+
+        return "댓글 작성 완료";
+    }
+
+    // 대댓글 작성
+    @Override
+    public String addReply(Long groupId, Long commentId, Authentication authentication, ReplyDto.Request request) {
+
+        validateGroupId(groupId);
+        Comment comment = validateCommentId(groupId, commentId);
+
+        Member member = getMember(authentication);
+
+        replyRepository.save(Reply.builder()
+                .comment(comment)
+                .member(member)
+                .content(request.getContent())
+                .build());
+
+        return "대댓글 작성 완료";
+    }
+
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
     private FoodGroup validateGroupId(Long groupId) {
 
@@ -188,6 +227,19 @@ public class GroupServiceImpl implements GroupService {
         }
 
         return group;
+    }
+
+    // {commentId} 경로 검증 - 존재하는 코멘트이면서, 해당 그룹의 코멘트가 맞으면 반환
+    private Comment validateCommentId(Long groupId, Long commentId) {
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentException(Error.COMMENT_NOT_FOUND));
+
+        if (comment.getFoodGroup().getId() != groupId) {
+            throw new CommentException(Error.INVALID_ADDRESS);
+        }
+
+        return comment;
     }
 
     private Member getMember(Authentication authentication) {
