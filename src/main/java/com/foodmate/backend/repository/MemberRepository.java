@@ -17,6 +17,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 이메일을 통해 회원 찾기
     Optional<Member> findByEmail(String email);
+
+    // RefreshToken 정보 찾기
+    Optional<Member> findByRefreshToken(String refreshToken);
   
     // RankingServiceImpl - 모임왕 랭킹
     @Query("SELECT m.id, m.nickname, m.image, COUNT(fg.member) AS count " +
