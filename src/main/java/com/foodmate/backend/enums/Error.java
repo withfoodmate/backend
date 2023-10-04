@@ -31,7 +31,11 @@ public enum Error {
 
     // EnrollmentException
     ENROLLMENT_HISTORY_EXISTS("해당 모임에 신청 이력이 존재합니다.", HttpStatus.BAD_REQUEST),
-    GROUP_FULL("해당 모임의 정원이 다 찼습니다.", HttpStatus.BAD_REQUEST);
+    GROUP_FULL("해당 모임의 정원이 다 찼습니다.", HttpStatus.BAD_REQUEST),
+
+    // CommentException
+    COMMENT_NOT_FOUND("해당 아이디의 댓글은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    INVALID_ADDRESS("올바르지 않은 주소입니다.", HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final HttpStatus httpStatus;
