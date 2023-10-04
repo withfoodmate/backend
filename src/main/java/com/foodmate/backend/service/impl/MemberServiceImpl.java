@@ -149,4 +149,17 @@ public class MemberServiceImpl implements MemberService {
         }
         return true;
     }
+
+    /**
+     * @param nickname
+     * @return 현재 사용중인 nickname 이면 false 리턴
+     *         아니면 true
+     */
+    @Override
+    public Boolean checkDuplicateNickname(String nickname) {
+        if(memberRepository.findByNickname(nickname).isPresent()){
+            return false;
+        }
+        return true;
+    }
 }

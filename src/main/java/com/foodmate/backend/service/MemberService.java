@@ -10,5 +10,8 @@ public interface MemberService {
 
     MemberDto.Response getMemberInfo(Authentication authentication);
     Boolean checkDuplicateEmail(String email);
+
     String patchProfileImage(Authentication authentication, MultipartFile imageFile) throws IOException;
+
+    Boolean checkDuplicateNickname(String nickname);
 }

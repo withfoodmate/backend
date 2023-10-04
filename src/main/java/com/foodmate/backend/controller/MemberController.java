@@ -51,4 +51,15 @@ public class MemberController {
         return ResponseEntity.ok(memberService.checkDuplicateEmail(request.getEmail()));
     }
 
+
+    /**
+     * @param request 사용자가 입력한 nickname
+     * @return 현재 사용중인 nickname이면 false
+     *         아니면 true
+     */
+    @GetMapping("/nickname")
+    public ResponseEntity<Boolean> checkDuplicateNickname(@RequestBody MemberDto.Request request){
+        return ResponseEntity.ok(memberService.checkDuplicateNickname(request.getNickname()));
+    }
+
 }
