@@ -1,21 +1,31 @@
 package com.foodmate.backend.service.impl;
 
+import com.foodmate.backend.dto.MemberDto;
+import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.Member;
+import com.foodmate.backend.entity.Preference;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.MemberException;
+import com.foodmate.backend.repository.FoodRepository;
+import com.foodmate.backend.repository.LikesRepository;
 import com.foodmate.backend.repository.MemberRepository;
+import com.foodmate.backend.repository.PreferenceRepository;
 import com.foodmate.backend.service.MemberService;
 import com.foodmate.backend.util.FileRandomNaming;
 import com.foodmate.backend.util.S3Deleter;
 import com.foodmate.backend.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 @Service
@@ -24,10 +34,40 @@ import java.util.StringTokenizer;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final PreferenceRepository preferenceRepository;
+    private final FoodRepository foodRepository;
+    private final LikesRepository likesRepository;
     private final S3Uploader s3Uploader;
     private final S3Deleter s3Deleter;
     private final String s3BucketFolderName = "profile-images/";
+    @Value("${S3_GENERAL_IMAGE_PATH}")
+    private String defaultProfileImage;
 
+    /**
+     * @param authentication 로그인한 사용자의 정보
+     * @return 사용자의 정보
+     */
+    @Override
+    public MemberDto.Response getMemberInfo(Authentication authentication) {
+        /* 사용자가 없을 시 예외 처리 */
+        Member member = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        List<Preference> preferences = preferenceRepository.findAllByMember(member);
+        List<String> foods = new ArrayList<>();
+
+        for (Preference preference : preferences){
+            Food food = foodRepository.findById(preference.getFood().getId()).orElseThrow(
+                    () -> new FoodException(Error.FOOD_NOT_FOUND)
+            );
+            foods.add(food.getType());
+        }
+
+        if(member.getImage() == null){
+            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLikedMember(member), foods, defaultProfileImage);
+        }
+        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLikedMember(member), foods);
+    }
 
     /**
      * @param authentication
