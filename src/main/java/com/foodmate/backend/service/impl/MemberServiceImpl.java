@@ -19,9 +19,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -161,5 +165,30 @@ public class MemberServiceImpl implements MemberService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 로그 아웃 기능
+     * @param request
+     * @param response
+     * @return 로그아웃 상태 호출
+     */
+    @Override
+    public String logoutMember(HttpServletRequest request, HttpServletResponse response) {
+        logout(request, response);
+        return "로그아웃 완료";
+    }
+
+    /**
+     * @param request
+     * @param response
+     * 로그아웃 로직 구현
+     */
+    private void logout(HttpServletRequest request, HttpServletResponse response){
+        // 현재 사용자의 인증 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // 로그아웃 처리
+        SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+        logoutHandler.logout(request, response, authentication);
     }
 }

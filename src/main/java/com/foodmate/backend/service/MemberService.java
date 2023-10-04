@@ -4,6 +4,8 @@ import com.foodmate.backend.dto.MemberDto;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public interface MemberService {
@@ -14,4 +16,6 @@ public interface MemberService {
     String patchProfileImage(Authentication authentication, MultipartFile imageFile) throws IOException;
 
     Boolean checkDuplicateNickname(String nickname);
+
+    String logoutMember(HttpServletRequest request, HttpServletResponse response);
 }

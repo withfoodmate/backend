@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @RestController
@@ -61,5 +63,16 @@ public class MemberController {
     public ResponseEntity<Boolean> checkDuplicateNickname(@RequestBody MemberDto.Request request){
         return ResponseEntity.ok(memberService.checkDuplicateNickname(request.getNickname()));
     }
+
+    /**
+     * @param request 로그아웃을 위한
+     * @param response 로그아웃을 위한
+     * @return
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<String> logoutMember(HttpServletRequest request, HttpServletResponse response) {
+        return ResponseEntity.ok(memberService.logoutMember(request, response));
+    }
+
 
 }
