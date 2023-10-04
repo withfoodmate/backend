@@ -22,6 +22,16 @@ public class MemberController {
 
     /**
      * @param authentication 로그인한 사용자의 정보
+     * @return 사용자 본인 정보 조회
+     */
+    @GetMapping
+    public ResponseEntity<MemberDto.Response> getMemberInfo(Authentication authentication){
+        return ResponseEntity.ok(memberService.getMemberInfo(authentication));
+    }
+
+
+    /**
+     * @param authentication 로그인한 사용자의 정보
      * @param imageFile 사용자가 업로드를 원하는 사진
      * 사용자에게 사진파일을 받아와 프로필 이미지 변경
      */
