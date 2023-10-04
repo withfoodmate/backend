@@ -22,6 +22,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.servlet.http.HttpServletResponse;
+
 
 @Configuration
 @EnableWebSecurity(debug = true)
@@ -66,7 +68,15 @@ public class SecurityConfig {
                 .authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper)) //AuthenticationException
                 .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper));     //AccessDeniedException
 
-
+        http
+                .logout()
+                .logoutUrl("/member/logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    // 로그아웃 성공 후에 추가 작업을 수행하고 리디렉션을 막음
+                    response.setStatus(HttpServletResponse.SC_OK);
+                })
+                .invalidateHttpSession(true) // http 세션 무효와
+                .deleteCookies("JSESSIONID"); // 쿠키 삭제
         return http.build();
     }
 
