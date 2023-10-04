@@ -23,6 +23,7 @@ public enum Error {
     OUT_OF_DATE_RANGE("현재 시간으로부터 한 시간 이후 ~ 한 달 이내의 모임만 생성 가능합니다.", HttpStatus.BAD_REQUEST),
     GROUP_NOT_FOUND("해당 아이디의 모임은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     GROUP_DELETED("해당 모임은 삭제되었습니다.", HttpStatus.GONE),
+    NO_MODIFY_PERMISSION_GROUP("해당 모임을 수정할 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
     // ChatException
     CHATROOM_NOT_FOUND("해당 모임 아이디의 채팅룸은 존재하지 않습니다.", HttpStatus.NOT_FOUND);
