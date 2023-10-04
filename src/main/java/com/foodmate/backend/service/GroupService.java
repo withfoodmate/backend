@@ -1,6 +1,8 @@
 package com.foodmate.backend.service;
 
+import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
+import com.foodmate.backend.dto.ReplyDto;
 import org.springframework.security.core.Authentication;
 
 public interface GroupService {
@@ -14,5 +16,9 @@ public interface GroupService {
     String deleteGroup(Long groupId, Authentication authentication);
 
     String enrollInGroup(Long groupId, Authentication authentication);
+
+    String addComment(Long groupId, Authentication authentication, CommentDto.Request request);
+
+    String addReply(Long groupId, Long commentId, Authentication authentication, ReplyDto.Request request);
 
 }
