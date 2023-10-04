@@ -35,6 +35,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
     }
 
+    @ExceptionHandler(EnrollmentException.class)
+    public ResponseEntity<String> handleEnrollmentException(EnrollmentException e) {
+        log.error("EnrollmentException", e);
+        return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException", e);

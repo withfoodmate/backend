@@ -1,16 +1,10 @@
 package com.foodmate.backend.service.impl;
 
 import com.foodmate.backend.dto.GroupDto;
-import com.foodmate.backend.entity.ChatRoom;
-import com.foodmate.backend.entity.Food;
-import com.foodmate.backend.entity.FoodGroup;
-import com.foodmate.backend.entity.Member;
+import com.foodmate.backend.entity.*;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
-import com.foodmate.backend.exception.ChatException;
-import com.foodmate.backend.exception.FoodException;
-import com.foodmate.backend.exception.GroupException;
-import com.foodmate.backend.exception.MemberException;
+import com.foodmate.backend.exception.*;
 import com.foodmate.backend.repository.*;
 import com.foodmate.backend.service.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -150,6 +144,37 @@ public class GroupServiceImpl implements GroupService {
         chatRoomRepository.deleteByFoodGroupId(groupId);
 
         return "모임 삭제 완료";
+    }
+
+    // TODO 동시성 1차 체크?
+    // 특정 모임 신청
+    @Override
+    public String enrollInGroup(Long groupId, Authentication authentication) {
+
+        FoodGroup group = validateGroupId(groupId);
+
+        Member member = getMember(authentication);
+
+        // 이미 신청 이력이 존재할 경우
+        if (enrollmentRepository.existsByMemberAndFoodGroup(member, group)) {
+            throw new EnrollmentException(Error.ENROLLMENT_HISTORY_EXISTS);
+        }
+
+        // 현재 인원은 모임 생성자 포함이니까 +1 해줘야
+        int current = enrollmentRepository.countByFoodGroupIdAndStatus(groupId, EnrollmentStatus.ACCEPT) + 1;
+
+        // 모임 현재인원 체크
+        if (current >= group.getMaximum()) {
+            throw new EnrollmentException(Error.GROUP_FULL);
+        }
+
+        enrollmentRepository.save(Enrollment.builder()
+                .member(member)
+                .foodGroup(group)
+                .status(EnrollmentStatus.SUBMIT)
+                .build());
+
+        return "신청 완료";
     }
 
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환

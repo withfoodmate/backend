@@ -44,4 +44,11 @@ public class GroupController {
         return ResponseEntity.ok(groupService.deleteGroup(groupId, authentication));
     }
 
+    // 특정 모임 신청
+    @PostMapping("/{groupId}/enrollment")
+    public ResponseEntity<String> enrollInGroup(@PathVariable Long groupId,
+                                                Authentication authentication) {
+        return ResponseEntity.ok(groupService.enrollInGroup(groupId, authentication));
+    }
+
 }
