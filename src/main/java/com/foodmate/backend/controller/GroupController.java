@@ -37,4 +37,11 @@ public class GroupController {
         return ResponseEntity.ok(groupService.updateGroup(groupId, authentication, request));
     }
 
+    // 특정 모임 삭제
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<String> deleteGroup(@PathVariable Long groupId,
+                                              Authentication authentication) {
+        return ResponseEntity.ok(groupService.deleteGroup(groupId, authentication));
+    }
+
 }
