@@ -1,6 +1,8 @@
 package com.foodmate.backend.controller;
 
+import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
+import com.foodmate.backend.dto.ReplyDto;
 import com.foodmate.backend.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +51,23 @@ public class GroupController {
     public ResponseEntity<String> enrollInGroup(@PathVariable Long groupId,
                                                 Authentication authentication) {
         return ResponseEntity.ok(groupService.enrollInGroup(groupId, authentication));
+    }
+
+    // 댓글 작성
+    @PostMapping("/{groupId}/comment")
+    public ResponseEntity<String> addComment(@PathVariable Long groupId,
+                                             Authentication authentication,
+                                             @RequestBody @Valid CommentDto.Request request) {
+        return ResponseEntity.ok(groupService.addComment(groupId, authentication, request));
+    }
+
+    // 대댓글 작성
+    @PostMapping("/{groupId}/comment/{commentId}/reply")
+    public ResponseEntity<String> addReply(@PathVariable Long groupId,
+                                           @PathVariable Long commentId,
+                                           Authentication authentication,
+                                           @RequestBody @Valid ReplyDto.Request request) {
+        return ResponseEntity.ok(groupService.addReply(groupId, commentId, authentication, request));
     }
 
 }

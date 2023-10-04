@@ -41,6 +41,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
     }
 
+    @ExceptionHandler(CommentException.class)
+    public ResponseEntity<String> handleCommentException(CommentException e) {
+        log.error("CommentException", e);
+        return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException", e);
