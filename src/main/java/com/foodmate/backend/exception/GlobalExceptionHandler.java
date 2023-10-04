@@ -29,6 +29,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
     }
 
+    @ExceptionHandler(ChatException.class)
+    public ResponseEntity<String> handleChatException(ChatException e) {
+        log.error("ChatException", e);
+        return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException", e);
