@@ -1,6 +1,8 @@
 package com.foodmate.backend.repository;
 
 import com.foodmate.backend.entity.Enrollment;
+import com.foodmate.backend.entity.FoodGroup;
+import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -17,5 +19,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Modifying
     @Query("UPDATE Enrollment e SET e.status = :status WHERE e.foodGroup.id = :groupId")
     void changeStatusByGroupId(Long groupId, EnrollmentStatus status);
+
+    // 해당 모임에 신청 이력이 존재하는지 확인
+    boolean existsByMemberAndFoodGroup(Member member, FoodGroup foodGroup);
 
 }
