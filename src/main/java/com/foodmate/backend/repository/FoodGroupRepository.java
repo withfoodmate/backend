@@ -54,4 +54,19 @@ public interface FoodGroupRepository extends JpaRepository<FoodGroup, Long> {
             "ORDER BY fg.groupDateTime ASC")
     Page<SearchedGroupDto> getTodayGroupList(LocalDateTime start, LocalDateTime end, Pageable pageable);
 
+    // GroupServiceImpl - 전체 모임 조회
+    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(" +
+            "fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
+            "m.id, m.nickname, m.image, f.type, COUNT(e.id)) " +
+            "FROM FoodGroup fg " +
+            "JOIN Member m ON fg.member.id = m.id " +
+            "JOIN Food f ON fg.food.id = f.id " +
+            "LEFT JOIN Enrollment e ON fg.id = e.foodGroup.id AND e.status = 'ACCEPT' " +
+            "WHERE fg.groupDateTime BETWEEN :start AND :end " +
+            "AND fg.isDeleted IS NULL " +
+            "GROUP BY fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
+            "m.id, m.nickname, m.image, f.type " +
+            "ORDER BY fg.createdDate DESC")
+    Page<SearchedGroupDto> getAllGroupList(LocalDateTime start, LocalDateTime end, Pageable pageable);
+
 }
