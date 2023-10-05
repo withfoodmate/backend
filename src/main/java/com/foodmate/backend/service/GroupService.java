@@ -36,4 +36,6 @@ public interface GroupService {
 
     Page<SearchedGroupDto> searchByKeyword(String keyword, Pageable pageable);
 
+    Page<SearchedGroupDto> getTodayGroupList(Pageable pageable);
+
 }
