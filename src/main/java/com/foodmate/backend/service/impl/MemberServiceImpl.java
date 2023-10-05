@@ -240,7 +240,6 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.save(member);
         processFoodPreferences(member, request.getFood()); // 선호음식 등록
         uploadProfileImage(member, imageFile); // 사진 업로드
-
         sendMail(request, uuid); // 메일 전송
         return "일반 회원 가입 완료";
     }
@@ -364,6 +363,13 @@ public class MemberServiceImpl implements MemberService {
         return jwtTokenDto;
     }
 
+
+    /**
+     *
+     * @param request 사용자가 입력한 정보
+     * @param authentication 로그인한 사용자의 정보
+     * @return
+     */
     @Override
     public String changePassword(MemberDto.passwordUpdateRequest request, Authentication authentication) {
         Member member = memberRepository.findByEmail(authentication.getName())
@@ -375,6 +381,53 @@ public class MemberServiceImpl implements MemberService {
         member.updatePassword(BCrypt.hashpw(request.getNewPassword(),BCrypt.gensalt()));
         memberRepository.save(member);
         return "비밀번호 변경 완료";
+    }
+
+
+    /**
+     * 회원 탈퇴 (카카오 로그인 사용자)
+     * @param request
+     * @param response
+     * @param authentication
+     * @return 회원 탈퇴 성공 여부
+     * 사용자가 지정한 비밀번호와 일치 하면 탈퇴 승인
+     */
+    @Override
+    @Transactional
+    public String deleteKakaoMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        Member member = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        member.setIsDeleted(LocalDateTime.now());
+        memberRepository.save(member);
+        return "회원 탈퇴 성공";
+    }
+
+    /**
+     * 회원 탈퇴 (일반 사용자)
+     * @param request
+     * @param response
+     * @param authentication
+     * @param deleteMemberRequest
+     * @return 회원 탈퇴 성공 여부
+     * 사용자가 지정한 비밀번호와 일치 하면 탈퇴 승인
+     */
+    @Override
+    @Transactional
+    public String deleteGeneralMember(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication,
+            MemberDto.deleteMemberRequest deleteMemberRequest) {
+        Member member = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+        if (BCrypt.checkpw(deleteMemberRequest.getPassword(), member.getPassword())) {
+            member.setIsDeleted(LocalDateTime.now());
+            memberRepository.save(member);
+            logout(request, response);
+            return "회원 탈퇴 성공";
+        }
+        throw new MemberException(Error.ACCESS_DENIED);
     }
 
 }
