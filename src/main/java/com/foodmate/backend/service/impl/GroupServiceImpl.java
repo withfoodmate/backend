@@ -354,6 +354,15 @@ public class GroupServiceImpl implements GroupService {
                 LocalDate.now().atTime(23, 59, 59), pageable);
     }
 
+    // 전체 모임 조회
+    @Override
+    public Page<SearchedGroupDto> getAllGroupList(Pageable pageable) {
+
+        return foodGroupRepository.getAllGroupList(
+                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
+                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+    }
+
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
     private FoodGroup validateGroupId(Long groupId) {
 
