@@ -68,4 +68,12 @@ public class MemberDto {
         private String oldPassword;
         private String newPassword;
     }
+
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class deleteMemberRequest{
+        private String password;
+    }
 }
