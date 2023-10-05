@@ -14,6 +14,8 @@ import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.LikesRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.PreferenceRepository;
+import com.foodmate.backend.security.dto.JwtTokenDto;
+import com.foodmate.backend.security.service.JwtTokenProvider;
 import com.foodmate.backend.service.MemberService;
 import com.foodmate.backend.util.FileRandomNaming;
 import com.foodmate.backend.util.S3Deleter;
@@ -33,10 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringTokenizer;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +51,8 @@ public class MemberServiceImpl implements MemberService {
     private final String s3BucketFolderName = "profile-images/";
     @Value("${S3_GENERAL_IMAGE_PATH}")
     private String defaultProfileImage;
+    private final MailComponents mailComponents;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * @param authentication 로그인한 사용자의 정보
@@ -340,4 +341,26 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Override
+    public JwtTokenDto login(Map<String, String> loginInfo) {
+        String email = loginInfo.get("email");
+        String password = loginInfo.get("password");
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+        if (!BCrypt.checkpw(password, member.getPassword())) {
+            log.info(password);
+            log.info(member.getPassword());
+            throw new MemberException(Error.LOGIN_FAILED);
+        }
+        String refreshToken = jwtTokenProvider.createRefreshToken();
+
+        JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+                .accessToken(jwtTokenProvider.createAccessToken(member.getId()))
+                .refreshToken(refreshToken)
+                .build();
+        jwtTokenProvider.updateRefreshToken(member.getEmail(), refreshToken);
+
+        return jwtTokenDto;
+    }
 }

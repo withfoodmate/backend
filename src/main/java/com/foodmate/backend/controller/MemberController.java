@@ -1,6 +1,7 @@
 package com.foodmate.backend.controller;
 
 import com.foodmate.backend.dto.MemberDto;
+import com.foodmate.backend.security.dto.JwtTokenDto;
 import com.foodmate.backend.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -120,5 +122,12 @@ public class MemberController {
         return ResponseEntity.ok(memberService.toggleLikeForPost(memberId, authentication));
     }
 
+    /**
+     * 이메일, 패스워드 입력
+     */
+    @PostMapping("/signin")
+    public ResponseEntity<JwtTokenDto> login(@RequestBody Map<String, String> user) {
+        return ResponseEntity.ok(memberService.login(user));
+    }
 
 }
