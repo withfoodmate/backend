@@ -1,9 +1,11 @@
 package com.foodmate.backend.service.impl;
 
+import com.foodmate.backend.component.MailComponents;
 import com.foodmate.backend.dto.MemberDto;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
+import com.foodmate.backend.enums.EmailContents;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.MemberException;
@@ -20,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,9 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +48,7 @@ public class MemberServiceImpl implements MemberService {
     private final String s3BucketFolderName = "profile-images/";
     @Value("${S3_GENERAL_IMAGE_PATH}")
     private String defaultProfileImage;
+    private final MailComponents mailComponents;
 
     /**
      * @param authentication 로그인한 사용자의 정보
@@ -215,5 +218,97 @@ public class MemberServiceImpl implements MemberService {
         }
         return foods;
 
+    }
+
+    /**
+     * 회원가입 진행하면서 이메일, 닉네임 중복 확인 진행하므로 추가 중복 확인 x
+     */
+    @Override
+    @Transactional
+    public String createMember(MemberDto.CreateMemberRequest request, MultipartFile imageFile) throws IOException {
+        String uuid = UUID.randomUUID().toString();
+
+        Member member = Member.MemberDtoToMember(
+                request,
+                BCrypt.hashpw(request.getPassword(),
+                        BCrypt.gensalt()),
+                uuid);
+        memberRepository.save(member);
+        processFoodPreferences(member, request.getFood()); // 선호음식 등록
+        uploadProfileImage(member, imageFile); // 사진 업로드
+
+        sendMail(request, uuid); // 메일 전송
+        return "일반 회원 가입 완료";
+    }
+
+    @Override
+    @Transactional
+    public String createDefaultImageMember(MemberDto.CreateMemberRequest request) {
+        String uuid = UUID.randomUUID().toString();
+        Member member = Member.MemberDtoToMember(
+                request,
+                BCrypt.hashpw(request.getPassword(),
+                        BCrypt.gensalt()),
+                uuid);
+        memberRepository.save(member);
+        processFoodPreferences(member, request.getFood()); // 선호음식 등록
+        sendMail(request, uuid); // 메일 전송
+        return "일반 회원 가입 완료";
+    }
+
+    @Override
+    public boolean emailAuth(String emailAuthKey) {
+
+        Optional<Member> optionalMember = memberRepository.findByEmailAuthKey(emailAuthKey);
+        if (!optionalMember.isPresent()) {
+            return false;
+        }
+        Member member = optionalMember.get();
+
+        // 계정 반복 활성화 방지
+        if (member.getIsEmailAuth()) {
+            return false;
+        }
+        member.setIsEmailAuth(true);
+        member.setEmailAuthDate(LocalDateTime.now());
+        memberRepository.save(member);
+
+        return true;
+    }
+
+    /**
+     * 인증 메일 전송 메서드
+     * @param request
+     * @param uuid
+     */
+    private void sendMail(MemberDto.CreateMemberRequest request, String uuid){
+        mailComponents.sendMail(
+                request.getEmail(),
+                EmailContents.WELCOME.getSubject(),
+                EmailContents.WELCOME.getText().replace("{uuid}", uuid)
+        );
+    }
+
+    /**
+     * 선호음식 넣는 메서드
+     * @param member
+     * @param foodNames
+     */
+    private void processFoodPreferences(Member member, List<String> foodNames){
+        if (foodNames != null && !foodNames.isEmpty()) {
+            for (String foodName : foodNames) {
+                Food food = foodRepository.findByType(foodName) // 음식 이름으로 음식 엔티티 찾기
+                        .orElseThrow(() -> new FoodException(Error.FOOD_NOT_FOUND));
+                log.error(foodName);
+                if (food == null) {
+                    throw new FoodException(Error.FOOD_NOT_FOUND);
+                }
+                Preference preference = new Preference();
+                preference.updateMember(member);
+                preference.updateFood(food);
+                preferenceRepository.save(preference); // Preference 테이블에 저장
+
+            }
+        }
     }
 }

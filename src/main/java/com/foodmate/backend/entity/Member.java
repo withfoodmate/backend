@@ -1,5 +1,6 @@
 package com.foodmate.backend.entity;
 
+import com.foodmate.backend.dto.MemberDto;
 import com.foodmate.backend.enums.MemberLoginType;
 import com.foodmate.backend.enums.MemberRole;
 import lombok.*;
@@ -56,4 +57,17 @@ public class Member {
         this.refreshToken = updateRefreshToken;
     }
 
+    public static Member MemberDtoToMember(MemberDto.CreateMemberRequest request, String encPassword, String uuid){
+        return Member.builder()
+                .email(request.getEmail())
+                .nickname(request.getNickname())
+                .password(encPassword)
+                .memberLoginType(MemberLoginType.GENERAL)
+                .memberRole(MemberRole.USER)
+                .registeredDate(LocalDateTime.now())
+                .updatedDate(LocalDateTime.now())
+                .emailAuthKey(uuid)
+                .isEmailAuth(false)
+                .build();
+    }
 }

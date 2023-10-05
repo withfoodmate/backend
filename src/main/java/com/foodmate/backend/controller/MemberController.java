@@ -82,4 +82,30 @@ public class MemberController {
     public ResponseEntity<MemberDto.Response> getMemberInfoByNickname(@PathVariable String nickname){
         return ResponseEntity.ok(memberService.getMemberInfoByNickname(nickname));
     }
+
+    /**
+     * @param request 회원가입 (사용자가 입력한 정보)
+     * @param imageFile 사용자가 등록한 프로필 이미지파일(null 허용)
+     * @return
+     * @throws IOException 사진 업로드 실패시
+     */
+    @PostMapping("/signup")
+    public ResponseEntity<String> createMember(@RequestPart MemberDto.CreateMemberRequest request,
+                                               @RequestPart(value = "file", required = false) MultipartFile imageFile) throws IOException {
+
+        if(imageFile == null){ // 이미지가 없을 때
+            return ResponseEntity.ok(memberService.createDefaultImageMember(request));
+        }
+        return ResponseEntity.ok(memberService.createMember(request, imageFile)); // 이미지가 있을 때
+    }
+
+    /**
+     * @param emailAuthKey 이메일 인증 키
+     * @return
+     */
+    @GetMapping("/email-auth")
+    public boolean emailAuth (@RequestParam("id") String emailAuthKey){
+        boolean result = memberService.emailAuth(emailAuthKey);
+        return result;
+    }
 }
