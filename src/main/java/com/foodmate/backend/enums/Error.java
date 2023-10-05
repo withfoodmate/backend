@@ -16,6 +16,7 @@ public enum Error {
     TOKEN_INVALID("유효하지 않은 토큰 입니다.", HttpStatus.UNAUTHORIZED),
     USER_NOT_FOUND("해당 사용자가 없습니다.", HttpStatus.NOT_FOUND),
     PASSWORD_NOT_MATCH("패스워드가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    ACCESS_DENIED("해당 요청에 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
     // FoodException
     FOOD_NOT_FOUND("입력한 음식은 DB에 존재하지 않습니다.", HttpStatus.BAD_REQUEST),

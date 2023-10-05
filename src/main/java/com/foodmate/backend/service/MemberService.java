@@ -34,4 +34,12 @@ public interface MemberService {
     JwtTokenDto login(Map<String, String> loginInfo);
 
     String changePassword(MemberDto.passwordUpdateRequest request, Authentication authentication);
+
+    String deleteKakaoMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication);
+
+    String deleteGeneralMember(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication,
+            MemberDto.deleteMemberRequest deleteMemberRequest);
 }
