@@ -25,4 +25,8 @@ public interface GroupService {
 
     String updateReply(Long groupId, Long commentId, Long replyId, Authentication authentication, ReplyDto.Request request);
 
+    String deleteComment(Long groupId, Long commentId, Authentication authentication);
+
+    String deleteReply(Long groupId, Long commentId, Long replyId, Authentication authentication);
+
 }

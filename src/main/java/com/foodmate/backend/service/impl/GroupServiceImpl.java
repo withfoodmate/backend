@@ -259,6 +259,49 @@ public class GroupServiceImpl implements GroupService {
         return "대댓글 수정 완료";
     }
 
+    // 댓글 삭제
+    @Transactional
+    @Override
+    public String deleteComment(Long groupId, Long commentId, Authentication authentication) {
+
+        validateGroupId(groupId);
+        Comment comment = validateCommentId(groupId, commentId);
+
+        Member member = getMember(authentication);
+
+        // 해당 댓글 작성자만 삭제 가능
+        if (comment.getMember().getId() != member.getId()) {
+            throw new CommentException(Error.NO_DELETE_PERMISSION_COMMENT);
+        }
+
+        // 우선 해당 댓글의 대댓글 일괄 삭제해야 댓글 삭제 가능
+        replyRepository.deleteAllByComment(comment);
+
+        commentRepository.deleteById(commentId);
+
+        return "댓글 삭제 완료";
+    }
+
+    // 대댓글 삭제
+    @Override
+    public String deleteReply(Long groupId, Long commentId, Long replyId, Authentication authentication) {
+
+        validateGroupId(groupId);
+        validateCommentId(groupId, commentId);
+        Reply reply = validateReplyId(commentId, replyId);
+
+        Member member = getMember(authentication);
+
+        // 해당 대댓글 작성자만 삭제 가능
+        if (reply.getMember().getId() != member.getId()) {
+            throw new ReplyException(Error.NO_DELETE_PERMISSION_REPLY);
+        }
+
+        replyRepository.deleteById(replyId);
+
+        return "대댓글 삭제 완료";
+    }
+
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
     private FoodGroup validateGroupId(Long groupId) {
 

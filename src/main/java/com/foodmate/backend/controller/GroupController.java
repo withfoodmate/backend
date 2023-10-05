@@ -89,4 +89,21 @@ public class GroupController {
         return ResponseEntity.ok(groupService.updateReply(groupId, commentId, replyId, authentication, request));
     }
 
+    // 댓글 삭제
+    @DeleteMapping("/{groupId}/comment/{commentId}")
+    public ResponseEntity<String> deleteComment(@PathVariable Long groupId,
+                                                @PathVariable Long commentId,
+                                                Authentication authentication) {
+        return ResponseEntity.ok(groupService.deleteComment(groupId, commentId, authentication));
+    }
+
+    // 대댓글 삭제
+    @DeleteMapping("/{groupId}/comment/{commentId}/reply/{replyId}")
+    public ResponseEntity<String> deleteReply(@PathVariable Long groupId,
+                                              @PathVariable Long commentId,
+                                              @PathVariable Long replyId,
+                                              Authentication authentication) {
+        return ResponseEntity.ok(groupService.deleteReply(groupId, commentId, replyId, authentication));
+    }
+
 }
