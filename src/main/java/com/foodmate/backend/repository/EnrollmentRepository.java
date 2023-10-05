@@ -1,13 +1,19 @@
 package com.foodmate.backend.repository;
 
+import com.foodmate.backend.dto.EnrollmentDto;
 import com.foodmate.backend.entity.Enrollment;
 import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.EnrollmentStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
@@ -23,4 +29,21 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     // 해당 모임에 신청 이력이 존재하는지 확인
     boolean existsByMemberAndFoodGroup(Member member, FoodGroup foodGroup);
 
+    @Query(value = "SELECT NEW com.foodmate.backend.dto.EnrollmentDto(" +
+            "e.id, e.foodGroup.id, m.image, fg.title, fg.name, f.type, " +
+            "fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, e.status) " +
+            "FROM Enrollment e " +
+            "INNER JOIN FoodGroup fg ON fg.id = e.foodGroup.id " +
+            "INNER JOIN Member m ON e.member.id = m.id " +
+            "INNER JOIN Food f ON fg.food.id = f.id " +
+            "WHERE (e.member.id = :memberId) " +
+            "AND (e.status = :enrollmentStatus) " +
+            "AND (fg.groupDateTime BETWEEN :startDateTime AND :endDateTime)" +
+            "ORDER BY fg.groupDateTime ASC")
+    Page<EnrollmentDto> getMyEnrollment(
+            Long memberId,
+            @Param("enrollmentStatus") EnrollmentStatus enrollmentStatus,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            Pageable pageable);
 }
