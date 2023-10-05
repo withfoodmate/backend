@@ -397,7 +397,7 @@ public class MemberServiceImpl implements MemberService {
     public String deleteKakaoMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
-
+        logout(request, response);
         member.setIsDeleted(LocalDateTime.now());
         memberRepository.save(member);
         return "회원 탈퇴 성공";
