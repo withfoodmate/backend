@@ -35,7 +35,12 @@ public enum Error {
 
     // CommentException
     COMMENT_NOT_FOUND("해당 아이디의 댓글은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
-    INVALID_ADDRESS("올바르지 않은 주소입니다.", HttpStatus.BAD_REQUEST);
+    INVALID_ADDRESS("올바르지 않은 주소입니다.", HttpStatus.BAD_REQUEST),
+    NO_MODIFY_PERMISSION_COMMENT("해당 댓글을 수정할 권한이 없습니다.", HttpStatus.FORBIDDEN),
+
+    // ReplyException
+    REPLY_NOT_FOUND("해당 아이디의 대댓글은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    NO_MODIFY_PERMISSION_REPLY("해당 대댓글을 수정할 권한이 없습니다.", HttpStatus.FORBIDDEN);
 
     private final String message;
     private final HttpStatus httpStatus;
