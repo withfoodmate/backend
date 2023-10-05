@@ -5,6 +5,8 @@ import com.foodmate.backend.dto.GroupDto;
 import com.foodmate.backend.dto.ReplyDto;
 import com.foodmate.backend.service.GroupService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -104,6 +106,12 @@ public class GroupController {
                                               @PathVariable Long replyId,
                                               Authentication authentication) {
         return ResponseEntity.ok(groupService.deleteReply(groupId, commentId, replyId, authentication));
+    }
+
+    // 댓글 대댓글 전체 조회
+    @GetMapping("{groupId}/comment")
+    public ResponseEntity<Page<CommentDto.Response>> getComments(@PathVariable Long groupId, Pageable pageable) {
+        return ResponseEntity.ok(groupService.getComments(groupId, pageable));
     }
 
 }
