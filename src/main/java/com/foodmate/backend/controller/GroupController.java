@@ -122,4 +122,10 @@ public class GroupController {
         return ResponseEntity.ok(groupService.searchByKeyword(keyword, pageable));
     }
 
+    // 오늘 모임 조회
+    @GetMapping("/today")
+    public ResponseEntity<Page<SearchedGroupDto>> getTodayGroupList(Pageable pageable) {
+        return ResponseEntity.ok(groupService.getTodayGroupList(pageable));
+    }
+
 }
