@@ -1,12 +1,14 @@
 package com.foodmate.backend.service;
 
 import com.foodmate.backend.dto.MemberDto;
+import com.foodmate.backend.security.dto.JwtTokenDto;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 public interface MemberService {
 
@@ -28,4 +30,6 @@ public interface MemberService {
     boolean emailAuth(String emailAuthKey);
 
     String toggleLikeForPost(Long memberId, Authentication authentication);
+
+    JwtTokenDto login(Map<String, String> loginInfo);
 }

@@ -1,6 +1,7 @@
 package com.foodmate.backend.controller;
 
 import com.foodmate.backend.dto.MemberDto;
+import com.foodmate.backend.security.dto.JwtTokenDto;
 import com.foodmate.backend.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
