@@ -28,4 +28,15 @@ public class EnrollmentController {
     public ResponseEntity<Page<EnrollmentDto>> getMyEnrollment(@RequestParam String status, Authentication authentication, Pageable pageable){
         return ResponseEntity.ok(enrollmentService.getMyEnrollment(status, authentication, pageable));
     }
+
+    /**
+     *
+     * @param decision 처리 상태
+     * @param authentication 사용자 정보
+     * @return 처리 상태에 따른 정보 가져옴
+     */
+    @GetMapping("/receive")
+    public ResponseEntity<Page<EnrollmentDto.RequestList>> enrollmentList(@RequestParam String decision, Authentication authentication) {
+        return ResponseEntity.ok(enrollmentService.enrollmentList(decision, authentication));
+    }
 }
