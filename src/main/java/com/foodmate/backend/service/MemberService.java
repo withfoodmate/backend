@@ -26,4 +26,6 @@ public interface MemberService {
     String createDefaultImageMember(MemberDto.CreateMemberRequest request);
 
     boolean emailAuth(String emailAuthKey);
+
+    String toggleLikeForPost(Long memberId, Authentication authentication);
 }

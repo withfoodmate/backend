@@ -3,6 +3,7 @@ package com.foodmate.backend.service.impl;
 import com.foodmate.backend.component.MailComponents;
 import com.foodmate.backend.dto.MemberDto;
 import com.foodmate.backend.entity.Food;
+import com.foodmate.backend.entity.Likes;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
 import com.foodmate.backend.enums.EmailContents;
@@ -32,7 +33,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringTokenizer;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +52,6 @@ public class MemberServiceImpl implements MemberService {
     private final String s3BucketFolderName = "profile-images/";
     @Value("${S3_GENERAL_IMAGE_PATH}")
     private String defaultProfileImage;
-    private final MailComponents mailComponents;
 
     /**
      * @param authentication 로그인한 사용자의 정보
@@ -61,9 +64,9 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
 
         if(member.getImage() == null){
-            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLikedMember(member), findPreferences(member) , defaultProfileImage);
+            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLikedMember(member), findPreferences(member));
+        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
     }
 
     /**
@@ -197,9 +200,9 @@ public class MemberServiceImpl implements MemberService {
             throw new MemberException(Error.DELETED_USER);
         }
         if(member.getImage() == null){
-            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLikedMember(member), findPreferences(member) , defaultProfileImage);
+            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLikedMember(member), findPreferences(member));
+        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
     }
 
     /**
@@ -311,4 +314,30 @@ public class MemberServiceImpl implements MemberService {
             }
         }
     }
+
+    /**
+     *
+     * @param memberId
+     * @param authentication
+     * @return 이미 좋아요 한 사람이면 좋아요 취소/ 아니면 좋아요 누름
+     */
+    @Override
+    public String toggleLikeForPost(Long memberId, Authentication authentication) {
+        Member liked = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND)); // 좋아요 받은 사람
+
+        Member liker = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND)); // 좋아요 누른 사람
+
+        Optional<Likes> optionalLikes = likesRepository.findByLikedAndLiker(liked, liker);
+
+        if(optionalLikes.isPresent()){
+            likesRepository.deleteById(optionalLikes.get().getId());
+            return "좋아요 취소 완료";
+        } else {
+            likesRepository.save(Likes.makeLikes(liked, liker));
+            return "좋아요 완료";
+        }
+    }
+
 }

@@ -108,4 +108,17 @@ public class MemberController {
         boolean result = memberService.emailAuth(emailAuthKey);
         return result;
     }
+
+    /**
+     * @param memberId 좋아요 받는 사람의 id 정보
+     * @param authentication 로그인한 사용자의 정보
+     * @return
+     */
+    @PostMapping("{memberId}/likes")
+    public ResponseEntity<String> toggleLikeForPost(@PathVariable Long memberId,
+                                                    Authentication authentication){
+        return ResponseEntity.ok(memberService.toggleLikeForPost(memberId, authentication));
+    }
+
+
 }
