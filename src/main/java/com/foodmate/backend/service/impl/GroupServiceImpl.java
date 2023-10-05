@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -343,6 +344,14 @@ public class GroupServiceImpl implements GroupService {
         return foodGroupRepository.searchByKeyword(keyword,
                 LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
                 LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+    }
+
+    // 오늘 모임 조회
+    @Override
+    public Page<SearchedGroupDto> getTodayGroupList(Pageable pageable) {
+
+        return foodGroupRepository.getTodayGroupList(LocalDateTime.now(),
+                LocalDate.now().atTime(23, 59, 59), pageable);
     }
 
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
