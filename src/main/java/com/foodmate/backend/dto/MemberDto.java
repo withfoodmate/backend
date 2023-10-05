@@ -76,4 +76,11 @@ public class MemberDto {
     public static class deleteMemberRequest{
         private String password;
     }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class changePreferenceFoodRequest{
+        List<String> food;
+    }
 }
