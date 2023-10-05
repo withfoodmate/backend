@@ -363,4 +363,18 @@ public class MemberServiceImpl implements MemberService {
 
         return jwtTokenDto;
     }
+
+    @Override
+    public String changePassword(MemberDto.passwordUpdateRequest request, Authentication authentication) {
+        Member member = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        if (!BCrypt.checkpw(request.getOldPassword(), member.getPassword())) {
+            throw new MemberException(Error.PASSWORD_NOT_MATCH);
+        }
+        member.updatePassword(BCrypt.hashpw(request.getNewPassword(),BCrypt.gensalt()));
+        memberRepository.save(member);
+        return "비밀번호 변경 완료";
+    }
+
 }
