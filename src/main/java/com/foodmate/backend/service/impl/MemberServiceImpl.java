@@ -430,4 +430,20 @@ public class MemberServiceImpl implements MemberService {
         throw new MemberException(Error.ACCESS_DENIED);
     }
 
+    /**
+     * @param request 사용자가 선택한 음식 종류
+     * @param authentication 사용자의 정보
+     * @return
+     */
+    @Override
+    @Transactional
+    public String changePreferenceFood(MemberDto.changePreferenceFoodRequest request, Authentication authentication) {
+        Member member = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        preferenceRepository.deleteByMember(member);
+        processFoodPreferences(member, request.getFood());
+        return "선호음식 수정 완료";
+    }
+
 }
