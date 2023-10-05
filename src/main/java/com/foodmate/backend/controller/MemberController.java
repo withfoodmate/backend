@@ -94,7 +94,6 @@ public class MemberController {
     @PostMapping("/signup")
     public ResponseEntity<String> createMember(@RequestPart MemberDto.CreateMemberRequest request,
                                                @RequestPart(value = "file", required = false) MultipartFile imageFile) throws IOException {
-
         if(imageFile == null){ // 이미지가 없을 때
             return ResponseEntity.ok(memberService.createDefaultImageMember(request));
         }
@@ -138,7 +137,24 @@ public class MemberController {
      */
     @PatchMapping("/password")
     public ResponseEntity<String> changePassword(@RequestBody MemberDto.passwordUpdateRequest request, Authentication authentication) {
-        log.error(request.getOldPassword());
         return ResponseEntity.ok(memberService.changePassword(request, authentication));
+    }
+
+
+    /**
+     * @param request 로그아웃을 위한
+     * @param response 로그아웃을 위한  response
+     * @param authentication 현재 로그인한 사용자의 정보
+     * @param deleteMemberRequest 사용자가 입력한 password
+     * @return 회원탈퇴 상태 호출
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication,
+                                               @RequestBody(required = false) MemberDto.deleteMemberRequest deleteMemberRequest) {
+        if (deleteMemberRequest == null) {
+            return ResponseEntity.ok(memberService.deleteKakaoMember(request, response, authentication));
+        } else {
+            return ResponseEntity.ok(memberService.deleteGeneralMember(request, response, authentication, deleteMemberRequest));
+        }
     }
 }
