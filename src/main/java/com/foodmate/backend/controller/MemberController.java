@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -156,5 +157,16 @@ public class MemberController {
         } else {
             return ResponseEntity.ok(memberService.deleteGeneralMember(request, response, authentication, deleteMemberRequest));
         }
+    }
+
+    /**
+     *
+     * @param request 사용자가 선택한 음식 종류
+     * @param authentication 로그인한 사용자의 정보
+     * @return
+     */
+    @PatchMapping("/food")
+    public ResponseEntity<String> changePreferenceFood(@RequestBody MemberDto.changePreferenceFoodRequest request, Authentication authentication) {
+        return ResponseEntity.ok(memberService.changePreferenceFood(request, authentication));
     }
 }
