@@ -3,6 +3,7 @@ package com.foodmate.backend.entity;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 @Entity
 public class Enrollment {
 
