@@ -42,4 +42,7 @@ public interface MemberService {
             HttpServletResponse response,
             Authentication authentication,
             MemberDto.deleteMemberRequest deleteMemberRequest);
+
+
+    String changePreferenceFood(MemberDto.changePreferenceFoodRequest request, Authentication authentication);
 }
