@@ -8,4 +8,6 @@ import org.springframework.security.core.Authentication;
 public interface EnrollmentService {
 
     Page<EnrollmentDto> getMyEnrollment(String status, Authentication authentication, Pageable pageable);
+
+    Page<EnrollmentDto.RequestList> enrollmentList(String decision, Authentication authentication);
 }
