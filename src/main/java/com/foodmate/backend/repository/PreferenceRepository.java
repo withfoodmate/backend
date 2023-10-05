@@ -11,4 +11,6 @@ import java.util.List;
 public interface PreferenceRepository extends JpaRepository<Preference,Long> {
 
     List<Preference> findAllByMember(Member member);
+
+    void deleteByMember(Member member);
 }
