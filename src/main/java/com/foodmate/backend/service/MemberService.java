@@ -32,4 +32,6 @@ public interface MemberService {
     String toggleLikeForPost(Long memberId, Authentication authentication);
 
     JwtTokenDto login(Map<String, String> loginInfo);
+
+    String changePassword(MemberDto.passwordUpdateRequest request, Authentication authentication);
 }
