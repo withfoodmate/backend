@@ -3,6 +3,7 @@ package com.foodmate.backend.service.impl;
 import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
 import com.foodmate.backend.dto.ReplyDto;
+import com.foodmate.backend.dto.SearchedGroupDto;
 import com.foodmate.backend.entity.*;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
@@ -29,6 +30,7 @@ public class GroupServiceImpl implements GroupService {
 
     private static final int RESERVATION_INTERVAL_HOUR = 1;
     private static final int RESERVATION_RANGE_MONTH = 1;
+    private static final int SEARCH_INTERVAL_MINUTE = 10;
 
     private final MemberRepository memberRepository;
     private final FoodRepository foodRepository;
@@ -332,6 +334,15 @@ public class GroupServiceImpl implements GroupService {
         });
 
         return commentDTOs;
+    }
+
+    // 검색 기능
+    @Override
+    public Page<SearchedGroupDto> searchByKeyword(String keyword, Pageable pageable) {
+
+        return foodGroupRepository.searchByKeyword(keyword,
+                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
+                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
