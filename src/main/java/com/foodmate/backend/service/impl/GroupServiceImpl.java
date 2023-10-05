@@ -13,11 +13,15 @@ import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -300,6 +304,34 @@ public class GroupServiceImpl implements GroupService {
         replyRepository.deleteById(replyId);
 
         return "대댓글 삭제 완료";
+    }
+
+    // 댓글 대댓글 전체 조회
+    @Override
+    public Page<CommentDto.Response> getComments(Long groupId, Pageable pageable) {
+
+        FoodGroup group = validateGroupId(groupId);
+
+        // 댓글 전체 조회
+        Page<Comment> comments = commentRepository.findAllByFoodGroup(group, pageable);
+
+        Page<CommentDto.Response> commentDTOs = comments.map(comment -> {
+
+            List<ReplyDto.Response> replyDTOs = new ArrayList<>();
+
+            // 해당 댓글의 대댓글 전체 조회
+            List<Reply> replies = replyRepository.findAllByComment(comment);
+
+            // 대댓글 DTO 로 변환 & 리스트에 추가
+            for (Reply reply : replies) {
+                replyDTOs.add(ReplyDto.Response.fromEntity(reply));
+            }
+
+            // 댓글 DTO 로 변환 (안에 대댓글 리스트 세팅)
+            return CommentDto.Response.fromEntity(comment, replyDTOs);
+        });
+
+        return commentDTOs;
     }
 
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
