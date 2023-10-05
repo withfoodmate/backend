@@ -38,4 +38,6 @@ public interface GroupService {
 
     Page<SearchedGroupDto> getTodayGroupList(Pageable pageable);
 
+    Page<SearchedGroupDto> getAllGroupList(Pageable pageable);
+
 }
