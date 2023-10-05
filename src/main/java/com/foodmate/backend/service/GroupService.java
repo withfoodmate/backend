@@ -21,4 +21,8 @@ public interface GroupService {
 
     String addReply(Long groupId, Long commentId, Authentication authentication, ReplyDto.Request request);
 
+    String updateComment(Long groupId, Long commentId, Authentication authentication, CommentDto.Request request);
+
+    String updateReply(Long groupId, Long commentId, Long replyId, Authentication authentication, ReplyDto.Request request);
+
 }

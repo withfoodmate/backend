@@ -216,6 +216,49 @@ public class GroupServiceImpl implements GroupService {
         return "대댓글 작성 완료";
     }
 
+    // 댓글 수정
+    @Override
+    public String updateComment(Long groupId, Long commentId, Authentication authentication, CommentDto.Request request) {
+
+        validateGroupId(groupId);
+        Comment comment = validateCommentId(groupId, commentId);
+
+        Member member = getMember(authentication);
+
+        // 해당 댓글 작성자만 수정 가능
+        if (comment.getMember().getId() != member.getId()) {
+            throw new CommentException(Error.NO_MODIFY_PERMISSION_COMMENT);
+        }
+
+        comment.setContent(request.getContent());
+
+        commentRepository.save(comment);
+
+        return "댓글 수정 완료";
+    }
+
+    // 대댓글 수정
+    @Override
+    public String updateReply(Long groupId, Long commentId, Long replyId, Authentication authentication, ReplyDto.Request request) {
+
+        validateGroupId(groupId);
+        validateCommentId(groupId, commentId);
+        Reply reply = validateReplyId(commentId, replyId);
+
+        Member member = getMember(authentication);
+
+        // 해당 대댓글 작성자만 수정 가능
+        if (reply.getMember().getId() != member.getId()) {
+            throw new ReplyException(Error.NO_MODIFY_PERMISSION_REPLY);
+        }
+
+        reply.setContent(request.getContent());
+
+        replyRepository.save(reply);
+
+        return "대댓글 수정 완료";
+    }
+
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
     private FoodGroup validateGroupId(Long groupId) {
 
@@ -240,6 +283,19 @@ public class GroupServiceImpl implements GroupService {
         }
 
         return comment;
+    }
+
+    // {replyId} 경로 검증 - 존재하는 리플라이면서, 해당 코멘트의 리플라이가 맞으면 반환
+    private Reply validateReplyId(Long commentId, Long replyId) {
+
+        Reply reply = replyRepository.findById(replyId)
+                .orElseThrow(() -> new ReplyException(Error.REPLY_NOT_FOUND));
+
+        if (reply.getComment().getId() != commentId) {
+            throw new ReplyException(Error.INVALID_ADDRESS);
+        }
+
+        return reply;
     }
 
     private Member getMember(Authentication authentication) {
