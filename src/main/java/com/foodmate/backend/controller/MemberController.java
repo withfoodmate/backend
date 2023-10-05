@@ -130,4 +130,15 @@ public class MemberController {
         return ResponseEntity.ok(memberService.login(user));
     }
 
+
+    /**
+     * @param request 사용자의 현재 비밀번호와, 변경할 비밀번호
+     * @param authentication 로그인한 사용자의 정보
+     * @return
+     */
+    @PatchMapping("/password")
+    public ResponseEntity<String> changePassword(@RequestBody MemberDto.passwordUpdateRequest request, Authentication authentication) {
+        log.error(request.getOldPassword());
+        return ResponseEntity.ok(memberService.changePassword(request, authentication));
+    }
 }

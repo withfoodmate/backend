@@ -70,4 +70,8 @@ public class Member {
                 .isEmailAuth(false)
                 .build();
     }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

@@ -4,6 +4,7 @@ import com.foodmate.backend.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -58,5 +59,13 @@ public class MemberDto {
                     .food(food)
                     .build();
         }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class passwordUpdateRequest{
+        private String oldPassword;
+        private String newPassword;
     }
 }
