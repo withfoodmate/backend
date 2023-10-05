@@ -3,6 +3,7 @@ package com.foodmate.backend.service;
 import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
 import com.foodmate.backend.dto.ReplyDto;
+import com.foodmate.backend.dto.SearchedGroupDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -32,5 +33,7 @@ public interface GroupService {
     String deleteReply(Long groupId, Long commentId, Long replyId, Authentication authentication);
 
     Page<CommentDto.Response> getComments(Long groupId, Pageable pageable);
+
+    Page<SearchedGroupDto> searchByKeyword(String keyword, Pageable pageable);
 
 }
