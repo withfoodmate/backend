@@ -42,6 +42,15 @@ public class EnrollmentDto {
         this.storeAddress = storeAddress;
         this.status = status;
     }
+
+    @Getter
+    @Builder
+    public static class RequestList {
+        private Long enrollmentId;
+        private Long memberId;
+        private String nickname;
+        private String image;
+    }
 }
 
 
