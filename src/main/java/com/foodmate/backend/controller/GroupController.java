@@ -70,4 +70,23 @@ public class GroupController {
         return ResponseEntity.ok(groupService.addReply(groupId, commentId, authentication, request));
     }
 
+    // 댓글 수정
+    @PutMapping("/{groupId}/comment/{commentId}")
+    public ResponseEntity<String> updateComment(@PathVariable Long groupId,
+                                                @PathVariable Long commentId,
+                                                Authentication authentication,
+                                                @RequestBody @Valid CommentDto.Request request) {
+        return ResponseEntity.ok(groupService.updateComment(groupId, commentId, authentication, request));
+    }
+
+    // 대댓글 수정
+    @PutMapping("/{groupId}/comment/{commentId}/reply/{replyId}")
+    public ResponseEntity<String> updateReply(@PathVariable Long groupId,
+                                              @PathVariable Long commentId,
+                                              @PathVariable Long replyId,
+                                              Authentication authentication,
+                                              @RequestBody @Valid ReplyDto.Request request) {
+        return ResponseEntity.ok(groupService.updateReply(groupId, commentId, replyId, authentication, request));
+    }
+
 }
