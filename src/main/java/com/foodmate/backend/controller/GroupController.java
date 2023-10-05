@@ -3,6 +3,7 @@ package com.foodmate.backend.controller;
 import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
 import com.foodmate.backend.dto.ReplyDto;
+import com.foodmate.backend.dto.SearchedGroupDto;
 import com.foodmate.backend.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -112,6 +113,13 @@ public class GroupController {
     @GetMapping("{groupId}/comment")
     public ResponseEntity<Page<CommentDto.Response>> getComments(@PathVariable Long groupId, Pageable pageable) {
         return ResponseEntity.ok(groupService.getComments(groupId, pageable));
+    }
+
+    // 검색 기능
+    @GetMapping("/search")
+    public ResponseEntity<Page<SearchedGroupDto>> searchByKeyword(@RequestParam String keyword,
+                                                                  Pageable pageable) {
+        return ResponseEntity.ok(groupService.searchByKeyword(keyword, pageable));
     }
 
 }
