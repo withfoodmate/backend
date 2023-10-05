@@ -19,7 +19,7 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect   // 공간데이터 사용을 위한 쿼리 제공
+        dialect: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect # 공간데이터 사용을 위한 쿼리 제공
 
   mail:
     host: smtp.gmail.com
