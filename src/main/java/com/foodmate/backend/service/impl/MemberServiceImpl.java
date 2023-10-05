@@ -33,10 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringTokenizer;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +49,7 @@ public class MemberServiceImpl implements MemberService {
     private final String s3BucketFolderName = "profile-images/";
     @Value("${S3_GENERAL_IMAGE_PATH}")
     private String defaultProfileImage;
-
+    private final MailComponents mailComponents;
     /**
      * @param authentication 로그인한 사용자의 정보
      * @return 사용자의 정보
