@@ -3,6 +3,8 @@ package com.foodmate.backend.service;
 import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
 import com.foodmate.backend.dto.ReplyDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 public interface GroupService {
@@ -28,5 +30,7 @@ public interface GroupService {
     String deleteComment(Long groupId, Long commentId, Authentication authentication);
 
     String deleteReply(Long groupId, Long commentId, Long replyId, Authentication authentication);
+
+    Page<CommentDto.Response> getComments(Long groupId, Pageable pageable);
 
 }
