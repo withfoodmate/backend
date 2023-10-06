@@ -51,7 +51,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT e FROM Enrollment e " +
             "JOIN e.foodGroup fg " +
             "WHERE fg.member.id = :id " +
-            "AND e.status = 'SUBMIT' " +
+            "AND e.status = 'ACCEPT' " +
             "ORDER BY e.enrollDate ASC")
     Page<Enrollment> findByMyEnrollmentProcessedList(@Param("id") Long readerId, Pageable pageable);
 
@@ -59,7 +59,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT e FROM Enrollment e " +
             "JOIN e.foodGroup fg " +
             "WHERE fg.member.id = :id " +
-            "AND e.status = 'ACCEPT' " +
+            "AND e.status = 'SUBMIT' " +
             "ORDER BY e.enrollDate ASC")
     Page<Enrollment> findByMyEnrollmentUnprocessedList(@Param("id") Long readerId, Pageable pageable);
 }
