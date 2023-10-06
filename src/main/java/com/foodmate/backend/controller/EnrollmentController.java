@@ -7,10 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,5 +35,25 @@ public class EnrollmentController {
     @GetMapping("/receive")
     public ResponseEntity<Page<EnrollmentDto.RequestList>> enrollmentList(@RequestParam String decision, Authentication authentication, Pageable pageable) {
         return ResponseEntity.ok(enrollmentService.enrollmentList(decision, authentication, pageable));
+    }
+
+    /**
+     * 모임 요청 수락
+     * @param enrollmentId 신청 id
+     * @return 처리 상태에 대한 응답
+     */
+    @PatchMapping("/{enrollmentId}/accept")
+    public ResponseEntity<String> acceptEnrollment(@PathVariable Long enrollmentId) {
+        return ResponseEntity.ok(enrollmentService.acceptEnrollment(enrollmentId));
+    }
+
+    /**
+     * 모임 요청 거절
+     * @param enrollmentId 신청 id
+     * @return 처리 상태에 대한 응답
+     */
+    @PatchMapping("/{enrollmentId}/refuse")
+    public ResponseEntity<String> refuseEnrollment(@PathVariable Long enrollmentId) {
+        return ResponseEntity.ok(enrollmentService.refuseEnrollment(enrollmentId));
     }
 }

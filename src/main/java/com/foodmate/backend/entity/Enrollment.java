@@ -39,4 +39,8 @@ public class Enrollment {
     @LastModifiedDate
     private LocalDateTime decisionDate;
 
+    public void updateEnrollment(EnrollmentStatus status) {
+        this.status = status;
+    }
+
 }

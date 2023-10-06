@@ -80,5 +80,30 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         } else {
             throw new EnrollmentException(Error.REQUEST_NOT_FOUND);
         }
+
+
+    }
+
+    @Override
+    public String acceptEnrollment(Long enrollmentId) {
+
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
+        enrollment.updateEnrollment(EnrollmentStatus.ACCEPT);
+        enrollmentRepository.save(enrollment);
+
+        return "수락 완료";
+    }
+
+    @Override
+    public String refuseEnrollment(Long enrollmentId) {
+
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
+        enrollment.updateEnrollment(EnrollmentStatus.REFUSE);
+        enrollmentRepository.save(enrollment);
+
+        return "거절 완료";
     }
 }
+
