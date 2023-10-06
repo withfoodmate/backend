@@ -1,7 +1,6 @@
 package com.foodmate.backend.service.impl;
 
 import com.foodmate.backend.dto.EnrollmentDto;
-import com.foodmate.backend.entity.Enrollment;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
@@ -19,7 +18,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -105,5 +106,27 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         return "거절 완료";
     }
-}
 
+    @Override
+    public String cancelEnrollment(Long enrollmentId, Authentication authentication) {
+        Member member = memberRepository.findByEmail(authentication.getName()).orElseThrow(
+                () -> new MemberException(Error.USER_NOT_FOUND));
+
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(
+                () -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
+
+        log.error(enrollment.getId().toString());
+        if(enrollment.getMember().getId() != member.getId()){
+            throw new EnrollmentException(Error.ACCESS_DENIED);
+        }
+
+
+        if(enrollment.getStatus() != EnrollmentStatus.SUBMIT){
+            throw new EnrollmentException(Error.ENROLLMENT_CANCEL_NOT_STATUS);
+        }
+        enrollment.setStatus(EnrollmentStatus.CANCEL);
+        enrollmentRepository.save(enrollment);
+
+        return "취소 완료";
+    }
+}
