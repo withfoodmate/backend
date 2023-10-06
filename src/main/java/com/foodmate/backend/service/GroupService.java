@@ -40,4 +40,6 @@ public interface GroupService {
 
     Page<SearchedGroupDto> getAllGroupList(Pageable pageable);
 
+    Page<SearchedGroupDto> searchByLocation(String latitude, String longitude, Pageable pageable);
+
 }
