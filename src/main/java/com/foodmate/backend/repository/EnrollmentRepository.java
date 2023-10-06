@@ -47,7 +47,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             LocalDateTime endDateTime,
             Pageable pageable);
 
-    // 본인이 생성한 모든 모임의 요청 중 신청완료인 리스트 조회
+    // 본인이 생성한 모든 모임의 요청 중 수락한 리스트 조회
     @Query("SELECT e FROM Enrollment e " +
             "JOIN e.foodGroup fg " +
             "WHERE fg.member.id = :id " +
@@ -55,7 +55,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             "ORDER BY e.enrollDate ASC")
     Page<Enrollment> findByMyEnrollmentProcessedList(@Param("id") Long readerId, Pageable pageable);
 
-    // 본인이 생성한 모든 모임의 요청 중 수락한 리스트 조회
+    // 본인이 생성한 모든 모임의 요청 중 신청완료인 리스트 조회
     @Query("SELECT e FROM Enrollment e " +
             "JOIN e.foodGroup fg " +
             "WHERE fg.member.id = :id " +
