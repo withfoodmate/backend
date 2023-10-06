@@ -42,8 +42,5 @@ public class Enrollment {
     public void updateEnrollment(EnrollmentStatus status) {
         this.status = status;
     }
-    public void updateDecisionDate(LocalDateTime decisionDate) {
-        this.decisionDate = decisionDate;
-    }
 
 }
