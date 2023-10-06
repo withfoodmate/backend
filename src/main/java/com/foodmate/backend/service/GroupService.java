@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface GroupService {
 
@@ -45,5 +46,7 @@ public interface GroupService {
     Page<SearchedGroupDto> searchByLocation(String latitude, String longitude, Pageable pageable);
 
     Page<SearchedGroupDto> searchByDate(LocalDate start, LocalDate end, Pageable pageable);
+
+    Page<SearchedGroupDto> searchByFood(List<String> foods, Pageable pageable);
 
 }

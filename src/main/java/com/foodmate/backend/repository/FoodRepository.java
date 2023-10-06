@@ -25,4 +25,7 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
     // 음식 이름으로 푸드 엔티티 찾기
     Optional<Food> findByType(String foodName);
 
+    // 입력받은 음식 이름이 DB 에 존재하는지 확인
+    boolean existsByType(String foodName);
+
 }

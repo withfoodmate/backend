@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -159,6 +160,13 @@ public class GroupController {
         }
 
         return ResponseEntity.ok(groupService.searchByDate(start, end, pageable));
+    }
+
+    // 메뉴별 조회
+    @GetMapping("/search/food")
+    public ResponseEntity<Page<SearchedGroupDto>> searchByFood(@RequestParam List<String> foods,
+                                                               Pageable pageable) {
+        return ResponseEntity.ok(groupService.searchByFood(foods, pageable));
     }
 
 }
