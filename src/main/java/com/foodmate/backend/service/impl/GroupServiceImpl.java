@@ -386,6 +386,22 @@ public class GroupServiceImpl implements GroupService {
         return foodGroupRepository.searchByDate(searchStart, searchEnd, pageable);
     }
 
+    // 메뉴별 조회
+    @Override
+    public Page<SearchedGroupDto> searchByFood(List<String> foods, Pageable pageable) {
+
+        // foods 검증
+        for (String foodType : foods) {
+            if (!foodRepository.existsByType(foodType)) {
+                throw new FoodException(Error.FOOD_NOT_FOUND);
+            }
+        }
+
+        return foodGroupRepository.searchByFood(foods,
+                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
+                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+    }
+
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
     private FoodGroup validateGroupId(Long groupId) {
 
