@@ -4,15 +4,19 @@ import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
 import com.foodmate.backend.dto.ReplyDto;
 import com.foodmate.backend.dto.SearchedGroupDto;
+import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
@@ -140,6 +144,21 @@ public class GroupController {
                                                                    @RequestParam String longitude,
                                                                    Pageable pageable) {
         return ResponseEntity.ok(groupService.searchByLocation(latitude, longitude, pageable));
+    }
+
+    // 날짜별 조회
+    @GetMapping("/search/date")
+    public ResponseEntity<Page<SearchedGroupDto>> searchByDate(@RequestParam
+                                                               @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
+                                                               @RequestParam
+                                                               @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end,
+                                                               Pageable pageable) {
+
+        if (start.isBefore(LocalDate.now()) || end.isBefore(start)) {
+            throw new GroupException(Error.INVALID_DATE_RANGE);
+        }
+
+        return ResponseEntity.ok(groupService.searchByDate(start, end, pageable));
     }
 
 }
