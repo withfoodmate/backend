@@ -90,7 +90,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
         enrollment.updateEnrollment(EnrollmentStatus.ACCEPT);
-        enrollment.updateDecisionDate(LocalDateTime.now());
         enrollmentRepository.save(enrollment);
 
         return "수락 완료";
@@ -103,6 +102,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
         enrollment.updateEnrollment(EnrollmentStatus.REFUSE);
         enrollmentRepository.save(enrollment);
+
         return "거절 완료";
     }
 }
