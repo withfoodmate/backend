@@ -27,16 +27,16 @@ public enum Error {
     GROUP_DELETED("해당 모임은 삭제되었습니다.", HttpStatus.GONE),
     NO_MODIFY_PERMISSION_GROUP("해당 모임을 수정할 권한이 없습니다.", HttpStatus.FORBIDDEN),
     NO_DELETE_PERMISSION_GROUP("해당 모임을 삭제할 권한이 없습니다.", HttpStatus.FORBIDDEN),
-    INVALID_DATE_RANGE("검색 시작일 혹은 종료일 정보가 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
 
     // ChatException
     CHATROOM_NOT_FOUND("해당 모임 아이디의 채팅룸은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
 
     // EnrollmentException
+    ENROLLMENT_NOT_FOUND("해당 신청이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     ENROLLMENT_HISTORY_EXISTS("해당 모임에 신청 이력이 존재합니다.", HttpStatus.BAD_REQUEST),
     GROUP_FULL("해당 모임의 정원이 다 찼습니다.", HttpStatus.BAD_REQUEST),
     REQUEST_NOT_FOUND("입력한 요청이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
-    ENROLLMENT_NOT_FOUND("신청정보가 DB에 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    ENROLLMENT_CANCEL_NOT_STATUS("해당 신청은 취소가능한 상태가 아닙니다.", HttpStatus.ACCEPTED),
 
     // CommentException
     COMMENT_NOT_FOUND("해당 아이디의 댓글은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
