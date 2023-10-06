@@ -14,4 +14,6 @@ public interface EnrollmentService {
     String acceptEnrollment(Long enrollmentId);
 
     String refuseEnrollment(Long enrollmentId);
+
+    String cancelEnrollment(Long enrollmentId, Authentication authentication);
 }
