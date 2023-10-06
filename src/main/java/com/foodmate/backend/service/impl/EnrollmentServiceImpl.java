@@ -54,9 +54,18 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedList(member.getId(), PageRequest.of(0, 20));
             return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
                     .enrollmentId(enrollment.getId())
+                    .groupId(enrollment.getFoodGroup().getId())
                     .memberId(enrollment.getMember().getId())
                     .nickname(enrollment.getMember().getNickname())
                     .image(enrollment.getMember().getImage())
+                    .title(enrollment.getFoodGroup().getTitle())
+                    .name(enrollment.getFoodGroup().getName())
+                    .food(enrollment.getFoodGroup().getFood().getType())
+                    .date(enrollment.getFoodGroup().getGroupDateTime().toLocalDate())
+                    .time(enrollment.getFoodGroup().getGroupDateTime().toLocalTime())
+                    .maximum(enrollment.getFoodGroup().getMaximum())
+                    .storeName(enrollment.getFoodGroup().getStoreName())
+                    .storeAddress(enrollment.getFoodGroup().getStoreAddress())
                     .build());
 
         } else if (decision.equals("unprocessed")) {
