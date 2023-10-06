@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -372,6 +373,17 @@ public class GroupServiceImpl implements GroupService {
         return foodGroupRepository.searchByLocation(userLocation,
                 LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
                 LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+    }
+
+    // 날짜별 조회
+    @Override
+    public Page<SearchedGroupDto> searchByDate(LocalDate start, LocalDate end, Pageable pageable) {
+
+        LocalDateTime searchStart = (start.isEqual(LocalDate.now())) ?
+                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE) : start.atStartOfDay();
+        LocalDateTime searchEnd = end.atTime(LocalTime.MAX);
+
+        return foodGroupRepository.searchByDate(searchStart, searchEnd, pageable);
     }
 
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
