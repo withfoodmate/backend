@@ -134,4 +134,12 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getAllGroupList(pageable));
     }
 
+    // 거리순 조회 & 내 근처 모임
+    @GetMapping("/search/distance")
+    public ResponseEntity<Page<SearchedGroupDto>> searchByLocation(@RequestParam String latitude,
+                                                                   @RequestParam String longitude,
+                                                                   Pageable pageable) {
+        return ResponseEntity.ok(groupService.searchByLocation(latitude, longitude, pageable));
+    }
+
 }
