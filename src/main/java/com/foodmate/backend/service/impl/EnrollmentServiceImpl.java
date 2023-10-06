@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 
@@ -43,7 +44,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public Page<EnrollmentDto.RequestList> enrollmentList(String decision, Authentication authentication) {
+    public Page<EnrollmentDto.RequestList> enrollmentList(String decision, Authentication authentication, Pageable pageable) {
 
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
@@ -51,7 +52,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Page<Enrollment> enrollmentsPage;
 
         if (decision.equals("processed")) {
-            enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedList(member.getId(), PageRequest.of(0, 20));
+            enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedList(member.getId(), pageable);
             return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
                     .enrollmentId(enrollment.getId())
                     .groupId(enrollment.getFoodGroup().getId())
@@ -69,7 +70,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                     .build());
 
         } else if (decision.equals("unprocessed")) {
-            enrollmentsPage = enrollmentRepository.findByMyEnrollmentUnprocessedList(member.getId(), PageRequest.of(0, 20));
+            enrollmentsPage = enrollmentRepository.findByMyEnrollmentUnprocessedList(member.getId(), pageable);
             return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
                     .enrollmentId(enrollment.getId())
                     .memberId(enrollment.getMember().getId())

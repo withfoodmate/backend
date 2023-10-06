@@ -9,5 +9,5 @@ public interface EnrollmentService {
 
     Page<EnrollmentDto> getMyEnrollment(String status, Authentication authentication, Pageable pageable);
 
-    Page<EnrollmentDto.RequestList> enrollmentList(String decision, Authentication authentication);
+    Page<EnrollmentDto.RequestList> enrollmentList(String decision, Authentication authentication, Pageable pageable);
 }
