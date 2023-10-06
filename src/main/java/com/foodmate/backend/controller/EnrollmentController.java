@@ -56,4 +56,14 @@ public class EnrollmentController {
     public ResponseEntity<String> refuseEnrollment(@PathVariable Long enrollmentId) {
         return ResponseEntity.ok(enrollmentService.refuseEnrollment(enrollmentId));
     }
+
+    /**
+     * @param enrollmentId // 신청id
+     * @param authentication 사용자 정보
+     * @return
+     */
+    @DeleteMapping("/{enrollmentId}/cancel")
+    public ResponseEntity<String> cancelEnrollment(@PathVariable Long enrollmentId, Authentication authentication){
+        return ResponseEntity.ok(enrollmentService.cancelEnrollment(enrollmentId, authentication));
+    }
 }
