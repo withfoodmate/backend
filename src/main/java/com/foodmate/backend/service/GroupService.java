@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
+import java.time.LocalDate;
+
 public interface GroupService {
 
     String addGroup(Authentication authentication, GroupDto.Request request);
@@ -41,5 +43,7 @@ public interface GroupService {
     Page<SearchedGroupDto> getAllGroupList(Pageable pageable);
 
     Page<SearchedGroupDto> searchByLocation(String latitude, String longitude, Pageable pageable);
+
+    Page<SearchedGroupDto> searchByDate(LocalDate start, LocalDate end, Pageable pageable);
 
 }
