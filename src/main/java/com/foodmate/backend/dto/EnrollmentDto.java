@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Getter
 @NoArgsConstructor
@@ -41,6 +43,24 @@ public class EnrollmentDto {
         this.storeName = storeName;
         this.storeAddress = storeAddress;
         this.status = status;
+    }
+
+    @Getter
+    @Builder
+    public static class RequestList {
+        private Long enrollmentId;
+        private Long groupId;
+        private Long memberId;
+        private String nickname;
+        private String image;
+        private String title;
+        private String name;
+        private String food;
+        private LocalDate date;
+        private LocalTime time;
+        private int maximum;
+        private String storeName;
+        private String storeAddress;
     }
 }
 
