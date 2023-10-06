@@ -363,6 +363,17 @@ public class GroupServiceImpl implements GroupService {
                 LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
+    // 거리순 조회 & 내 근처 모임
+    @Override
+    public Page<SearchedGroupDto> searchByLocation(String latitude, String longitude, Pageable pageable) {
+
+        Point userLocation = getPoint(latitude, longitude);
+
+        return foodGroupRepository.searchByLocation(userLocation,
+                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
+                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+    }
+
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
     private FoodGroup validateGroupId(Long groupId) {
 
@@ -428,7 +439,7 @@ public class GroupServiceImpl implements GroupService {
 
     private Point getPoint(String latitude, String longitude) {
         return new GeometryFactory().createPoint(
-                new Coordinate(Double.parseDouble(latitude), Double.parseDouble(longitude)));
+                new Coordinate(Double.parseDouble(longitude), Double.parseDouble(latitude)));
     }
 
 }
