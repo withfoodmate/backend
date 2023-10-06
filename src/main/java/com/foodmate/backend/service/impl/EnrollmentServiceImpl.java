@@ -1,6 +1,7 @@
 package com.foodmate.backend.service.impl;
 
 import com.foodmate.backend.dto.EnrollmentDto;
+import com.foodmate.backend.entity.Enrollment;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
