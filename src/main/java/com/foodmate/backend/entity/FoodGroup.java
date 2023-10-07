@@ -38,6 +38,8 @@ public class FoodGroup {
 
     private int maximum;
 
+    private int attendance;
+
     private String storeName;
 
     private String storeAddress;
