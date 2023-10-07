@@ -4,7 +4,9 @@ import com.foodmate.backend.dto.EnrollmentDto;
 import com.foodmate.backend.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +20,15 @@ public class EnrollmentController {
     /**
      * @param status // 신청상태
      * @param authentication // 사용자 정보
-     * @param pageable
+     * @param
      * @return 신청상태에 맞는 신청정보를 가져옴
      */
     @GetMapping("")
-    public ResponseEntity<Page<EnrollmentDto>> getMyEnrollment(@RequestParam String status, Authentication authentication, Pageable pageable){
+    public ResponseEntity<Page<EnrollmentDto.myEnrollmentResponse>> getMyEnrollment(
+            @RequestParam String status,
+            Authentication authentication,
+           @PageableDefault(size = 5) Pageable pageable
+    ) {
         return ResponseEntity.ok(enrollmentService.getMyEnrollment(status, authentication, pageable));
     }
 
