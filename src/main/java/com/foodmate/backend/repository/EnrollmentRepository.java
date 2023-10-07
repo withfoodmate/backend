@@ -18,9 +18,6 @@ import java.time.LocalDateTime;
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
-    // 모임의 현재 참여인원 카운트할 때 사용
-    int countByFoodGroupIdAndStatus(Long groupId, EnrollmentStatus status);
-
     // 모임 삭제 후 Status 상태 모임취소로 일괄 변경할 때 사용
     @Modifying
     @Query("UPDATE Enrollment e SET e.status = :status WHERE e.foodGroup.id = :groupId")
