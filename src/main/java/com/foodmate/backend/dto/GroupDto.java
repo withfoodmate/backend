@@ -60,7 +60,7 @@ public class GroupDto {
         private LocalDateTime createdDate;
         private Long chatRoomId;
 
-        public static DetailResponse fromEntity(FoodGroup foodGroup, int current, ChatRoom chatRoom) {
+        public static DetailResponse fromEntity(FoodGroup foodGroup, ChatRoom chatRoom) {
             return DetailResponse.builder()
                     .groupId(foodGroup.getId())
                     .memberId(foodGroup.getMember().getId())
@@ -73,7 +73,7 @@ public class GroupDto {
                     .date(foodGroup.getGroupDateTime().toLocalDate())
                     .time(foodGroup.getGroupDateTime().toLocalTime())
                     .maximum(foodGroup.getMaximum())
-                    .current(current)
+                    .current(foodGroup.getAttendance())
                     .storeName(foodGroup.getStoreName())
                     .storeAddress(foodGroup.getStoreAddress())
                     .latitude(Double.toString(foodGroup.getLocation().getY()))
