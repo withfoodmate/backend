@@ -15,105 +15,59 @@ import java.util.List;
 @Repository
 public interface FoodGroupRepository extends JpaRepository<FoodGroup, Long> {
 
-    // RankingServiceImpl - 많이찾는 식당 랭킹
+    // RankingService - 많이찾는 식당 랭킹
     @Query("SELECT fg.storeName, fg.storeAddress, COUNT(*) AS count " +
             "FROM FoodGroup fg " +
-            "WHERE fg.groupDateTime < CURRENT_TIMESTAMP " +
+            "WHERE fg.groupDateTime < :comparisonDate " +
             "AND fg.isDeleted IS NULL " +
             "GROUP BY fg.storeName, fg.storeAddress " +
             "ORDER BY COUNT(*) DESC")
-    List<Object[]> findTop10StoreWithCount(Pageable pageable);
+    List<Object[]> findTop10StoreWithCount(LocalDateTime comparisonDate, Pageable pageable);
 
-    // GroupServiceImpl - 검색 기능
-    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(" +
-            "fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type, COUNT(e.id)) " +
+    // GroupService - 검색 기능
+    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(fg) " +
             "FROM FoodGroup fg " +
             "JOIN Member m ON fg.member.id = m.id " +
-            "JOIN Food f ON fg.food.id = f.id " +
-            "LEFT JOIN Enrollment e ON fg.id = e.foodGroup.id AND e.status = 'ACCEPT' " +
             "WHERE (fg.title LIKE %:keyword% OR m.nickname LIKE %:keyword%) " +
             "AND fg.groupDateTime BETWEEN :start AND :end " +
             "AND fg.isDeleted IS NULL " +
-            "GROUP BY fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type " +
             "ORDER BY fg.createdDate DESC")
     Page<SearchedGroupDto> searchByKeyword(String keyword, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    // GroupServiceImpl - 오늘 모임 조회
-    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(" +
-            "fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type, COUNT(e.id)) " +
-            "FROM FoodGroup fg " +
-            "JOIN Member m ON fg.member.id = m.id " +
-            "JOIN Food f ON fg.food.id = f.id " +
-            "LEFT JOIN Enrollment e ON fg.id = e.foodGroup.id AND e.status = 'ACCEPT' " +
-            "WHERE fg.groupDateTime BETWEEN :start AND :end " +
-            "AND fg.isDeleted IS NULL " +
-            "GROUP BY fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type " +
-            "ORDER BY fg.groupDateTime ASC")
-    Page<SearchedGroupDto> getTodayGroupList(LocalDateTime start, LocalDateTime end, Pageable pageable);
+    // GroupService - 오늘 모임 조회 &  날짜별 조회
+    Page<FoodGroup> findAllByGroupDateTimeBetweenAndIsDeletedIsNullOrderByGroupDateTimeAsc(
+            LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    // GroupServiceImpl - 전체 모임 조회
-    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(" +
-            "fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type, COUNT(e.id)) " +
-            "FROM FoodGroup fg " +
-            "JOIN Member m ON fg.member.id = m.id " +
-            "JOIN Food f ON fg.food.id = f.id " +
-            "LEFT JOIN Enrollment e ON fg.id = e.foodGroup.id AND e.status = 'ACCEPT' " +
-            "WHERE fg.groupDateTime BETWEEN :start AND :end " +
-            "AND fg.isDeleted IS NULL " +
-            "GROUP BY fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type " +
-            "ORDER BY fg.createdDate DESC")
-    Page<SearchedGroupDto> getAllGroupList(LocalDateTime start, LocalDateTime end, Pageable pageable);
+    default Page<SearchedGroupDto> searchByDate(LocalDateTime start, LocalDateTime end, Pageable pageable) {
+        return findAllByGroupDateTimeBetweenAndIsDeletedIsNullOrderByGroupDateTimeAsc(
+                start, end, pageable).map(foodGroup -> new SearchedGroupDto(foodGroup));
+    }
 
-    // GroupServiceImpl - 거리순 조회 & 내 근처 모임
-    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(" +
-            "fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type, COUNT(e.id)) " +
+    // GroupService - 전체 모임 조회
+    Page<FoodGroup> findAllByGroupDateTimeBetweenAndIsDeletedIsNullOrderByCreatedDateDesc(
+            LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    default Page<SearchedGroupDto> getAllGroupList(LocalDateTime start, LocalDateTime end, Pageable pageable) {
+        return findAllByGroupDateTimeBetweenAndIsDeletedIsNullOrderByCreatedDateDesc(
+                start, end, pageable).map(foodGroup -> new SearchedGroupDto(foodGroup));
+    }
+
+    // GroupService - 거리순 조회 & 내 근처 모임
+    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(fg) " +
             "FROM FoodGroup fg " +
-            "JOIN Member m ON fg.member.id = m.id " +
-            "JOIN Food f ON fg.food.id = f.id " +
-            "LEFT JOIN Enrollment e ON fg.id = e.foodGroup.id AND e.status = 'ACCEPT' " +
             "WHERE fg.groupDateTime BETWEEN :start AND :end " +
             "AND fg.isDeleted IS NULL " +
             "AND FUNCTION('ST_Distance_Sphere', fg.location, :userLocation) < 5000 " +
-            "GROUP BY fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type " +
             "ORDER BY FUNCTION('ST_Distance_Sphere', fg.location, :userLocation)")
     Page<SearchedGroupDto> searchByLocation(Point userLocation, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    // GroupServiceImpl - 날짜별 조회
-    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(" +
-            "fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type, COUNT(e.id)) " +
+    // GroupService - 메뉴별 조회
+    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(fg) " +
             "FROM FoodGroup fg " +
-            "JOIN Member m ON fg.member.id = m.id " +
             "JOIN Food f ON fg.food.id = f.id " +
-            "LEFT JOIN Enrollment e ON fg.id = e.foodGroup.id AND e.status = 'ACCEPT' " +
-            "WHERE fg.groupDateTime BETWEEN :start AND :end " +
-            "AND fg.isDeleted IS NULL " +
-            "GROUP BY fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type " +
-            "ORDER BY fg.groupDateTime ASC")
-    Page<SearchedGroupDto> searchByDate(LocalDateTime start, LocalDateTime end, Pageable pageable);
-
-    // GroupServiceImpl - 메뉴별 조회
-    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(" +
-            "fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type, COUNT(e.id)) " +
-            "FROM FoodGroup fg " +
-            "JOIN Member m ON fg.member.id = m.id " +
-            "JOIN Food f ON fg.food.id = f.id " +
-            "LEFT JOIN Enrollment e ON fg.id = e.foodGroup.id AND e.status = 'ACCEPT' " +
             "WHERE f.type IN :foodTypes " +
             "AND fg.groupDateTime BETWEEN :start AND :end " +
             "AND fg.isDeleted IS NULL " +
-            "GROUP BY fg.id, fg.title, fg.name, fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, fg.createdDate, " +
-            "m.id, m.nickname, m.image, f.type " +
             "ORDER BY fg.createdDate DESC")
     Page<SearchedGroupDto> searchByFood(List<String> foodTypes, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
