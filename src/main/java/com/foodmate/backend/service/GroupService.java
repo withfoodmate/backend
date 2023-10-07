@@ -358,6 +358,17 @@ public class GroupService {
                 LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
+    // 로그인한 사용자가 참여한 모임 조회
+    public GroupDto.AcceptedGroup getAcceptedGroupList(Authentication authentication) {
+
+        Member member = getMember(authentication);
+
+        return new GroupDto.AcceptedGroup(enrollmentRepository.getAcceptedGroupIdList(
+                member.getId(),
+                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
+                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH)));
+    }
+
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
     private FoodGroup validateGroupId(Long groupId) {
 
