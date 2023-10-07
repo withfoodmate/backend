@@ -4,9 +4,9 @@ import com.foodmate.backend.dto.EnrollmentDto;
 import com.foodmate.backend.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -49,8 +49,9 @@ public class EnrollmentController {
      * @return 처리 상태에 대한 응답
      */
     @PatchMapping("/{enrollmentId}/accept")
-    public ResponseEntity<String> acceptEnrollment(@PathVariable Long enrollmentId) {
-        return ResponseEntity.ok(enrollmentService.acceptEnrollment(enrollmentId));
+    public ResponseEntity<?> acceptEnrollment(@PathVariable Long enrollmentId) {
+        enrollmentService.acceptEnrollment(enrollmentId);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     /**
@@ -59,8 +60,9 @@ public class EnrollmentController {
      * @return 처리 상태에 대한 응답
      */
     @PatchMapping("/{enrollmentId}/refuse")
-    public ResponseEntity<String> refuseEnrollment(@PathVariable Long enrollmentId) {
-        return ResponseEntity.ok(enrollmentService.refuseEnrollment(enrollmentId));
+    public ResponseEntity<?> refuseEnrollment(@PathVariable Long enrollmentId) {
+        enrollmentService.refuseEnrollment(enrollmentId);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     /**
@@ -69,7 +71,8 @@ public class EnrollmentController {
      * @return
      */
     @DeleteMapping("/{enrollmentId}/cancel")
-    public ResponseEntity<String> cancelEnrollment(@PathVariable Long enrollmentId, Authentication authentication){
-        return ResponseEntity.ok(enrollmentService.cancelEnrollment(enrollmentId, authentication));
+    public ResponseEntity<?> cancelEnrollment(@PathVariable Long enrollmentId, Authentication authentication){
+        enrollmentService.cancelEnrollment(enrollmentId, authentication);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 }

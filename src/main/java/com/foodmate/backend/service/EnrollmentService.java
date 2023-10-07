@@ -28,21 +28,6 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final MemberRepository memberRepository;
 
-//    @Override
-//    public Page<EnrollmentDto> getMyEnrollment(String status, Authentication authentication, Pageable pageable) {
-//        Member member = memberRepository.findByEmail(authentication.getName()).orElseThrow(
-//                () -> new MemberException(Error.USER_NOT_FOUND));
-//        LocalDateTime currentDate = LocalDateTime.now();
-//        log.error(member.getId().toString());
-//        return enrollmentRepository.getMyEnrollment(
-//                member.getId(),
-//                EnrollmentStatus.fromString(status),
-//                currentDate.minusMonths(3),
-//                currentDate.plusMonths(1),
-//                pageable);
-//    }
-
-
     public Page<EnrollmentDto.myEnrollmentResponse> getMyEnrollment(String status, Authentication authentication, Pageable pageable) {
         // 현재 시간 가져오기
         LocalDateTime currentDate = LocalDateTime.now();
@@ -122,14 +107,12 @@ public class EnrollmentService {
     }
 
 
-    public String refuseEnrollment(Long enrollmentId) {
+    public void refuseEnrollment(Long enrollmentId) {
 
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
         enrollment.updateEnrollment(EnrollmentStatus.REFUSE);
         enrollmentRepository.save(enrollment);
-
-        return "거절 완료";
     }
 
 
