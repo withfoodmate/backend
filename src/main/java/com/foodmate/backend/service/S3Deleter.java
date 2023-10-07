@@ -1,4 +1,4 @@
-package com.foodmate.backend.util;
+package com.foodmate.backend.service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;

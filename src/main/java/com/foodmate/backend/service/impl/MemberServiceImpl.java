@@ -18,8 +18,8 @@ import com.foodmate.backend.security.dto.JwtTokenDto;
 import com.foodmate.backend.security.service.JwtTokenProvider;
 import com.foodmate.backend.service.MemberService;
 import com.foodmate.backend.util.FileRandomNaming;
-import com.foodmate.backend.util.S3Deleter;
-import com.foodmate.backend.util.S3Uploader;
+import com.foodmate.backend.service.S3Deleter;
+import com.foodmate.backend.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -340,27 +340,27 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    @Override
-    public JwtTokenDto login(Map<String, String> loginInfo) {
-        String email = loginInfo.get("email");
-        String password = loginInfo.get("password");
+   @Override
+        public JwtTokenDto login(Map<String, String> loginInfo) {
+            String email = loginInfo.get("email");
+            String password = loginInfo.get("password");
 
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
-        if (!BCrypt.checkpw(password, member.getPassword())) {
-            log.info(password);
-            log.info(member.getPassword());
-            throw new MemberException(Error.LOGIN_FAILED);
-        }
-        String refreshToken = jwtTokenProvider.createRefreshToken();
+            Member member = memberRepository.findByEmail(email)
+                    .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+            if (!BCrypt.checkpw(password, member.getPassword())) {
+                log.info(password);
+                log.info(member.getPassword());
+                throw new MemberException(Error.LOGIN_FAILED);
+            }
+            String refreshToken = jwtTokenProvider.createRefreshToken();
 
-        JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
-                .accessToken(jwtTokenProvider.createAccessToken(member.getId()))
-                .refreshToken(refreshToken)
-                .build();
-        jwtTokenProvider.updateRefreshToken(member.getEmail(), refreshToken);
+            JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+                    .accessToken(jwtTokenProvider.createAccessToken(member.getId()))
+                    .refreshToken(refreshToken)
+                    .build();
+            jwtTokenProvider.updateRefreshToken(member.getEmail(), refreshToken);
 
-        return jwtTokenDto;
+            return jwtTokenDto;
     }
 
 
