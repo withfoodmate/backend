@@ -179,4 +179,10 @@ public class GroupController {
         return ResponseEntity.ok(groupService.searchByFood(foods, pageable));
     }
 
+    // 로그인한 사용자가 참여한 모임 조회
+    @GetMapping("/accepted")
+    public ResponseEntity<GroupDto.AcceptedGroup> getAcceptedGroupList(Authentication authentication) {
+        return ResponseEntity.ok(groupService.getAcceptedGroupList(authentication));
+    }
+
 }

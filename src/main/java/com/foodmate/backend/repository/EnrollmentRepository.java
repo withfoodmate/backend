@@ -7,7 +7,6 @@ import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +14,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
@@ -65,5 +65,22 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             "AND e.status = 'SUBMIT' " +
             "ORDER BY e.enrollDate ASC")
     Page<Enrollment> findByMyEnrollmentUnprocessedList(@Param("id") Long readerId, Pageable pageable);
+
+    // 로그인한 사용자가 참여한 모임 조회 ver. 1
+    List<Enrollment> findAllByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
+            Member member, EnrollmentStatus status, LocalDateTime start, LocalDateTime end);
+
+    default List<Long> getAcceptedGroupList(Member member, EnrollmentStatus status, LocalDateTime start, LocalDateTime end) {
+        return findAllByMemberAndStatusAndFoodGroupGroupDateTimeBetween(member, status, start, end).stream().map(
+                Enrollment -> Enrollment.getFoodGroup().getId()).collect(Collectors.toList());
+    }
+
+    // 로그인한 사용자가 참여한 모임 조회 ver. 2
+    @Query("SELECT e.foodGroup.id " +
+            "FROM Enrollment e " +
+            "WHERE e.member.id = :memberId " +
+            "AND e.status = 'ACCEPT' " +
+            "AND e.foodGroup.groupDateTime BETWEEN :startDateTime AND :endDateTime")
+    List<Long> getAcceptedGroupIdList(Long memberId, LocalDateTime startDateTime, LocalDateTime endDateTime);
 
 }

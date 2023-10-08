@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 public class GroupDto {
 
@@ -81,6 +82,15 @@ public class GroupDto {
                     .createdDate(foodGroup.getCreatedDate())
                     .chatRoomId(chatRoom.getId())
                     .build();
+        }
+    }
+
+    @Getter
+    public static class AcceptedGroup {
+        private List<Long> enrollmentList;
+
+        public AcceptedGroup(List<Long> enrollmentList) {
+            this.enrollmentList = enrollmentList;
         }
     }
 
