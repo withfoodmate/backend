@@ -15,6 +15,7 @@ on:
 
 env:
   S3_BUCKET_NAME: foodtest-deploy1238
+  RESOURCE_PATH: src/main/resources/application.yml
 
 jobs:
   build:
