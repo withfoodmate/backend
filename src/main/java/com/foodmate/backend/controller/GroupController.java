@@ -144,7 +144,7 @@ public class GroupController {
     }
 
     // 전체 모임 조회
-    @GetMapping("/All")
+    @GetMapping("/all")
     public ResponseEntity<Page<SearchedGroupDto>> getAllGroupList(Pageable pageable) {
         return ResponseEntity.ok(groupService.getAllGroupList(pageable));
     }
