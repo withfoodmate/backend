@@ -14,9 +14,15 @@ public class MemberDto {
 
     @Getter
     @AllArgsConstructor
-    public static class Request{
+    public static class emailRequest{
         private String email;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class nicknameRequest{
         private String nickname;
+
     }
     @Builder
     @Getter
