@@ -145,13 +145,17 @@ public class GroupService {
         chatRoomRepository.deleteByFoodGroupId(groupId);
     }
 
-    // TODO 동시성 1차 체크?
     // 특정 모임 신청
     public void enrollInGroup(Long groupId, Authentication authentication) {
 
         FoodGroup group = validateGroupId(groupId);
 
         Member member = getMember(authentication);
+
+        // 본인이 생성한 모임일 경우
+        if (group.getMember().getId() == member.getId()) {
+            throw new EnrollmentException(Error.CANNOT_APPLY_TO_OWN_GROUP);
+        }
 
         // 이미 신청 이력이 존재할 경우
         if (enrollmentRepository.existsByMemberAndFoodGroup(member, group)) {
