@@ -34,6 +34,7 @@ public enum Error {
 
     // EnrollmentException
     ENROLLMENT_NOT_FOUND("해당 신청이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    CANNOT_APPLY_TO_OWN_GROUP("본인이 생성한 모임에는 신청이 불가합니다.", HttpStatus.BAD_REQUEST),
     ENROLLMENT_HISTORY_EXISTS("해당 모임에 신청 이력이 존재합니다.", HttpStatus.BAD_REQUEST),
     GROUP_FULL("해당 모임의 정원이 다 찼습니다.", HttpStatus.BAD_REQUEST),
     REQUEST_NOT_FOUND("입력한 요청이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
