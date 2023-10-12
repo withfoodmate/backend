@@ -3,12 +3,15 @@ package com.foodmate.backend.dto;
 import com.foodmate.backend.entity.ChatMessage;
 import com.foodmate.backend.entity.ChatRoom;
 import com.foodmate.backend.entity.FoodGroup;
+import com.foodmate.backend.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ChatDto {
@@ -33,6 +36,45 @@ public class ChatDto {
                     .content(chatMessage.getContent())
                     .lastMessageTime(chatMessage.getCreateDateTime())
                     .count(count)
+                    .build();
+        }
+
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    public static class ChatMember{
+        private Long memberId;
+        private String nickname;
+        private String image;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ChatRoomInfoResponse{
+        private Long chatRoomId;
+        private String chatRoomName;
+        private LocalDateTime groupDate;
+        private Integer count;
+        private List<ChatMember> chatMembers;
+
+        public static ChatDto.ChatRoomInfoResponse createChatRoomInfo(ChatRoom chatRoom, FoodGroup foodGroup, List<Member> members) {
+            List<ChatMember> chatMemberList = new ArrayList<>();
+            for(Member member : members){
+                chatMemberList.add(
+                        new ChatMember(member.getId(), member.getNickname(), member.getImage())
+                );
+            }
+
+            return ChatRoomInfoResponse.builder()
+                    .chatRoomId(chatRoom.getId())
+                    .chatRoomName(foodGroup.getName())
+                    .groupDate(foodGroup.getGroupDateTime())
+                    .count(foodGroup.getAttendance())
+                    .chatMembers(chatMemberList)
                     .build();
         }
 
