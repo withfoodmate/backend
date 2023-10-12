@@ -33,6 +33,8 @@ public enum Error {
 
     // ChatException
     CHATROOM_NOT_FOUND("해당 모임 아이디의 채팅룸은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    USER_NOT_IN_CHATROOM("채팅에 해당 사용자가 없습니다", HttpStatus.NOT_FOUND),
+
 
     // EnrollmentException
     ENROLLMENT_NOT_FOUND("해당 신청이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
