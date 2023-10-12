@@ -15,8 +15,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -61,6 +63,8 @@ public class ChatRoomService {
                     chatMessageStatusRepository.countByChatMessage_ChatRoomAndMessageStatusAndMember(chatRoom, MessageStatus.UNREAD, member)
             ));
             }
+
+        chatRoomListResponses.sort(Comparator.comparing(ChatDto.ChatRoomListResponse::getLastMessageTime).reversed()); // 최신순 정렬
         return chatRoomListResponses;
 
     }
