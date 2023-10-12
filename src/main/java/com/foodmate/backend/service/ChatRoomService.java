@@ -11,6 +11,7 @@ import com.foodmate.backend.exception.MemberException;
 import com.foodmate.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,8 @@ public class ChatRoomService {
     private final FoodGroupRepository foodGroupRepository;
     private final MemberRepository memberRepository;
 
+    @Value("${S3_GENERAL_IMAGE_PATH}")
+    private String defaultProfileImage;
 
     public List<ChatDto.ChatRoomListResponse> getChatRoomList(Authentication authentication) {
         Member member = memberRepository.findByEmail(authentication.getName()).orElseThrow(
@@ -67,5 +70,29 @@ public class ChatRoomService {
         chatRoomListResponses.sort(Comparator.comparing(ChatDto.ChatRoomListResponse::getLastMessageTime).reversed()); // 최신순 정렬
         return chatRoomListResponses;
 
+    }
+
+    public ChatDto.ChatRoomInfoResponse getChatRoomInfo(Long charRoomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(charRoomId).orElseThrow(
+                () -> new ChatException(Error.CHATROOM_NOT_FOUND)
+        );
+
+        FoodGroup foodGroup = foodGroupRepository.findById(chatRoom.getFoodGroup().getId()).orElseThrow(
+                () -> new GroupException(Error.GROUP_NOT_FOUND)
+        );
+
+        List<ChatMember> chatMembers = chatMemberRepository.findByChatRoom(chatRoom);
+        List<Member> members = new ArrayList<>();
+
+        for(ChatMember chatMember : chatMembers){
+            Member member = memberRepository.findById(chatMember.getMember().getId()).orElseThrow(
+                    () -> new MemberException(Error.USER_NOT_FOUND)
+            );
+            if(member.getImage() == null) {
+                member.setImage(defaultProfileImage);
+            }
+            members.add(member);
+        }
+        return ChatDto.ChatRoomInfoResponse.createChatRoomInfo(chatRoom, foodGroup, members);
     }
 }
