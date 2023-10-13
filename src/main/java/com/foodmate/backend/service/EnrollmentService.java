@@ -96,27 +96,27 @@ public class EnrollmentService {
     }
 
 
-    public String acceptEnrollment(Long enrollmentId) {
+    public Enrollment acceptEnrollment(Long enrollmentId) {
 
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
         enrollment.updateEnrollment(EnrollmentStatus.ACCEPT);
         enrollmentRepository.save(enrollment);
 
-        return "수락 완료";
+        return enrollment;
     }
 
 
-    public void refuseEnrollment(Long enrollmentId) {
-
+    public Enrollment refuseEnrollment(Long enrollmentId) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
         enrollment.updateEnrollment(EnrollmentStatus.REFUSE);
         enrollmentRepository.save(enrollment);
+        return enrollment;
     }
 
 
-    public String cancelEnrollment(Long enrollmentId, Authentication authentication) {
+    public void cancelEnrollment(Long enrollmentId, Authentication authentication) {
         Member member = memberRepository.findByEmail(authentication.getName()).orElseThrow(
                 () -> new MemberException(Error.USER_NOT_FOUND));
 
@@ -134,7 +134,5 @@ public class EnrollmentService {
         }
         enrollment.setStatus(EnrollmentStatus.CANCEL);
         enrollmentRepository.save(enrollment);
-
-        return "취소 완료";
     }
 }
