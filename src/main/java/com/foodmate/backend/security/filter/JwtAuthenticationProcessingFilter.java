@@ -5,7 +5,7 @@ import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.AuthException;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.security.service.JwtTokenProvider;
-import com.foodmate.backend.util.PasswordUtil;
+import com.foodmate.backend.util.RandomStringMaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -102,7 +102,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     public void setAuthentication(Member member) {
         String password = member.getPassword();
         if (password == null) { // 소셜 로그인 유저의 비밀번호 임의로 설정 하여 인증 되도록 설정
-            password = PasswordUtil.generateRandomPassword();
+            password = RandomStringMaker.randomStringMaker();
         }
 
         UserDetails userDetailsUser = User.builder()
