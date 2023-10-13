@@ -3,7 +3,6 @@ package com.foodmate.backend.service;
 import com.foodmate.backend.dto.ChatDto;
 import com.foodmate.backend.entity.*;
 import com.foodmate.backend.enums.Error;
-import com.foodmate.backend.enums.MessageStatus;
 import com.foodmate.backend.exception.ChatException;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.GroupException;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,7 +27,6 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMemberRepository chatMemberRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final ChatMessageStatusRepository chatMessageStatusRepository;
 
     private final FoodGroupRepository foodGroupRepository;
     private final MemberRepository memberRepository;
@@ -63,7 +60,7 @@ public class ChatRoomService {
 
             chatRoomListResponses.add(ChatDto.ChatRoomListResponse.createChatRoomListResponse(
                     chatRoom, foodGroup, chatMessage.isEmpty() ? new ChatMessage() : chatMessage.get(),
-                    chatMessageStatusRepository.countByChatMessage_ChatRoomAndMessageStatusAndMember(chatRoom, MessageStatus.UNREAD, member)
+                    chatMessageRepository.countByCreateDateTimeAfterAndChatRoom(chatMember.getLastReadTime(), chatRoom)
             ));
             }
 

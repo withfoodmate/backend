@@ -27,4 +27,6 @@ public class ChatMember {
 
     private LocalDateTime insertTime;
 
+    private LocalDateTime lastReadTime;
+
 }
