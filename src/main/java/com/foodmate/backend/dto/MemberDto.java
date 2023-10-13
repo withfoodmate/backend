@@ -24,6 +24,14 @@ public class MemberDto {
         private String nickname;
 
     }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class loginRequest{
+        private String email;
+        private String password;
+    }
     @Builder
     @Getter
     public static class CreateMemberRequest{
@@ -31,40 +39,6 @@ public class MemberDto {
         private String nickname;
         private String password;
         private List<String> food;
-    }
-
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    public static class Response{
-        private Long memberId;
-        private String email;
-        private String nickname;
-        private String image;
-        private Long likes;
-        List<String> food;
-
-        public static MemberDto.Response memberToMemberDtoResponse(Member member, Long likes, List<String> food){
-            return Response.builder()
-                    .memberId(member.getId())
-                    .email(member.getEmail())
-                    .nickname(member.getNickname())
-                    .image(member.getImage())
-                    .likes(likes)
-                    .food(food)
-                    .build();
-        }
-
-        public static MemberDto.Response memberToMemberDtoResponse(Member member, Long likes, List<String> food, String defaultImage){
-            return Response.builder()
-                    .memberId(member.getId())
-                    .email(member.getEmail())
-                    .nickname(member.getNickname())
-                    .image(defaultImage)
-                    .likes(likes)
-                    .food(food)
-                    .build();
-        }
     }
 
     @Getter
@@ -89,4 +63,40 @@ public class MemberDto {
     public static class changePreferenceFoodRequest{
         List<String> food;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class Response{
+        private Long memberId;
+        private String email;
+        private String nickname;
+        private String image;
+        private Long likes;
+        List<String> food;
+
+        public static MemberDto.Response createMemberDtoResponse(Member member, Long likes, List<String> food){
+            return Response.builder()
+                    .memberId(member.getId())
+                    .email(member.getEmail())
+                    .nickname(member.getNickname())
+                    .image(member.getImage())
+                    .likes(likes)
+                    .food(food)
+                    .build();
+        }
+
+        public static MemberDto.Response createMemberDtoResponse(Member member, Long likes, List<String> food, String defaultImage){
+            return Response.builder()
+                    .memberId(member.getId())
+                    .email(member.getEmail())
+                    .nickname(member.getNickname())
+                    .image(defaultImage)
+                    .likes(likes)
+                    .food(food)
+                    .build();
+        }
+    }
+
+
 }
