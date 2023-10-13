@@ -16,7 +16,7 @@ import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.PreferenceRepository;
 import com.foodmate.backend.security.dto.JwtTokenDto;
 import com.foodmate.backend.security.service.JwtTokenProvider;
-import com.foodmate.backend.util.FileRandomNaming;
+import com.foodmate.backend.util.RandomStringMaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,9 +63,9 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
 
         if(member.getImage() == null){
-            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
+            return MemberDto.Response.createMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
+        return MemberDto.Response.createMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
     }
 
     /**
@@ -130,7 +130,7 @@ public class MemberService {
                 s3Uploader.uploadAndGenerateUrl(
                         imageFile,
                         s3BucketFolderName +
-                                FileRandomNaming.fileRandomNaming(imageFile))
+                                RandomStringMaker.randomStringMaker())
         );
         memberRepository.save(member);
     }
@@ -165,9 +165,8 @@ public class MemberService {
      * @param response
      * @return 로그아웃 상태 호출
      */
-    public String logoutMember(HttpServletRequest request, HttpServletResponse response) {
+    public void logoutMember(HttpServletRequest request, HttpServletResponse response) {
         logout(request, response);
-        return "로그아웃 완료";
     }
 
     /**
@@ -194,9 +193,9 @@ public class MemberService {
             throw new MemberException(Error.DELETED_USER);
         }
         if(member.getImage() == null){
-            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
+            return MemberDto.Response.createMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
+        return MemberDto.Response.createMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
     }
 
     /**
@@ -324,15 +323,10 @@ public class MemberService {
         }
     }
 
-        public JwtTokenDto login(Map<String, String> loginInfo) {
-            String email = loginInfo.get("email");
-            String password = loginInfo.get("password");
-
-            Member member = memberRepository.findByEmail(email)
+        public JwtTokenDto login(MemberDto.loginRequest request) {
+            Member member = memberRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
-            if (!BCrypt.checkpw(password, member.getPassword())) {
-                log.info(password);
-                log.info(member.getPassword());
+            if (!BCrypt.checkpw(request.getPassword(), member.getPassword())) {
                 throw new MemberException(Error.LOGIN_FAILED);
             }
             String refreshToken = jwtTokenProvider.createRefreshToken();
