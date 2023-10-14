@@ -26,7 +26,9 @@ public class ChatDto {
         private String chatRoomName;
         private String lastMessage;
         private LocalDateTime lastMessageTime;
+        private int attendance;
         private int count;
+
 
 
         public static ChatDto.ChatRoomListResponse createChatRoomListResponse(
@@ -36,6 +38,7 @@ public class ChatDto {
                     .chatRoomName(foodGroup.getName())
                     .lastMessage(chatMessage == null ? null : chatMessage.getContent())
                     .lastMessageTime(chatMessage == null ? null : chatMessage.getCreateDateTime())
+                    .attendance(foodGroup.getAttendance())
                     .count(count)
                     .build();
         }
@@ -45,10 +48,19 @@ public class ChatDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
-    public static class ChatMember{
+    @Builder
+    public static class ChatMemberInfo{
         private Long memberId;
         private String nickname;
         private String image;
+
+        public static ChatMemberInfo createChatMemberInfo(Member member){
+            return ChatMemberInfo.builder()
+                    .memberId(member.getId())
+                    .nickname(member.getNickname())
+                    .image(member.getImage())
+                    .build();
+        }
     }
 
     @Getter
@@ -59,23 +71,16 @@ public class ChatDto {
         private Long chatRoomId;
         private String chatRoomName;
         private LocalDateTime groupDate;
-        private int count;
-        private List<ChatMember> chatMembers;
+        private int attendance;
+        private List<ChatMemberInfo> chatMembers;
 
-        public static ChatDto.ChatRoomInfoResponse createChatRoomInfo(ChatRoom chatRoom, FoodGroup foodGroup, List<Member> members) {
-            List<ChatMember> chatMemberList = new ArrayList<>();
-            for(Member member : members){
-                chatMemberList.add(
-                        new ChatMember(member.getId(), member.getNickname(), member.getImage())
-                );
-            }
-
+        public static ChatDto.ChatRoomInfoResponse createChatRoomInfo(ChatRoom chatRoom, FoodGroup foodGroup, List<ChatMemberInfo> chatMemberInfos) {
             return ChatRoomInfoResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .chatRoomName(foodGroup.getName())
                     .groupDate(foodGroup.getGroupDateTime())
-                    .count(chatRoom.getAttendance())
-                    .chatMembers(chatMemberList)
+                    .attendance(chatRoom.getAttendance())
+                    .chatMembers(chatMemberInfos)
                     .build();
         }
 

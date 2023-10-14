@@ -1,11 +1,12 @@
 package com.foodmate.backend.service;
 
 import com.foodmate.backend.dto.ChatDto;
-import com.foodmate.backend.entity.*;
+import com.foodmate.backend.entity.ChatMember;
+import com.foodmate.backend.entity.ChatMessage;
+import com.foodmate.backend.entity.ChatRoom;
+import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.ChatException;
-import com.foodmate.backend.exception.FoodException;
-import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.exception.MemberException;
 import com.foodmate.backend.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -28,8 +28,6 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMemberRepository chatMemberRepository;
     private final ChatMessageRepository chatMessageRepository;
-
-    private final FoodGroupRepository foodGroupRepository;
     private final MemberRepository memberRepository;
 
     @Value("${S3_GENERAL_IMAGE_PATH}")
@@ -48,20 +46,12 @@ public class ChatRoomService {
 
         List<ChatDto.ChatRoomListResponse> chatRoomListResponses = new ArrayList<>();
         for(ChatMember chatMember : chatMembers) {
-            ChatRoom chatRoom = chatRoomRepository.findById(chatMember.getChatRoom().getId()).orElseThrow(
-                    () -> new FoodException(Error.CHATROOM_NOT_FOUND)
-            );
-
-            FoodGroup foodGroup = foodGroupRepository.findById(chatRoom.getId()).orElseThrow(
-                    () -> new GroupException(Error.GROUP_NOT_FOUND)
-            );
-
             Optional<ChatMessage> chatMessage = chatMessageRepository
-                    .findTopByChatRoomAndCreateDateTimeAfterOrderByCreateDateTimeDesc(chatRoom, chatMember.getInsertTime());
+                    .findTopByChatRoomAndCreateDateTimeAfterOrderByCreateDateTimeDesc(chatMember.getChatRoom(), chatMember.getInsertTime());
 
             chatRoomListResponses.add(ChatDto.ChatRoomListResponse.createChatRoomListResponse(
-                    chatRoom, foodGroup, chatMessage.isEmpty() ? null : chatMessage.get(),
-                    chatMessageRepository.countByCreateDateTimeAfterAndChatRoom(chatMember.getLastReadTime(), chatRoom)
+                    chatMember.getChatRoom(), chatMember.getChatRoom().getFoodGroup(), chatMessage.isEmpty() ? null : chatMessage.get(),
+                    chatMessageRepository.countByCreateDateTimeAfterAndChatRoom(chatMember.getLastReadTime(), chatMember.getChatRoom())
             ));
         }
 
@@ -74,24 +64,17 @@ public class ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.findById(charRoomId).orElseThrow(
                 () -> new ChatException(Error.CHATROOM_NOT_FOUND)
         );
-
-        FoodGroup foodGroup = foodGroupRepository.findById(chatRoom.getFoodGroup().getId()).orElseThrow(
-                () -> new GroupException(Error.GROUP_NOT_FOUND)
-        );
-
         List<ChatMember> chatMembers = chatMemberRepository.findByChatRoom(chatRoom);
-        List<Member> members = new ArrayList<>();
+        List<ChatDto.ChatMemberInfo> chatMemberInfos = new ArrayList<>();
 
         for(ChatMember chatMember : chatMembers){
-            Member member = memberRepository.findById(chatMember.getMember().getId()).orElseThrow(
-                    () -> new MemberException(Error.USER_NOT_FOUND)
-            );
+            Member member = chatMember.getMember();
             if(member.getImage() == null) {
                 member.setImage(defaultProfileImage);
             }
-            members.add(member);
+            chatMemberInfos.add(ChatDto.ChatMemberInfo.createChatMemberInfo(member));
         }
-        return ChatDto.ChatRoomInfoResponse.createChatRoomInfo(chatRoom, foodGroup, members);
+        return ChatDto.ChatRoomInfoResponse.createChatRoomInfo(chatRoom, chatRoom.getFoodGroup(), chatMemberInfos);
     }
 
 
@@ -113,6 +96,7 @@ public class ChatRoomService {
             if(otherMember.getImage() == null) {
                 otherMember.setImage(defaultProfileImage);
             }
+
             chatRoomMessageResponseList.add(ChatDto.ChatRoomMessageResponse.createChatMessageListResponse(chatMessage, otherMember));
         }
 
