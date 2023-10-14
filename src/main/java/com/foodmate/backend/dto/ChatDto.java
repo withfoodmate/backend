@@ -80,4 +80,44 @@ public class ChatDto {
         }
 
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ChatRoomMessageResponse {
+        private Long memberId;
+        private String nickname;
+        private String image;
+        private String content;
+        private LocalDateTime createdDate;
+
+        public static ChatRoomMessageResponse createChatMessageListResponse(
+                ChatMessage chatMessage, Member member) {
+            return ChatRoomMessageResponse.builder()
+                    .memberId(member.getId())
+                    .nickname(member.getNickname())
+                    .image(member.getImage())
+                    .content(chatMessage.getContent())
+                    .createdDate(chatMessage.getCreateDateTime())
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ChatRoomMessageListResponse {
+        private Long loginMemberId;
+        private List<ChatRoomMessageResponse> chatRoomMessageResponses;
+
+        public static ChatRoomMessageListResponse createChatMessageAllListResponse(
+                Long loginMemberId, List<ChatRoomMessageResponse> chatRoomMessageResponseList) {
+            return ChatRoomMessageListResponse.builder()
+                    .loginMemberId(loginMemberId)
+                    .chatRoomMessageResponses(chatRoomMessageResponseList)
+                    .build();
+        }
+    }
 }

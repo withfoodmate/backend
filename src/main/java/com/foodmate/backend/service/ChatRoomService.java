@@ -93,4 +93,29 @@ public class ChatRoomService {
         }
         return ChatDto.ChatRoomInfoResponse.createChatRoomInfo(chatRoom, foodGroup, members);
     }
+
+
+    public ChatDto.ChatRoomMessageListResponse getChatRoomMessageList(Authentication authentication, Long chatRoomId) {
+        chatRoomRepository.findById(chatRoomId).orElseThrow(
+                () -> new ChatException(Error.CHATROOM_NOT_FOUND)
+        );
+
+        Member loginMember = memberRepository.findByEmail(authentication.getName()).orElseThrow(
+                () -> new MemberException(Error.USER_NOT_FOUND)
+        );
+
+        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoom_Id(chatRoomId);
+        List<ChatDto.ChatRoomMessageResponse> chatRoomMessageResponseList = new ArrayList<>();
+        for (ChatMessage chatMessage : chatMessages) {
+            Member otherMember = memberRepository.findById(chatMessage.getMember().getId()).orElseThrow(
+                    () -> new MemberException(Error.USER_NOT_FOUND)
+            );
+            if(otherMember.getImage() == null) {
+                otherMember.setImage(defaultProfileImage);
+            }
+            chatRoomMessageResponseList.add(ChatDto.ChatRoomMessageResponse.createChatMessageListResponse(chatMessage, otherMember));
+        }
+
+        return ChatDto.ChatRoomMessageListResponse.createChatMessageAllListResponse(loginMember.getId(), chatRoomMessageResponseList);
+    }
 }
