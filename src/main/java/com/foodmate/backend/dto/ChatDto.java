@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 public class ChatDto {
@@ -23,18 +24,18 @@ public class ChatDto {
     public static class ChatRoomListResponse{
         private Long chatRoomId;
         private String chatRoomName;
-        private String content;
+        private String lastMessage;
         private LocalDateTime lastMessageTime;
-        private Integer count;
+        private int count;
 
 
         public static ChatDto.ChatRoomListResponse createChatRoomListResponse(
-                ChatRoom chatRoom, FoodGroup foodGroup, ChatMessage chatMessage, Integer count){
+                ChatRoom chatRoom, FoodGroup foodGroup, ChatMessage chatMessage, int count){
             return ChatRoomListResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .chatRoomName(foodGroup.getName())
-                    .content(chatMessage.getContent())
-                    .lastMessageTime(chatMessage.getCreateDateTime())
+                    .lastMessage(chatMessage == null ? null : chatMessage.getContent())
+                    .lastMessageTime(chatMessage == null ? null : chatMessage.getCreateDateTime())
                     .count(count)
                     .build();
         }
@@ -58,7 +59,7 @@ public class ChatDto {
         private Long chatRoomId;
         private String chatRoomName;
         private LocalDateTime groupDate;
-        private Integer count;
+        private int count;
         private List<ChatMember> chatMembers;
 
         public static ChatDto.ChatRoomInfoResponse createChatRoomInfo(ChatRoom chatRoom, FoodGroup foodGroup, List<Member> members) {
@@ -73,7 +74,7 @@ public class ChatDto {
                     .chatRoomId(chatRoom.getId())
                     .chatRoomName(foodGroup.getName())
                     .groupDate(foodGroup.getGroupDateTime())
-                    .count(foodGroup.getAttendance())
+                    .count(chatRoom.getAttendance())
                     .chatMembers(chatMemberList)
                     .build();
         }

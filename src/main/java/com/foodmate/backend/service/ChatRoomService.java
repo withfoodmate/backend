@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -59,10 +60,10 @@ public class ChatRoomService {
                     .findTopByChatRoomAndCreateDateTimeAfterOrderByCreateDateTimeDesc(chatRoom, chatMember.getInsertTime());
 
             chatRoomListResponses.add(ChatDto.ChatRoomListResponse.createChatRoomListResponse(
-                    chatRoom, foodGroup, chatMessage.isEmpty() ? new ChatMessage() : chatMessage.get(),
+                    chatRoom, foodGroup, chatMessage.isEmpty() ? null : chatMessage.get(),
                     chatMessageRepository.countByCreateDateTimeAfterAndChatRoom(chatMember.getLastReadTime(), chatRoom)
             ));
-            }
+        }
 
         chatRoomListResponses.sort(Comparator.comparing(ChatDto.ChatRoomListResponse::getLastMessageTime).reversed()); // 최신순 정렬
         return chatRoomListResponses;
