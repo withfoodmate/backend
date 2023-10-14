@@ -15,4 +15,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     // 모임 아이디로 채팅방 삭제
     void deleteByFoodGroupId(Long groupId);
 
+
 }
