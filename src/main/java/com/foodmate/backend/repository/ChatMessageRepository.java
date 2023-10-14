@@ -14,5 +14,5 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage,Long> {
 
     Optional<ChatMessage> findTopByChatRoomAndCreateDateTimeAfterOrderByCreateDateTimeDesc(ChatRoom chatRoom, LocalDateTime insertTime);
 
-    Integer countByCreateDateTimeAfterAndChatRoom(LocalDateTime lastReadTime, ChatRoom chatRoom);
+    int countByCreateDateTimeAfterAndChatRoom(LocalDateTime lastReadTime, ChatRoom chatRoom);
 }

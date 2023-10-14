@@ -27,9 +27,9 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomService.getChatRoomList(authentication));
     }
 
-    @GetMapping("/{charRoomId}")
-    public ResponseEntity<ChatDto.ChatRoomInfoResponse> getChatRoomInfo(@PathVariable Long charRoomId){
-        return ResponseEntity.ok(chatRoomService.getChatRoomInfo(charRoomId));
+    @GetMapping("/{chatRoomId}")
+    public ResponseEntity<ChatDto.ChatRoomInfoResponse> getChatRoomInfo(@PathVariable Long chatRoomId){
+        return ResponseEntity.ok(chatRoomService.getChatRoomInfo(chatRoomId));
     }
 
 }

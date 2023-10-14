@@ -17,8 +17,10 @@ public class ChatRoom {
     @OneToOne
     private FoodGroup foodGroup;
 
+    private int attendance;
     public ChatRoom(FoodGroup foodGroup) {
         this.foodGroup = foodGroup;
     }
+
 
 }
