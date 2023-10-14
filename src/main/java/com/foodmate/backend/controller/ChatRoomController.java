@@ -32,4 +32,8 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomService.getChatRoomInfo(chatRoomId));
     }
 
+    @GetMapping("/{chatRoomId}/message")
+    public ResponseEntity<ChatDto.ChatRoomMessageListResponse> getChatRoomMessageList(Authentication authentication, @PathVariable Long chatRoomId) {
+        return ResponseEntity.ok(chatRoomService.getChatRoomMessageList(authentication ,chatRoomId));
+    }
 }
