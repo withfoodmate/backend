@@ -307,9 +307,11 @@ public class GroupService {
     // 검색 기능
     public Page<SearchedGroupDto> searchByKeyword(String keyword, Pageable pageable) {
 
+        LocalDateTime current = LocalDateTime.now();
+
         return foodGroupRepository.searchByKeyword(keyword,
-                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
-                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+                current.plusMinutes(SEARCH_INTERVAL_MINUTE),
+                current.plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
     // 오늘 모임 조회
@@ -322,9 +324,11 @@ public class GroupService {
     // 전체 모임 조회
     public Page<SearchedGroupDto> getAllGroupList(Pageable pageable) {
 
+        LocalDateTime current = LocalDateTime.now();
+
         return foodGroupRepository.getAllGroupList(
-                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
-                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+                current.plusMinutes(SEARCH_INTERVAL_MINUTE),
+                current.plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
     // 거리순 조회
@@ -332,9 +336,11 @@ public class GroupService {
 
         Point userLocation = getPoint(latitude, longitude);
 
+        LocalDateTime current = LocalDateTime.now();
+
         return foodGroupRepository.searchByLocation(userLocation,
-                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
-                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+                current.plusMinutes(SEARCH_INTERVAL_MINUTE),
+                current.plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
     // 날짜별 조회
@@ -357,9 +363,11 @@ public class GroupService {
             }
         }
 
+        LocalDateTime current = LocalDateTime.now();
+
         return foodGroupRepository.searchByFood(foods,
-                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
-                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+                current.plusMinutes(SEARCH_INTERVAL_MINUTE),
+                current.plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
     // 내 근처 모임
@@ -367,9 +375,11 @@ public class GroupService {
 
         Point userLocation = getPoint(latitude, longitude);
 
+        LocalDateTime current = LocalDateTime.now();
+
         return foodGroupRepository.getNearbyGroupList(userLocation,
-                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
-                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+                current.plusMinutes(SEARCH_INTERVAL_MINUTE),
+                current.plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
     // 로그인한 사용자가 참여한 모임 조회
@@ -377,10 +387,12 @@ public class GroupService {
 
         Member member = getMember(authentication);
 
+        LocalDateTime current = LocalDateTime.now();
+
         return new GroupDto.AcceptedGroup(enrollmentRepository.getAcceptedGroupIdList(
                 member.getId(),
-                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
-                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH)));
+                current.plusMinutes(SEARCH_INTERVAL_MINUTE),
+                current.plusMonths(RESERVATION_RANGE_MONTH)));
     }
 
     // {groupId} 경로 검증 - 존재하는 그룹이면서, 삭제되지 않은 경우만 반환
@@ -437,9 +449,11 @@ public class GroupService {
         // 입력된 모임일시
         LocalDateTime groupDateTime = request.getDate().atTime(request.getTime());
 
+        LocalDateTime current = LocalDateTime.now();
+
         // 현재시간으로부터 한시간 이후 ~ 한달 이내의 모임만 생성 가능
-        if (groupDateTime.isBefore(LocalDateTime.now().plusHours(RESERVATION_INTERVAL_HOUR)) ||
-                groupDateTime.isAfter(LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH))) {
+        if (groupDateTime.isBefore(current.plusHours(RESERVATION_INTERVAL_HOUR)) ||
+                groupDateTime.isAfter(current.plusMonths(RESERVATION_RANGE_MONTH))) {
             throw new GroupException(Error.OUT_OF_DATE_RANGE);
         }
 
