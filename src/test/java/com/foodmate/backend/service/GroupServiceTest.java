@@ -1,5 +1,6 @@
 package com.foodmate.backend.service;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,7 +9,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.foodmate.backend.dto.GroupDto;
+import com.foodmate.backend.entity.ChatRoom;
 import com.foodmate.backend.entity.Food;
+import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.GroupException;
@@ -20,11 +23,15 @@ import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.ReplyRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,7 +67,7 @@ public class GroupServiceTest {
 
   public static final Long memberId1 = 1L;
   public static final Long foodId = 1L;
-
+  public static final Long groupId = 1L;
 
   @Test
   @DisplayName("모임 생성 성공")
@@ -132,6 +139,67 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("특정 모임 상세 조회 성공")
+  void success_getGroupDetail() {
+
+    //given
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    Long chatRoomId = 1L;
+    ChatRoom mockChatRoom = new ChatRoom();
+    mockChatRoom.setId(chatRoomId);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(chatRoomRepository.findByFoodGroupId(groupId)).willReturn(Optional.of(mockChatRoom));
+
+    //when
+    GroupDto.DetailResponse response = groupService.getGroupDetail(groupId);
+
+    //then
+    assertAll(
+        () -> assertEquals(mockGroup.getId(),
+            response.getGroupId()),
+        () -> assertEquals(mockGroup.getMember().getId(),
+            response.getMemberId()),
+        () -> assertEquals(mockGroup.getMember().getNickname(),
+            response.getNickname()),
+        () -> assertEquals(mockGroup.getMember().getImage(),
+            response.getImage()),
+        () -> assertEquals(mockGroup.getTitle(),
+            response.getTitle()),
+        () -> assertEquals(mockGroup.getName(),
+            response.getName()),
+        () -> assertEquals(mockGroup.getContent(),
+            response.getContent()),
+        () -> assertEquals(mockGroup.getFood().getType(),
+            response.getFood()),
+        () -> assertEquals(mockGroup.getGroupDateTime().toLocalDate(),
+            response.getDate()),
+        () -> assertEquals(mockGroup.getGroupDateTime().toLocalTime(),
+            response.getTime()),
+        () -> assertEquals(mockGroup.getMaximum(),
+            response.getMaximum()),
+        () -> assertEquals(mockGroup.getAttendance(),
+            response.getCurrent()),
+        () -> assertEquals(mockGroup.getStoreName(),
+            response.getStoreName()),
+        () -> assertEquals(mockGroup.getStoreAddress(),
+            response.getStoreAddress()),
+        () -> assertEquals(mockGroup.getLocation().getY(),
+            Double.parseDouble(response.getLatitude())),
+        () -> assertEquals(mockGroup.getLocation().getX(),
+            Double.parseDouble(response.getLongitude())),
+        () -> assertEquals(mockGroup.getCreatedDate(),
+            response.getCreatedDate()),
+        () -> assertEquals(chatRoomId,
+            response.getChatRoomId())
+    );
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
@@ -158,6 +226,29 @@ public class GroupServiceTest {
         .id(foodId)
         .type("치킨")
         .image("abc123")
+        .build();
+  }
+
+  private FoodGroup createMockFoodGroup(Long groupId, Member mockMember, Food mockFood, int attendance) {
+    String longitude = "126.926176";
+    String latitude = "37.5591095";
+
+    Point location = new GeometryFactory().createPoint(
+        new Coordinate(Double.parseDouble(longitude), Double.parseDouble(latitude)));
+
+    return FoodGroup.builder()
+        .id(groupId)
+        .member(mockMember)
+        .title("치킨 먹을 사람~")
+        .name("치킨 모임")
+        .content("치킨 먹을 사람 구해요!")
+        .food(mockFood)
+        .groupDateTime(LocalDateTime.parse("2021-01-01T15:39:30"))
+        .maximum(8)
+        .attendance(attendance)
+        .storeName("BBQ 홍대점")
+        .storeAddress("서울특별시 마포구 동교동 147-4")
+        .location(location)
         .build();
   }
 
