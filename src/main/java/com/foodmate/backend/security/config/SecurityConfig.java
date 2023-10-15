@@ -19,8 +19,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -64,8 +62,8 @@ public class SecurityConfig {
 
         // 필터 순서를 설정하여 정상작동 및 Filter에서 예외처리 진행
         http
-                .addFilterBefore(new JwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new ExceptionHandlerFilter(objectMapper), JwtAuthenticationProcessingFilter.class)
+                .addFilterBefore(jwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(exceptionHandlerFilter(objectMapper), JwtAuthenticationProcessingFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper)) //AuthenticationException
                 .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper));     //AccessDeniedException
@@ -89,7 +87,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // BCryptPasswordEncoder를 사용하여 암호를 해시화
+    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
+        return new JwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository);
+    }
+
+    @Bean
+    public ExceptionHandlerFilter exceptionHandlerFilter(ObjectMapper objectMapper) {
+        return new ExceptionHandlerFilter(objectMapper);
     }
 }
