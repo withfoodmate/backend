@@ -182,7 +182,7 @@ public class GroupServiceTest {
             response.getTime()),
         () -> assertEquals(mockGroup.getMaximum(),
             response.getMaximum()),
-        () -> assertEquals(1,
+        () -> assertEquals(mockGroup.getAttendance(),
             response.getCurrent()),
         () -> assertEquals(mockGroup.getStoreName(),
             response.getStoreName()),
