@@ -62,8 +62,8 @@ public class SecurityConfig {
 
         // 필터 순서를 설정하여 정상작동 및 Filter에서 예외처리 진행
         http
-                .addFilterBefore(new JwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new ExceptionHandlerFilter(objectMapper), JwtAuthenticationProcessingFilter.class)
+                .addFilterBefore(jwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(exceptionHandlerFilter(objectMapper), JwtAuthenticationProcessingFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper)) //AuthenticationException
                 .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper));     //AccessDeniedException
@@ -84,5 +84,15 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+    }
+
+    @Bean
+    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
+        return new JwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository);
+    }
+
+    @Bean
+    public ExceptionHandlerFilter exceptionHandlerFilter(ObjectMapper objectMapper) {
+        return new ExceptionHandlerFilter(objectMapper);
     }
 }
