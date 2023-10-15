@@ -19,6 +19,7 @@ public class GroupDto {
     @Getter
     @NotNull
     @AllArgsConstructor
+    @Builder
     public static class Request {
         private String title;
         private String name;
