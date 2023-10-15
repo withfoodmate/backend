@@ -327,7 +327,7 @@ public class GroupService {
                 LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
 
-    // 거리순 조회 & 내 근처 모임
+    // 거리순 조회
     public Page<SearchedGroupDto> searchByLocation(String latitude, String longitude, Pageable pageable) {
 
         Point userLocation = getPoint(latitude, longitude);
@@ -358,6 +358,16 @@ public class GroupService {
         }
 
         return foodGroupRepository.searchByFood(foods,
+                LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
+                LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
+    }
+
+    // 내 근처 모임
+    public Page<SearchedGroupDto> getNearbyGroupList(String latitude, String longitude, Pageable pageable) {
+
+        Point userLocation = getPoint(latitude, longitude);
+
+        return foodGroupRepository.getNearbyGroupList(userLocation,
                 LocalDateTime.now().plusMinutes(SEARCH_INTERVAL_MINUTE),
                 LocalDateTime.now().plusMonths(RESERVATION_RANGE_MONTH), pageable);
     }
