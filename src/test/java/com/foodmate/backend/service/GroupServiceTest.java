@@ -24,7 +24,6 @@ import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.ReplyRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -71,6 +70,18 @@ public class GroupServiceTest {
   public static final Long foodId = 1L;
   public static final Long groupId = 1L;
 
+  private static final String TITLE = "치킨 먹을 사람~";
+  private static final String NAME = "치킨 모임";
+  private static final String CONTENT = "치킨 먹을 사람 구해요!";
+  private static final String TYPE = "치킨";
+  private static final LocalDate VALID_DATE = LocalDate.parse("2023-11-04");
+  private static final LocalTime VALID_TIME = LocalTime.parse("18:30");
+  private static final int MAX_PARTICIPANTS = 8;
+  private static final String STORE_NAME = "BBQ 홍대점";
+  private static final String STORE_ADDRESS = "서울특별시 마포구 동교동 147-4";
+  private static final String LATITUDE = "33.12112";
+  private static final String LONGITUDE = "127.12112";
+
   @Test
   @DisplayName("모임 생성 성공")
   void success_addGroup() {
@@ -85,17 +96,17 @@ public class GroupServiceTest {
 
     //when
     groupService.addGroup(mockAuthentication, GroupDto.Request.builder()
-        .title("치킨 먹을 사람~")
-        .name("치킨 모임")
-        .content("치킨 먹을 사람 구해요!")
-        .food("치킨")
-        .date(LocalDate.parse("2023-11-04"))
-        .time(LocalTime.parse("18:30"))
-        .maximum(8)
-        .storeName("BBQ 홍대점")
-        .storeAddress("서울특별시 마포구 동교동 147-4")
-        .latitude("33.12112")
-        .longitude("127.12112")
+        .title(TITLE)
+        .name(NAME)
+        .content(CONTENT)
+        .food(TYPE)
+        .date(VALID_DATE)
+        .time(VALID_TIME)
+        .maximum(MAX_PARTICIPANTS)
+        .storeName(STORE_NAME)
+        .storeAddress(STORE_ADDRESS)
+        .latitude(LATITUDE)
+        .longitude(LONGITUDE)
         .build()
     );
 
@@ -121,17 +132,17 @@ public class GroupServiceTest {
     GroupException exception = assertThrows(GroupException.class,
         () -> groupService.addGroup(mockAuthentication,
             GroupDto.Request.builder()
-                .title("치킨 먹을 사람~")
-                .name("치킨 모임")
-                .content("치킨 먹을 사람 구해요!")
-                .food("치킨")
+                .title(TITLE)
+                .name(NAME)
+                .content(CONTENT)
+                .food(TYPE)
                 .date(LocalDate.parse("2022-10-04"))
-                .time(LocalTime.parse("18:30"))
-                .maximum(8)
-                .storeName("BBQ 홍대점")
-                .storeAddress("서울특별시 마포구 동교동 147-4")
-                .latitude("33.12112")
-                .longitude("127.12112")
+                .time(VALID_TIME)
+                .maximum(MAX_PARTICIPANTS)
+                .storeName(STORE_NAME)
+                .storeAddress(STORE_ADDRESS)
+                .latitude(LATITUDE)
+                .longitude(LONGITUDE)
                 .build()
         )
     );
@@ -218,13 +229,13 @@ public class GroupServiceTest {
 
     //when
     groupService.updateGroup(groupId, mockAuthentication, GroupDto.Request.builder()
-        .title("치킨 먹을 사람~")
-        .name("치킨 모임")
-        .content("치킨 먹을 사람 구해요!")
-        .food("치킨")
-        .date(LocalDate.parse("2023-11-04"))
-        .time(LocalTime.parse("18:30"))
-        .maximum(8)
+        .title(TITLE)
+        .name(NAME)
+        .content(CONTENT)
+        .food(TYPE)
+        .date(VALID_DATE)
+        .time(VALID_TIME)
+        .maximum(MAX_PARTICIPANTS)
         .storeName("자담치킨 서울홍대점")
         .storeAddress("서울 마포구 와우산로 140 1층")
         .latitude("37.5537505")
@@ -254,13 +265,13 @@ public class GroupServiceTest {
     //when
     GroupException exception = assertThrows(GroupException.class,
         () -> groupService.updateGroup(groupId, mockAuthentication, GroupDto.Request.builder()
-            .title("치킨 먹을 사람~")
-            .name("치킨 모임")
-            .content("치킨 먹을 사람 구해요!")
-            .food("치킨")
-            .date(LocalDate.parse("2023-11-04"))
-            .time(LocalTime.parse("18:30"))
-            .maximum(8)
+            .title(TITLE)
+            .name(NAME)
+            .content(CONTENT)
+            .food(TYPE)
+            .date(VALID_DATE)
+            .time(VALID_TIME)
+            .maximum(MAX_PARTICIPANTS)
             .storeName("자담치킨 서울홍대점")
             .storeAddress("서울 마포구 와우산로 140 1층")
             .latitude("37.5537505")
@@ -292,13 +303,13 @@ public class GroupServiceTest {
     GroupException exception = assertThrows(GroupException.class,
         () -> groupService.updateGroup(groupId, mockAuthentication,
             GroupDto.Request.builder()
-                .title("치킨 먹을 사람~")
-                .name("치킨 모임")
-                .content("치킨 먹을 사람 구해요!")
-                .food("치킨")
+                .title(TITLE)
+                .name(NAME)
+                .content(CONTENT)
+                .food(TYPE)
                 .date(LocalDate.parse("2022-10-04"))
-                .time(LocalTime.parse("18:30"))
-                .maximum(8)
+                .time(VALID_TIME)
+                .maximum(MAX_PARTICIPANTS)
                 .storeName("자담치킨 서울홍대점")
                 .storeAddress("서울 마포구 와우산로 140 1층")
                 .latitude("37.5537505")
@@ -351,15 +362,15 @@ public class GroupServiceTest {
     return FoodGroup.builder()
         .id(groupId)
         .member(mockMember)
-        .title("치킨 먹을 사람~")
-        .name("치킨 모임")
-        .content("치킨 먹을 사람 구해요!")
+        .title(TITLE)
+        .name(NAME)
+        .content(CONTENT)
         .food(mockFood)
-        .groupDateTime(LocalDateTime.parse("2021-01-01T15:39:30"))
-        .maximum(8)
+        .groupDateTime(VALID_DATE.atTime(VALID_TIME))
+        .maximum(MAX_PARTICIPANTS)
         .attendance(attendance)
-        .storeName("BBQ 홍대점")
-        .storeAddress("서울특별시 마포구 동교동 147-4")
+        .storeName(STORE_NAME)
+        .storeAddress(STORE_ADDRESS)
         .location(location)
         .build();
   }
