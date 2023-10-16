@@ -28,8 +28,8 @@ public class GroupController {
 
     // 모임 생성
     @PostMapping
-    public ResponseEntity<?> addGroup(Authentication authentication,
-                                      @RequestBody @Valid GroupDto.Request request) {
+    public ResponseEntity<Void> addGroup(Authentication authentication,
+                                         @RequestBody @Valid GroupDto.Request request) {
         groupService.addGroup(authentication, request);
         return ResponseEntity.ok().build();
     }
@@ -42,84 +42,84 @@ public class GroupController {
 
     // 특정 모임 수정
     @PutMapping("/{groupId}")
-    public ResponseEntity<?> updateGroup(@PathVariable Long groupId,
-                                         Authentication authentication,
-                                         @RequestBody @Valid GroupDto.Request request) {
+    public ResponseEntity<Void> updateGroup(@PathVariable Long groupId,
+                                            Authentication authentication,
+                                            @RequestBody @Valid GroupDto.Request request) {
         groupService.updateGroup(groupId, authentication, request);
         return ResponseEntity.ok().build();
     }
 
     // 특정 모임 삭제
     @DeleteMapping("/{groupId}")
-    public ResponseEntity<?> deleteGroup(@PathVariable Long groupId,
-                                         Authentication authentication) {
+    public ResponseEntity<Void> deleteGroup(@PathVariable Long groupId,
+                                            Authentication authentication) {
         groupService.deleteGroup(groupId, authentication);
         return ResponseEntity.ok().build();
     }
 
     // 특정 모임 신청
     @PostMapping("/{groupId}/enrollment")
-    public ResponseEntity<?> enrollInGroup(@PathVariable Long groupId,
-                                           Authentication authentication) {
+    public ResponseEntity<Void> enrollInGroup(@PathVariable Long groupId,
+                                              Authentication authentication) {
         groupService.enrollInGroup(groupId, authentication);
         return ResponseEntity.ok().build();
     }
 
     // 댓글 작성
     @PostMapping("/{groupId}/comment")
-    public ResponseEntity<?> addComment(@PathVariable Long groupId,
-                                        Authentication authentication,
-                                        @RequestBody @Valid CommentDto.Request request) {
+    public ResponseEntity<Void> addComment(@PathVariable Long groupId,
+                                           Authentication authentication,
+                                           @RequestBody @Valid CommentDto.Request request) {
         groupService.addComment(groupId, authentication, request);
         return ResponseEntity.ok().build();
     }
 
     // 대댓글 작성
     @PostMapping("/{groupId}/comment/{commentId}/reply")
-    public ResponseEntity<?> addReply(@PathVariable Long groupId,
-                                      @PathVariable Long commentId,
-                                      Authentication authentication,
-                                      @RequestBody @Valid ReplyDto.Request request) {
+    public ResponseEntity<Void> addReply(@PathVariable Long groupId,
+                                         @PathVariable Long commentId,
+                                         Authentication authentication,
+                                         @RequestBody @Valid ReplyDto.Request request) {
         groupService.addReply(groupId, commentId, authentication, request);
         return ResponseEntity.ok().build();
     }
 
     // 댓글 수정
     @PutMapping("/{groupId}/comment/{commentId}")
-    public ResponseEntity<?> updateComment(@PathVariable Long groupId,
-                                           @PathVariable Long commentId,
-                                           Authentication authentication,
-                                           @RequestBody @Valid CommentDto.Request request) {
+    public ResponseEntity<Void> updateComment(@PathVariable Long groupId,
+                                              @PathVariable Long commentId,
+                                              Authentication authentication,
+                                              @RequestBody @Valid CommentDto.Request request) {
         groupService.updateComment(groupId, commentId, authentication, request);
         return ResponseEntity.ok().build();
     }
 
     // 대댓글 수정
     @PutMapping("/{groupId}/comment/{commentId}/reply/{replyId}")
-    public ResponseEntity<?> updateReply(@PathVariable Long groupId,
-                                         @PathVariable Long commentId,
-                                         @PathVariable Long replyId,
-                                         Authentication authentication,
-                                         @RequestBody @Valid ReplyDto.Request request) {
+    public ResponseEntity<Void> updateReply(@PathVariable Long groupId,
+                                            @PathVariable Long commentId,
+                                            @PathVariable Long replyId,
+                                            Authentication authentication,
+                                            @RequestBody @Valid ReplyDto.Request request) {
         groupService.updateReply(groupId, commentId, replyId, authentication, request);
         return ResponseEntity.ok().build();
     }
 
     // 댓글 삭제
     @DeleteMapping("/{groupId}/comment/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long groupId,
-                                           @PathVariable Long commentId,
-                                           Authentication authentication) {
+    public ResponseEntity<Void> deleteComment(@PathVariable Long groupId,
+                                              @PathVariable Long commentId,
+                                              Authentication authentication) {
         groupService.deleteComment(groupId, commentId, authentication);
         return ResponseEntity.ok().build();
     }
 
     // 대댓글 삭제
     @DeleteMapping("/{groupId}/comment/{commentId}/reply/{replyId}")
-    public ResponseEntity<?> deleteReply(@PathVariable Long groupId,
-                                         @PathVariable Long commentId,
-                                         @PathVariable Long replyId,
-                                         Authentication authentication) {
+    public ResponseEntity<Void> deleteReply(@PathVariable Long groupId,
+                                            @PathVariable Long commentId,
+                                            @PathVariable Long replyId,
+                                            Authentication authentication) {
         groupService.deleteReply(groupId, commentId, replyId, authentication);
         return ResponseEntity.ok().build();
     }
@@ -149,7 +149,7 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getAllGroupList(pageable));
     }
 
-    // 거리순 조회 & 내 근처 모임
+    // 거리순 조회
     @GetMapping("/search/distance")
     public ResponseEntity<Page<SearchedGroupDto>> searchByLocation(@RequestParam String latitude,
                                                                    @RequestParam String longitude,
@@ -177,6 +177,14 @@ public class GroupController {
     public ResponseEntity<Page<SearchedGroupDto>> searchByFood(@RequestParam List<String> foods,
                                                                Pageable pageable) {
         return ResponseEntity.ok(groupService.searchByFood(foods, pageable));
+    }
+
+    // 내 근처 모임
+    @GetMapping("/near")
+    public ResponseEntity<Page<SearchedGroupDto>> getNearbyGroupList(@RequestParam String latitude,
+                                                                     @RequestParam String longitude,
+                                                                     Pageable pageable) {
+        return ResponseEntity.ok(groupService.getNearbyGroupList(latitude, longitude, pageable));
     }
 
     // 로그인한 사용자가 참여한 모임 조회
