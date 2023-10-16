@@ -55,7 +55,7 @@ public class EnrollmentService {
     }
 
 
-    public Page<EnrollmentDto.RequestList> enrollmentList(String decision, Authentication authentication, Pageable pageable) {
+    public Page<EnrollmentDto.myEnrollmentReceiveResponse> enrollmentList(String decision, Authentication authentication, Pageable pageable) {
 
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
@@ -64,33 +64,12 @@ public class EnrollmentService {
 
         if (decision.equals("processed")) {
             enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedListWithStatus(member.getId(), EnrollmentStatus.ACCEPT, pageable);
-            return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
-                    .enrollmentId(enrollment.getId())
-                    .groupId(enrollment.getFoodGroup().getId())
-                    .memberId(enrollment.getMember().getId())
-                    .nickname(enrollment.getMember().getNickname())
-                    .image(enrollment.getMember().getImage())
-                    .title(enrollment.getFoodGroup().getTitle())
-                    .name(enrollment.getFoodGroup().getName())
-                    .food(enrollment.getFoodGroup().getFood().getType())
-                    .date(enrollment.getFoodGroup().getGroupDateTime().toLocalDate())
-                    .time(enrollment.getFoodGroup().getGroupDateTime().toLocalTime())
-                    .maximum(enrollment.getFoodGroup().getMaximum())
-                    .storeName(enrollment.getFoodGroup().getStoreName())
-                    .storeAddress(enrollment.getFoodGroup().getStoreAddress())
-                    .build());
-
         } else if (decision.equals("unprocessed")) {
             enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedListWithStatus(member.getId(), EnrollmentStatus.SUBMIT, pageable);
-            return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
-                    .enrollmentId(enrollment.getId())
-                    .memberId(enrollment.getMember().getId())
-                    .nickname(enrollment.getMember().getNickname())
-                    .image(enrollment.getMember().getImage())
-                    .build());
         } else {
             throw new EnrollmentException(Error.REQUEST_NOT_FOUND);
         }
+        return enrollmentsPage.map(EnrollmentDto.myEnrollmentReceiveResponse::createMyEnrollmentReceiveResponse);
 
 
     }
