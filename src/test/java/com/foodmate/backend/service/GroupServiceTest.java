@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -66,6 +67,7 @@ public class GroupServiceTest {
   private GroupService groupService;
 
   public static final Long memberId1 = 1L;
+  public static final Long memberId2 = 2L;
   public static final Long foodId = 1L;
   public static final Long groupId = 1L;
 
@@ -197,6 +199,116 @@ public class GroupServiceTest {
         () -> assertEquals(chatRoomId,
             response.getChatRoomId())
     );
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 수정 성공")
+  void success_updateGroup() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+    given(foodRepository.findByType("치킨")).willReturn(Optional.of(mockFood));
+
+    //when
+    groupService.updateGroup(groupId, mockAuthentication, GroupDto.Request.builder()
+        .title("치킨 먹을 사람~")
+        .name("치킨 모임")
+        .content("치킨 먹을 사람 구해요!")
+        .food("치킨")
+        .date(LocalDate.parse("2023-11-04"))
+        .time(LocalTime.parse("18:30"))
+        .maximum(8)
+        .storeName("자담치킨 서울홍대점")
+        .storeAddress("서울 마포구 와우산로 140 1층")
+        .latitude("37.5537505")
+        .longitude("126.929225")
+        .build()
+    );
+
+    //then
+    verify(foodGroupRepository, times(1)).save(any());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 수정 실패 - 해당 모임 생성자만 수정 가능")
+  void fail_updateGroup_no_modify_permission_group() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+
+    given(foodGroupRepository.findById(anyLong())).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    GroupException exception = assertThrows(GroupException.class,
+        () -> groupService.updateGroup(groupId, mockAuthentication, GroupDto.Request.builder()
+            .title("치킨 먹을 사람~")
+            .name("치킨 모임")
+            .content("치킨 먹을 사람 구해요!")
+            .food("치킨")
+            .date(LocalDate.parse("2023-11-04"))
+            .time(LocalTime.parse("18:30"))
+            .maximum(8)
+            .storeName("자담치킨 서울홍대점")
+            .storeAddress("서울 마포구 와우산로 140 1층")
+            .latitude("37.5537505")
+            .longitude("126.929225")
+            .build()
+        )
+    );
+
+    //then
+    assertEquals(Error.NO_MODIFY_PERMISSION_GROUP, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 수정 실패 - 현재시간으로부터 한시간 이후 ~ 한달 이내의 모임만 생성 가능")
+  void fail_updateGroup_out_of_date_range() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(anyLong())).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+    given(foodRepository.findByType("치킨")).willReturn(Optional.of(mockFood));
+
+    //when
+    GroupException exception = assertThrows(GroupException.class,
+        () -> groupService.updateGroup(groupId, mockAuthentication,
+            GroupDto.Request.builder()
+                .title("치킨 먹을 사람~")
+                .name("치킨 모임")
+                .content("치킨 먹을 사람 구해요!")
+                .food("치킨")
+                .date(LocalDate.parse("2022-10-04"))
+                .time(LocalTime.parse("18:30"))
+                .maximum(8)
+                .storeName("자담치킨 서울홍대점")
+                .storeAddress("서울 마포구 와우산로 140 1층")
+                .latitude("37.5537505")
+                .longitude("126.929225")
+                .build()
+        )
+    );
+
+    //then
+    assertEquals(Error.OUT_OF_DATE_RANGE, exception.getError());
 
   }
 
