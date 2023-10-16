@@ -41,10 +41,10 @@ public class MemberController {
      * 사용자에게 사진파일을 받아와 프로필 이미지 변경
      */
     @PatchMapping("/image")
-    public ResponseEntity<HttpStatus> patchProfileImage(Authentication authentication,
+    public ResponseEntity<Void> patchProfileImage(Authentication authentication,
                                                     @RequestPart MultipartFile imageFile) throws IOException {
         memberService.patchProfileImage(authentication, imageFile);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -74,9 +74,9 @@ public class MemberController {
      * @return
      */
     @PostMapping("/logout")
-    public ResponseEntity<HttpStatus>logoutMember(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void>logoutMember(HttpServletRequest request, HttpServletResponse response) {
         memberService.logoutMember(request, response);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -95,14 +95,14 @@ public class MemberController {
      * @throws IOException 사진 업로드 실패시
      */
     @PostMapping("/signup")
-    public ResponseEntity<HttpStatus> createMember(@RequestPart MemberDto.CreateMemberRequest request,
+    public ResponseEntity<Void> createMember(@RequestPart MemberDto.CreateMemberRequest request,
                                                @RequestPart(value = "file", required = false) MultipartFile imageFile) throws IOException {
         if(imageFile == null){
             memberService.createDefaultImageMember(request); // 이미지가 없을 때
         } else {
             memberService.createMember(request, imageFile);  // 이미지가 있을 때
         }
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -120,10 +120,10 @@ public class MemberController {
      * @return
      */
     @PostMapping("{memberId}/likes")
-    public ResponseEntity<HttpStatus> toggleLikeForPost(@PathVariable Long memberId,
+    public ResponseEntity<Void> toggleLikeForPost(@PathVariable Long memberId,
                                                     Authentication authentication){
         memberService.toggleLikeForPost(memberId, authentication);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -141,9 +141,9 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/password")
-    public ResponseEntity<HttpStatus> changePassword(@RequestBody MemberDto.passwordUpdateRequest request, Authentication authentication) {
+    public ResponseEntity<Void> changePassword(@RequestBody MemberDto.passwordUpdateRequest request, Authentication authentication) {
         memberService.changePassword(request, authentication);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
 
@@ -155,7 +155,7 @@ public class MemberController {
      * @return 회원탈퇴 상태 호출
      */
     @DeleteMapping("/delete")
-    public ResponseEntity<HttpStatus> deleteMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication,
+    public ResponseEntity<Void> deleteMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication,
                                                @RequestBody(required = false) MemberDto.deleteMemberRequest deleteMemberRequest) {
         if (deleteMemberRequest == null) {
             memberService.deleteKakaoMember(request, response, authentication);
@@ -163,7 +163,7 @@ public class MemberController {
         } else {
             memberService.deleteGeneralMember(request, response, authentication, deleteMemberRequest);
         }
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -173,8 +173,8 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/food")
-    public ResponseEntity<HttpStatus> changePreferenceFood(@RequestBody MemberDto.changePreferenceFoodRequest request, Authentication authentication) {
+    public ResponseEntity<Void> changePreferenceFood(@RequestBody MemberDto.changePreferenceFoodRequest request, Authentication authentication) {
         memberService.changePreferenceFood(request, authentication);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }
