@@ -55,7 +55,7 @@ public class EnrollmentService {
     }
 
 
-    public Page<EnrollmentDto.RequestList> enrollmentList(String decision, Authentication authentication, Pageable pageable) {
+    public Page<EnrollmentDto.myEnrollmentReceiveResponse> enrollmentList(String decision, Authentication authentication, Pageable pageable) {
 
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
@@ -63,60 +63,39 @@ public class EnrollmentService {
         Page<Enrollment> enrollmentsPage;
 
         if (decision.equals("processed")) {
-            enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedList(member.getId(), pageable);
-            return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
-                    .enrollmentId(enrollment.getId())
-                    .groupId(enrollment.getFoodGroup().getId())
-                    .memberId(enrollment.getMember().getId())
-                    .nickname(enrollment.getMember().getNickname())
-                    .image(enrollment.getMember().getImage())
-                    .title(enrollment.getFoodGroup().getTitle())
-                    .name(enrollment.getFoodGroup().getName())
-                    .food(enrollment.getFoodGroup().getFood().getType())
-                    .date(enrollment.getFoodGroup().getGroupDateTime().toLocalDate())
-                    .time(enrollment.getFoodGroup().getGroupDateTime().toLocalTime())
-                    .maximum(enrollment.getFoodGroup().getMaximum())
-                    .storeName(enrollment.getFoodGroup().getStoreName())
-                    .storeAddress(enrollment.getFoodGroup().getStoreAddress())
-                    .build());
-
+            enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedListWithStatus(member.getId(), EnrollmentStatus.ACCEPT, pageable);
         } else if (decision.equals("unprocessed")) {
-            enrollmentsPage = enrollmentRepository.findByMyEnrollmentUnprocessedList(member.getId(), pageable);
-            return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
-                    .enrollmentId(enrollment.getId())
-                    .memberId(enrollment.getMember().getId())
-                    .nickname(enrollment.getMember().getNickname())
-                    .image(enrollment.getMember().getImage())
-                    .build());
+            enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedListWithStatus(member.getId(), EnrollmentStatus.SUBMIT, pageable);
         } else {
             throw new EnrollmentException(Error.REQUEST_NOT_FOUND);
         }
+        return enrollmentsPage.map(EnrollmentDto.myEnrollmentReceiveResponse::createMyEnrollmentReceiveResponse);
 
 
     }
 
 
-    public String acceptEnrollment(Long enrollmentId) {
+    public Enrollment acceptEnrollment(Long enrollmentId) {
 
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
         enrollment.updateEnrollment(EnrollmentStatus.ACCEPT);
         enrollmentRepository.save(enrollment);
 
-        return "수락 완료";
+        return enrollment;
     }
 
 
-    public void refuseEnrollment(Long enrollmentId) {
-
+    public Enrollment refuseEnrollment(Long enrollmentId) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
         enrollment.updateEnrollment(EnrollmentStatus.REFUSE);
         enrollmentRepository.save(enrollment);
+        return enrollment;
     }
 
 
-    public String cancelEnrollment(Long enrollmentId, Authentication authentication) {
+    public void cancelEnrollment(Long enrollmentId, Authentication authentication) {
         Member member = memberRepository.findByEmail(authentication.getName()).orElseThrow(
                 () -> new MemberException(Error.USER_NOT_FOUND));
 
@@ -134,7 +113,5 @@ public class EnrollmentService {
         }
         enrollment.setStatus(EnrollmentStatus.CANCEL);
         enrollmentRepository.save(enrollment);
-
-        return "취소 완료";
     }
 }

@@ -19,26 +19,26 @@ public class RankingController {
 
     // 좋아요 랭킹
     @GetMapping("/likes")
-    public ResponseEntity<List<RankingDto.Likes>> showLikesRanking() {
-        return ResponseEntity.ok(rankingService.showLikesRanking());
+    public ResponseEntity<List<RankingDto.Likes>> getLikesRanking() {
+        return ResponseEntity.ok(rankingService.getLikesRanking());
     }
 
     // 모임왕 랭킹
     @GetMapping("/meeting")
-    public ResponseEntity<List<RankingDto.Meeting>> showMeetingRanking() {
-        return ResponseEntity.ok(rankingService.showMeetingRanking());
+    public ResponseEntity<List<RankingDto.Meeting>> getMeetingRanking() {
+        return ResponseEntity.ok(rankingService.getMeetingRanking());
     }
 
     // 많이찾는 식당 랭킹
     @GetMapping("/store")
-    public ResponseEntity<List<RankingDto.Store>> showStoreRanking() {
-        return ResponseEntity.ok(rankingService.showStoreRanking());
+    public ResponseEntity<List<RankingDto.Store>> getStoreRanking() {
+        return ResponseEntity.ok(rankingService.getStoreRanking());
     }
 
     // 음식 카테고리 랭킹
     @GetMapping("/food")
-    public ResponseEntity<List<RankingDto.Food>> showFoodRanking() {
-        return ResponseEntity.ok(rankingService.showFoodRanking());
+    public ResponseEntity<List<RankingDto.Food>> getFoodRanking() {
+        return ResponseEntity.ok(rankingService.getFoodRanking());
     }
 
 }

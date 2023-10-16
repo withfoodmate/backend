@@ -39,7 +39,7 @@ public class EnrollmentController {
      * @return 처리 상태에 따른 정보 가져옴
      */
     @GetMapping("/receive")
-    public ResponseEntity<Page<EnrollmentDto.RequestList>> enrollmentList(@RequestParam String decision, Authentication authentication, Pageable pageable) {
+    public ResponseEntity<Page<EnrollmentDto.myEnrollmentReceiveResponse>> enrollmentList(@RequestParam String decision, Authentication authentication, Pageable pageable) {
         return ResponseEntity.ok(enrollmentService.enrollmentList(decision, authentication, pageable));
     }
 
@@ -49,9 +49,9 @@ public class EnrollmentController {
      * @return 처리 상태에 대한 응답
      */
     @PatchMapping("/{enrollmentId}/accept")
-    public ResponseEntity<?> acceptEnrollment(@PathVariable Long enrollmentId) {
+    public ResponseEntity<Void> acceptEnrollment(@PathVariable Long enrollmentId) {
         enrollmentService.acceptEnrollment(enrollmentId);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -60,9 +60,9 @@ public class EnrollmentController {
      * @return 처리 상태에 대한 응답
      */
     @PatchMapping("/{enrollmentId}/refuse")
-    public ResponseEntity<?> refuseEnrollment(@PathVariable Long enrollmentId) {
+    public ResponseEntity<Void> refuseEnrollment(@PathVariable Long enrollmentId) {
         enrollmentService.refuseEnrollment(enrollmentId);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -71,8 +71,8 @@ public class EnrollmentController {
      * @return
      */
     @DeleteMapping("/{enrollmentId}/cancel")
-    public ResponseEntity<?> cancelEnrollment(@PathVariable Long enrollmentId, Authentication authentication){
+    public ResponseEntity<Void> cancelEnrollment(@PathVariable Long enrollmentId, Authentication authentication){
         enrollmentService.cancelEnrollment(enrollmentId, authentication);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }

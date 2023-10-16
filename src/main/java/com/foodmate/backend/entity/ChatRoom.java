@@ -1,12 +1,14 @@
 package com.foodmate.backend.entity;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @NoArgsConstructor
 @Getter
+@Setter
 @Entity
 public class ChatRoom {
 
@@ -17,8 +19,10 @@ public class ChatRoom {
     @OneToOne
     private FoodGroup foodGroup;
 
+    private int attendance;
     public ChatRoom(FoodGroup foodGroup) {
         this.foodGroup = foodGroup;
     }
+
 
 }

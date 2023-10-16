@@ -22,7 +22,7 @@ public class RankingService {
     private final FoodRepository foodRepository;
 
     // 좋아요 랭킹
-    public List<RankingDto.Likes> showLikesRanking() {
+    public List<RankingDto.Likes> getLikesRanking() {
 
         List<RankingDto.Likes> result = new ArrayList<>();
 
@@ -41,7 +41,7 @@ public class RankingService {
     }
 
     // 모임왕 랭킹
-    public List<RankingDto.Meeting> showMeetingRanking() {
+    public List<RankingDto.Meeting> getMeetingRanking() {
 
         List<RankingDto.Meeting> result = new ArrayList<>();
 
@@ -61,7 +61,7 @@ public class RankingService {
     }
 
     // 많이찾는 식당 랭킹
-    public List<RankingDto.Store> showStoreRanking() {
+    public List<RankingDto.Store> getStoreRanking() {
 
         List<RankingDto.Store> result = new ArrayList<>();
 
@@ -80,7 +80,7 @@ public class RankingService {
     }
 
     // 음식 카테고리 랭킹
-    public List<RankingDto.Food> showFoodRanking() {
+    public List<RankingDto.Food> getFoodRanking() {
 
         List<RankingDto.Food> result = new ArrayList<>();
 
