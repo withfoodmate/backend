@@ -49,9 +49,9 @@ public class EnrollmentController {
      * @return 처리 상태에 대한 응답
      */
     @PatchMapping("/{enrollmentId}/accept")
-    public ResponseEntity<HttpStatus> acceptEnrollment(@PathVariable Long enrollmentId) {
+    public ResponseEntity<Void> acceptEnrollment(@PathVariable Long enrollmentId) {
         enrollmentService.acceptEnrollment(enrollmentId);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -60,9 +60,9 @@ public class EnrollmentController {
      * @return 처리 상태에 대한 응답
      */
     @PatchMapping("/{enrollmentId}/refuse")
-    public ResponseEntity<HttpStatus> refuseEnrollment(@PathVariable Long enrollmentId) {
+    public ResponseEntity<Void> refuseEnrollment(@PathVariable Long enrollmentId) {
         enrollmentService.refuseEnrollment(enrollmentId);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -71,8 +71,8 @@ public class EnrollmentController {
      * @return
      */
     @DeleteMapping("/{enrollmentId}/cancel")
-    public ResponseEntity<HttpStatus> cancelEnrollment(@PathVariable Long enrollmentId, Authentication authentication){
+    public ResponseEntity<Void> cancelEnrollment(@PathVariable Long enrollmentId, Authentication authentication){
         enrollmentService.cancelEnrollment(enrollmentId, authentication);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }
