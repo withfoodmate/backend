@@ -31,40 +31,15 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     Page<EnrollmentDto.myEnrollmentResponse> findByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
             Member member, EnrollmentStatus status, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
 
-
-//    @Query(value = "SELECT NEW com.foodmate.backend.dto.EnrollmentDto(" +
-//            "e.id, e.foodGroup.id, m.image, fg.title, fg.name, f.type, " +
-//            "fg.groupDateTime, fg.maximum, fg.storeName, fg.storeAddress, e.status) " +
-//            "FROM Enrollment e " +
-//            "INNER JOIN FoodGroup fg ON fg.id = e.foodGroup.id " +
-//            "INNER JOIN Member m ON fg.member.id = m.id " +
-//            "INNER JOIN Food f ON fg.food.id = f.id " +
-//            "WHERE (e.member.id = :memberId) " +
-//            "AND (e.status = :enrollmentStatus) " +
-//            "AND (fg.groupDateTime BETWEEN :startDateTime AND :endDateTime)" +
-//            "ORDER BY fg.groupDateTime ASC")
-//    Page<EnrollmentDto> getMyEnrollment(
-//            Long memberId,
-//            @Param("enrollmentStatus") EnrollmentStatus enrollmentStatus,
-//            LocalDateTime startDateTime,
-//            LocalDateTime endDateTime,
-//            Pageable pageable);
-
     // 본인이 생성한 모든 모임의 요청 중 수락한 리스트 조회
     @Query("SELECT e FROM Enrollment e " +
             "JOIN e.foodGroup fg " +
             "WHERE fg.member.id = :id " +
-            "AND e.status = 'ACCEPT' " +
+            "AND e.status = :status " +
             "ORDER BY e.enrollDate ASC")
-    Page<Enrollment> findByMyEnrollmentProcessedList(@Param("id") Long readerId, Pageable pageable);
+    Page<Enrollment> findByMyEnrollmentProcessedListWithStatus(@Param("id") Long readerId, @Param("status") EnrollmentStatus status, Pageable pageable);
 
-    // 본인이 생성한 모든 모임의 요청 중 신청완료인 리스트 조회
-    @Query("SELECT e FROM Enrollment e " +
-            "JOIN e.foodGroup fg " +
-            "WHERE fg.member.id = :id " +
-            "AND e.status = 'SUBMIT' " +
-            "ORDER BY e.enrollDate ASC")
-    Page<Enrollment> findByMyEnrollmentUnprocessedList(@Param("id") Long readerId, Pageable pageable);
+
 
     // 로그인한 사용자가 참여한 모임 조회 ver. 1
     List<Enrollment> findAllByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
