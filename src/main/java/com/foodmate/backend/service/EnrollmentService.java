@@ -63,7 +63,7 @@ public class EnrollmentService {
         Page<Enrollment> enrollmentsPage;
 
         if (decision.equals("processed")) {
-            enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedList(member.getId(), pageable);
+            enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedListWithStatus(member.getId(), EnrollmentStatus.ACCEPT, pageable);
             return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
                     .enrollmentId(enrollment.getId())
                     .groupId(enrollment.getFoodGroup().getId())
@@ -81,7 +81,7 @@ public class EnrollmentService {
                     .build());
 
         } else if (decision.equals("unprocessed")) {
-            enrollmentsPage = enrollmentRepository.findByMyEnrollmentUnprocessedList(member.getId(), pageable);
+            enrollmentsPage = enrollmentRepository.findByMyEnrollmentProcessedListWithStatus(member.getId(), EnrollmentStatus.SUBMIT, pageable);
             return enrollmentsPage.map(enrollment -> EnrollmentDto.RequestList.builder()
                     .enrollmentId(enrollment.getId())
                     .memberId(enrollment.getMember().getId())

@@ -35,17 +35,11 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT e FROM Enrollment e " +
             "JOIN e.foodGroup fg " +
             "WHERE fg.member.id = :id " +
-            "AND e.status = 'ACCEPT' " +
+            "AND e.status = :status " +
             "ORDER BY e.enrollDate ASC")
-    Page<Enrollment> findByMyEnrollmentProcessedList(@Param("id") Long readerId, Pageable pageable);
+    Page<Enrollment> findByMyEnrollmentProcessedListWithStatus(@Param("id") Long readerId, @Param("status") EnrollmentStatus status, Pageable pageable);
 
-    // 본인이 생성한 모든 모임의 요청 중 신청완료인 리스트 조회
-    @Query("SELECT e FROM Enrollment e " +
-            "JOIN e.foodGroup fg " +
-            "WHERE fg.member.id = :id " +
-            "AND e.status = 'SUBMIT' " +
-            "ORDER BY e.enrollDate ASC")
-    Page<Enrollment> findByMyEnrollmentUnprocessedList(@Param("id") Long readerId, Pageable pageable);
+
 
     // 로그인한 사용자가 참여한 모임 조회 ver. 1
     List<Enrollment> findAllByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
