@@ -232,7 +232,7 @@ public class MemberService {
     public void createMember(MemberDto.CreateMemberRequest request, MultipartFile imageFile)  {
         String uuid = UUID.randomUUID().toString();
 
-        Member member = Member.MemberDtoToMember(
+        Member member = Member.createGeneralMember(
                 request,
                 BCrypt.hashpw(request.getPassword(),
                         BCrypt.gensalt()),
@@ -246,7 +246,7 @@ public class MemberService {
     @Transactional
     public void createDefaultImageMember(MemberDto.CreateMemberRequest request) {
         String uuid = UUID.randomUUID().toString();
-        Member member = Member.MemberDtoToMember(
+        Member member = Member.createGeneralMember(
                 request,
                 BCrypt.hashpw(request.getPassword(),
                         BCrypt.gensalt()),
@@ -341,15 +341,16 @@ public class MemberService {
             if (!member.getIsEmailAuth()) {
                 throw new MemberException(Error.EMAIL_AUTH_FAILED);
             }
+
+            if (member.getIsDeleted() != null) {
+                throw new MemberException(Error.DELETED_USER);
+            }
+
             String refreshToken = jwtTokenProvider.createRefreshToken();
 
-            JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
-                    .accessToken(jwtTokenProvider.createAccessToken(member.getId()))
-                    .refreshToken(refreshToken)
-                    .build();
             jwtTokenProvider.updateRefreshToken(member.getEmail(), refreshToken);
 
-            return jwtTokenDto;
+            return JwtTokenDto.createJwtToken(jwtTokenProvider.createAccessToken(member.getId()), refreshToken);
     }
 
 
