@@ -14,6 +14,7 @@ import com.foodmate.backend.entity.ChatRoom;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
+import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.repository.ChatRoomRepository;
@@ -320,6 +321,54 @@ public class GroupServiceTest {
 
     //then
     assertEquals(Error.OUT_OF_DATE_RANGE, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 삭제 성공")
+  void success_deleteGroup() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.deleteGroup(groupId, mockAuthentication);
+
+    //then
+    verify(foodGroupRepository, times(1)).save(mockGroup);
+    verify(enrollmentRepository, times(1))
+        .changeStatusByGroupId(groupId, EnrollmentStatus.GROUP_CANCEL);
+    verify(chatRoomRepository, times(1)).deleteByFoodGroupId(groupId);
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 삭제 실패 - 해당 모임 생성자만 수정 가능")
+  void fail_deleteGroup_no_modify_permission_group() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    GroupException exception = assertThrows(GroupException.class,
+        () -> groupService.deleteGroup(groupId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.NO_DELETE_PERMISSION_GROUP, exception.getError());
 
   }
 
