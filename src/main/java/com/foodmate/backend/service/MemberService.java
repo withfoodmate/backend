@@ -91,11 +91,7 @@ public class MemberService {
         }
 
         /* 새로 받아온 사진을 UUID를 사용한 무작위의 파일명으로 변경 후 s3업로드 */
-        try {
-            uploadProfileImage(member, imageFile);
-        } catch (IOException e) {
-            throw new FileException(Error.UPLOAD_IMAGE_FILE_FAILED);
-        }
+        uploadProfileImage(member, imageFile);
     }
 
 
@@ -134,13 +130,17 @@ public class MemberService {
      * @param imageFile
      * @throws IOException
      */
-    private void uploadProfileImage(Member member, MultipartFile imageFile) throws IOException {
+    private void uploadProfileImage(Member member, MultipartFile imageFile){
+        try{
         member.setImage(
                 s3Uploader.uploadAndGenerateUrl(
                         imageFile,
                         s3BucketFolderName +
                                 RandomStringMaker.randomStringMaker())
         );
+        } catch (IOException e){
+            throw new FileException(Error.UPLOAD_IMAGE_FILE_FAILED);
+        }
         memberRepository.save(member);
     }
 
@@ -229,7 +229,7 @@ public class MemberService {
      * 회원가입 진행하면서 이메일, 닉네임 중복 확인 진행하므로 추가 중복 확인 x
      */
     @Transactional
-    public void createMember(MemberDto.CreateMemberRequest request, MultipartFile imageFile) throws IOException {
+    public void createMember(MemberDto.CreateMemberRequest request, MultipartFile imageFile)  {
         String uuid = UUID.randomUUID().toString();
 
         Member member = Member.MemberDtoToMember(
