@@ -17,6 +17,7 @@ public enum Error {
     USER_NOT_FOUND("해당 사용자가 없습니다.", HttpStatus.NOT_FOUND),
     PASSWORD_NOT_MATCH("패스워드가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
     ACCESS_DENIED("해당 요청에 권한이 없습니다.", HttpStatus.FORBIDDEN),
+    EMAIL_AUTH_FAILED("이메일 인증이 되지 않은 상태입니다.", HttpStatus.UNAUTHORIZED),
 
 
     // FoodException

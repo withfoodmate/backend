@@ -338,6 +338,9 @@ public class MemberService {
             if (!BCrypt.checkpw(request.getPassword(), member.getPassword())) {
                 throw new MemberException(Error.LOGIN_FAILED);
             }
+            if (!member.getIsEmailAuth()) {
+                throw new MemberException(Error.EMAIL_AUTH_FAILED);
+            }
             String refreshToken = jwtTokenProvider.createRefreshToken();
 
             JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
