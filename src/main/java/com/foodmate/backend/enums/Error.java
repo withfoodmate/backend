@@ -19,7 +19,6 @@ public enum Error {
     ACCESS_DENIED("해당 요청에 권한이 없습니다.", HttpStatus.FORBIDDEN),
     EMAIL_AUTH_FAILED("이메일 인증이 되지 않은 상태입니다.", HttpStatus.UNAUTHORIZED),
 
-
     // FoodException
     FOOD_NOT_FOUND("입력한 음식은 DB에 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
 
@@ -32,9 +31,8 @@ public enum Error {
     INVALID_DATE_RANGE("검색 시작일 혹은 종료일 정보가 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
 
     // ChatException
-    CHATROOM_NOT_FOUND("해당 모임 아이디의 채팅룸은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    CHATROOM_NOT_FOUND("채팅방이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     USER_NOT_IN_CHATROOM("채팅에 해당 사용자가 없습니다", HttpStatus.NOT_FOUND),
-
 
     // EnrollmentException
     ENROLLMENT_NOT_FOUND("해당 신청이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
@@ -59,7 +57,11 @@ public enum Error {
     S3_SERVICE_ERROR("S3 서비스 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     S3_CLIENT_ERROR("S3 클라이언트 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     DELETE_IMAGE_FILE_FAILED("이미지를 삭제하는데 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    UPLOAD_IMAGE_FILE_FAILED("이미지를 업로드하는데 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    UPLOAD_IMAGE_FILE_FAILED("이미지를 업로드하는데 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // WebSocketException
+    MISSING_SESSION_ATTRIBUTE("세션 속성이 없습니다. 연결에 필요한 정보가 없습니다.", HttpStatus.BAD_REQUEST),
+    MISSING_DESTINATION("웹소켓 요청에 목적지(destination) 정보가 비어 있습니다.", HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final HttpStatus httpStatus;
