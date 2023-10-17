@@ -57,7 +57,7 @@ public class Member {
         this.refreshToken = updateRefreshToken;
     }
 
-    public static Member MemberDtoToMember(MemberDto.CreateMemberRequest request, String encPassword, String uuid){
+    public static Member createGeneralMember(MemberDto.CreateMemberRequest request, String encPassword, String uuid){
         return Member.builder()
                 .email(request.getEmail())
                 .nickname(request.getNickname())
@@ -68,6 +68,18 @@ public class Member {
                 .updatedDate(LocalDateTime.now())
                 .emailAuthKey(uuid)
                 .isEmailAuth(false)
+                .build();
+    }
+
+    public static Member createKakaolMember(String email){
+        return Member.builder()
+                .email(email)
+                .emailAuthDate(LocalDateTime.now())
+                .isEmailAuth(true)
+                .nickname(null)
+                .memberRole(MemberRole.USER)
+                .memberLoginType(MemberLoginType.KAKAO)
+                .registeredDate(LocalDateTime.now())
                 .build();
     }
 
