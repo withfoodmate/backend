@@ -117,7 +117,7 @@ public class JwtTokenProvider {
     }
 
     /**
-     * AccessToken에서 Email 추출
+     * AccessToken에서 Id 추출
      */
     public Optional<Long> extractId(String accessToken) {
         Jws<Claims> claimsJws = Jwts.parserBuilder()

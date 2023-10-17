@@ -8,6 +8,7 @@ import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
 import com.foodmate.backend.enums.EmailContents;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.exception.FileException;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.MemberException;
 import com.foodmate.backend.repository.FoodRepository;
@@ -16,7 +17,7 @@ import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.PreferenceRepository;
 import com.foodmate.backend.security.dto.JwtTokenDto;
 import com.foodmate.backend.security.service.JwtTokenProvider;
-import com.foodmate.backend.util.FileRandomNaming;
+import com.foodmate.backend.util.RandomStringMaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,9 +64,9 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
 
         if(member.getImage() == null){
-            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
+            return MemberDto.Response.createMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
+        return MemberDto.Response.createMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
     }
 
     /**
@@ -74,7 +75,7 @@ public class MemberService {
      * 사용자에게 사진파일을 받아와 프로필 이미지 변경
      */
     @Transactional
-    public void patchProfileImage(Authentication authentication, MultipartFile imageFile) throws IOException {
+    public void patchProfileImage(Authentication authentication, MultipartFile imageFile) {
         /* 사용자가 없을 시 예외 처리 */
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
@@ -82,7 +83,11 @@ public class MemberService {
        /* 기존 이미지가 null이 아니면,
        있던 프로필 정보를 삭제하기 위한 s3 삭제 */
         if (isProfileImage(member.getImage())) {
-            s3Deleter.deleteObject(getImageObjectKey(member.getImage()));
+            try {
+                s3Deleter.deleteObject(getImageObjectKey(member.getImage()));
+            } catch (IOException e) {
+                throw new FileException(Error.DELETE_IMAGE_FILE_FAILED);
+            }
         }
 
         /* 새로 받아온 사진을 UUID를 사용한 무작위의 파일명으로 변경 후 s3업로드 */
@@ -125,13 +130,17 @@ public class MemberService {
      * @param imageFile
      * @throws IOException
      */
-    private void uploadProfileImage(Member member, MultipartFile imageFile) throws IOException {
+    private void uploadProfileImage(Member member, MultipartFile imageFile){
+        try{
         member.setImage(
                 s3Uploader.uploadAndGenerateUrl(
                         imageFile,
                         s3BucketFolderName +
-                                FileRandomNaming.fileRandomNaming(imageFile))
+                                RandomStringMaker.randomStringMaker())
         );
+        } catch (IOException e){
+            throw new FileException(Error.UPLOAD_IMAGE_FILE_FAILED);
+        }
         memberRepository.save(member);
     }
 
@@ -165,9 +174,8 @@ public class MemberService {
      * @param response
      * @return 로그아웃 상태 호출
      */
-    public String logoutMember(HttpServletRequest request, HttpServletResponse response) {
+    public void logoutMember(HttpServletRequest request, HttpServletResponse response) {
         logout(request, response);
-        return "로그아웃 완료";
     }
 
     /**
@@ -194,9 +202,9 @@ public class MemberService {
             throw new MemberException(Error.DELETED_USER);
         }
         if(member.getImage() == null){
-            return MemberDto.Response.memberToMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
+            return MemberDto.Response.createMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.memberToMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
+        return MemberDto.Response.createMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
     }
 
     /**
@@ -221,10 +229,10 @@ public class MemberService {
      * 회원가입 진행하면서 이메일, 닉네임 중복 확인 진행하므로 추가 중복 확인 x
      */
     @Transactional
-    public void createMember(MemberDto.CreateMemberRequest request, MultipartFile imageFile) throws IOException {
+    public void createMember(MemberDto.CreateMemberRequest request, MultipartFile imageFile)  {
         String uuid = UUID.randomUUID().toString();
 
-        Member member = Member.MemberDtoToMember(
+        Member member = Member.createGeneralMember(
                 request,
                 BCrypt.hashpw(request.getPassword(),
                         BCrypt.gensalt()),
@@ -238,7 +246,7 @@ public class MemberService {
     @Transactional
     public void createDefaultImageMember(MemberDto.CreateMemberRequest request) {
         String uuid = UUID.randomUUID().toString();
-        Member member = Member.MemberDtoToMember(
+        Member member = Member.createGeneralMember(
                 request,
                 BCrypt.hashpw(request.getPassword(),
                         BCrypt.gensalt()),
@@ -324,26 +332,25 @@ public class MemberService {
         }
     }
 
-        public JwtTokenDto login(Map<String, String> loginInfo) {
-            String email = loginInfo.get("email");
-            String password = loginInfo.get("password");
-
-            Member member = memberRepository.findByEmail(email)
+        public JwtTokenDto login(MemberDto.loginRequest request) {
+            Member member = memberRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
-            if (!BCrypt.checkpw(password, member.getPassword())) {
-                log.info(password);
-                log.info(member.getPassword());
+            if (!BCrypt.checkpw(request.getPassword(), member.getPassword())) {
                 throw new MemberException(Error.LOGIN_FAILED);
             }
+            if (!member.getIsEmailAuth()) {
+                throw new MemberException(Error.EMAIL_AUTH_FAILED);
+            }
+
+            if (member.getIsDeleted() != null) {
+                throw new MemberException(Error.DELETED_USER);
+            }
+
             String refreshToken = jwtTokenProvider.createRefreshToken();
 
-            JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
-                    .accessToken(jwtTokenProvider.createAccessToken(member.getId()))
-                    .refreshToken(refreshToken)
-                    .build();
             jwtTokenProvider.updateRefreshToken(member.getEmail(), refreshToken);
 
-            return jwtTokenDto;
+            return JwtTokenDto.createJwtToken(jwtTokenProvider.createAccessToken(member.getId()), refreshToken);
     }
 
 
