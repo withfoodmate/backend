@@ -62,17 +62,7 @@ public class KakaoOAuth2MemberService implements OAuth2UserService<OAuth2UserReq
         Optional<Member> memberOptional = memberRepository.findByEmail(email);
 
         if (memberOptional.isEmpty()) {
-            memberRepository.save(
-                    Member.builder()
-                            .email(email)
-                            .emailAuthDate(LocalDateTime.now())
-                            .isEmailAuth(true)
-                            .nickname(null)
-                            .memberRole(MemberRole.USER)
-                            .memberLoginType(MemberLoginType.KAKAO)
-                            .registeredDate(LocalDateTime.now())
-                            .build()
-            );
+            memberRepository.save(Member.createKakaolMember(email));
         }
     }
 
