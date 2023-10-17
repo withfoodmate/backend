@@ -1,8 +1,10 @@
 package com.foodmate.backend.exception;
 
 import com.foodmate.backend.enums.Error;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public class AuthException extends RuntimeException {
 
     private final Error error;
