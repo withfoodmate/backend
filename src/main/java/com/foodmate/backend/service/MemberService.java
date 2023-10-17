@@ -8,6 +8,7 @@ import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
 import com.foodmate.backend.enums.EmailContents;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.exception.FileException;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.MemberException;
 import com.foodmate.backend.repository.FoodRepository;
@@ -74,7 +75,7 @@ public class MemberService {
      * 사용자에게 사진파일을 받아와 프로필 이미지 변경
      */
     @Transactional
-    public void patchProfileImage(Authentication authentication, MultipartFile imageFile) throws IOException {
+    public void patchProfileImage(Authentication authentication, MultipartFile imageFile) {
         /* 사용자가 없을 시 예외 처리 */
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
@@ -82,11 +83,19 @@ public class MemberService {
        /* 기존 이미지가 null이 아니면,
        있던 프로필 정보를 삭제하기 위한 s3 삭제 */
         if (isProfileImage(member.getImage())) {
-            s3Deleter.deleteObject(getImageObjectKey(member.getImage()));
+            try {
+                s3Deleter.deleteObject(getImageObjectKey(member.getImage()));
+            } catch (IOException e) {
+                throw new FileException(Error.DELETE_IMAGE_FILE_FAILED);
+            }
         }
 
         /* 새로 받아온 사진을 UUID를 사용한 무작위의 파일명으로 변경 후 s3업로드 */
-        uploadProfileImage(member, imageFile);
+        try {
+            uploadProfileImage(member, imageFile);
+        } catch (IOException e) {
+            throw new FileException(Error.UPLOAD_IMAGE_FILE_FAILED);
+        }
     }
 
 

@@ -18,6 +18,7 @@ public enum Error {
     PASSWORD_NOT_MATCH("패스워드가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
     ACCESS_DENIED("해당 요청에 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
+
     // FoodException
     FOOD_NOT_FOUND("입력한 음식은 DB에 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
 
@@ -49,7 +50,13 @@ public enum Error {
     // ReplyException
     REPLY_NOT_FOUND("해당 아이디의 대댓글은 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     NO_MODIFY_PERMISSION_REPLY("해당 대댓글을 수정할 권한이 없습니다.", HttpStatus.FORBIDDEN),
-    NO_DELETE_PERMISSION_REPLY("해당 대댓글을 삭제할 권한이 없습니다.", HttpStatus.FORBIDDEN);
+    NO_DELETE_PERMISSION_REPLY("해당 대댓글을 삭제할 권한이 없습니다.", HttpStatus.FORBIDDEN),
+
+    // FileException
+    S3_SERVICE_ERROR("S3 서비스 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    S3_CLIENT_ERROR("S3 클라이언트 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    DELETE_IMAGE_FILE_FAILED("이미지를 삭제하는데 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    UPLOAD_IMAGE_FILE_FAILED("이미지를 업로드하는데 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String message;
     private final HttpStatus httpStatus;
