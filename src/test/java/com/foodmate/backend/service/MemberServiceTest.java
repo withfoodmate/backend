@@ -4,7 +4,6 @@ import com.foodmate.backend.dto.MemberDto;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
-import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.MemberException;
 import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.LikesRepository;
@@ -24,15 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
