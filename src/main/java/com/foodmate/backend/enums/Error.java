@@ -10,7 +10,7 @@ public enum Error {
 
     // MemberException
     DELETED_USER("이미 삭제된 유저입니다.", HttpStatus.UNAUTHORIZED),
-    LOGIN_FAILED("로그인에 실패하였습니다.", HttpStatus.UNAUTHORIZED),
+    LOGIN_FAILED("이메일과 비밀번호를 확인하세요!", HttpStatus.UNAUTHORIZED),
     AUTHORIZATION_NOT_FOUND("권한이 존재하지 않습니다.", HttpStatus.UNAUTHORIZED),
     LOGIN_REQUIRED("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID("유효하지 않은 토큰 입니다.", HttpStatus.UNAUTHORIZED),
