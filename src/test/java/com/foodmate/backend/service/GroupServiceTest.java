@@ -16,6 +16,7 @@ import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.exception.EnrollmentException;
 import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.repository.ChatRoomRepository;
 import com.foodmate.backend.repository.CommentRepository;
@@ -369,6 +370,100 @@ public class GroupServiceTest {
 
     //then
     assertEquals(Error.NO_DELETE_PERMISSION_GROUP, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 신청 성공")
+  void success_enrollInGroup() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    groupService.enrollInGroup(groupId, mockAuthentication);
+
+    //then
+    verify(enrollmentRepository, times(1)).save(any());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 신청 실패 - 본인이 생성한 모임일 경우")
+  void fail_enrollInGroup_cannot_apply_to_own_group() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    EnrollmentException exception = assertThrows(EnrollmentException.class,
+        () -> groupService.enrollInGroup(groupId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.CANNOT_APPLY_TO_OWN_GROUP, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 신청 실패 - 이미 신청 이력이 존재하는 경우")
+  void fail_enrollInGroup_enrollment_history_exists() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+    given(enrollmentRepository.existsByMemberAndFoodGroup(mockMember2,mockGroup)).willReturn(true);
+
+    //when
+    EnrollmentException exception = assertThrows(EnrollmentException.class,
+        () -> groupService.enrollInGroup(groupId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.ENROLLMENT_HISTORY_EXISTS, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 신청 실패 - 해당 모임 정원이 다 찬 경우")
+  void fail_enrollInGroup_group_full() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 8);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    EnrollmentException exception = assertThrows(EnrollmentException.class,
+        () -> groupService.enrollInGroup(groupId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.GROUP_FULL, exception.getError());
 
   }
 
