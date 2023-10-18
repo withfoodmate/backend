@@ -116,39 +116,39 @@ class MemberServiceTest {
 
     }
 
-//    @Test
-//    @DisplayName("내 정보 가져오기 성공 - 기본 이미지/선호음식 있음")
-//    void success_getMemberInfoWithPreference() {
-//        // given
-//        Authentication mockAuthentication = createAuthentication();
-//        Member mockMember = createMockMember(memberId1);
-//
-//        Food mockFood = createFood(1L); // 유효한 음식 ID로 생성
-//
-//        List<Preference> mockPreference = new ArrayList<>();
-//        mockPreference.add(new Preference(1L, mockMember, mockFood)); // 선호음식 추가
-//        List<Food> mockFoods = new ArrayList<>();
-//        mockFoods.add(mockFood); // 선호음식 추가
-//        Long mockLikesCount = 32L;
-//
-//        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
-//        given(preferenceRepository.findAllByMember(mockMember)).willReturn(mockPreference);
-//        given(likesRepository.countAllByLiked(mockMember)).willReturn(mockLikesCount);
-//        given(foodRepository.findById(mockFood.getId())).willReturn(Optional.of(mockFood)); // 음식을 찾을 수 있도록 설정
-//
-//        // when
-//        MemberDto.Response response = memberService.getMemberInfo(mockAuthentication);
-//
-//        // then
-//        assertAll(
-//                () -> assertEquals(mockMember.getId(), response.getMemberId()),
-//                () -> assertEquals(mockMember.getEmail(), response.getEmail()),
-//                () -> assertEquals(mockMember.getImage(), response.getImage()),
-//                () -> assertEquals(mockLikesCount, response.getLikes()),
-//                () -> assertEquals(mockMember.getNickname(), response.getNickname()),
-//                () -> assertEquals(mockFoods, response.getFood())
-//        );
-//    }
+    @Test
+    @DisplayName("내 정보 가져오기 성공 - 기본 이미지/선호음식 있음")
+    void success_getMemberInfoWithPreference() {
+        // given
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockMember(memberId1);
+
+        Food mockFood = createFood(1L); // 유효한 음식 ID로 생성
+
+        List<Preference> mockPreference = new ArrayList<>();
+        mockPreference.add(new Preference(1L, mockMember, mockFood)); // 선호음식 추가
+        List<String> mockFoods = new ArrayList<>();
+        mockFoods.add(mockFood.getType()); // 선호음식 추가
+
+        Long mockLikesCount = 32L;
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+        given(preferenceRepository.findAllByMember(mockMember)).willReturn(mockPreference);
+        given(likesRepository.countAllByLiked(mockMember)).willReturn(mockLikesCount);
+        given(foodRepository.findById(mockFood.getId())).willReturn(Optional.of(mockFood)); // 음식을 찾을 수 있도록 설정
+
+        // when
+        MemberDto.Response response = memberService.getMemberInfo(mockAuthentication);
+        // then
+        assertAll(
+                () -> assertEquals(mockMember.getId(), response.getMemberId()),
+                () -> assertEquals(mockMember.getEmail(), response.getEmail()),
+                () -> assertEquals(mockMember.getImage(), response.getImage()),
+                () -> assertEquals(mockLikesCount, response.getLikes()),
+                () -> assertEquals(mockMember.getNickname(), response.getNickname()),
+                () -> assertEquals(mockFoods, response.getFood())
+        );
+    }
 
 
     @Test
@@ -165,7 +165,6 @@ class MemberServiceTest {
     }
 
 
-    @Test
 
 
     private Authentication createAuthentication() {
