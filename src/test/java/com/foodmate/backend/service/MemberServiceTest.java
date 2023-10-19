@@ -4,6 +4,7 @@ import com.foodmate.backend.dto.MemberDto;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
+import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.MemberException;
 import com.foodmate.backend.repository.FoodRepository;
@@ -147,14 +148,17 @@ class MemberServiceTest {
     @Test
     @DisplayName("내 정보 가져오기 실패 - 유저 없음")
     void fail_getMemberInfoNotFoundMember() {
-        //given
+        // given
         Authentication mockAuthentication = createAuthentication();
         Member mockMember = null; // 사용자를 찾지 못했음을 나타내기 위해 null로 설정
 
         given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.ofNullable(mockMember)); // Optional.ofNullable 사용
 
-        //when & then
-        assertThrows(MemberException.class, () -> memberService.getMemberInfo(mockAuthentication));
+        // when
+        MemberException exception = assertThrows(MemberException.class, () -> memberService.getMemberInfo(mockAuthentication));
+
+        // then
+        assertEquals(Error.USER_NOT_FOUND, exception.getError());
     }
 
 
@@ -170,7 +174,12 @@ class MemberServiceTest {
         given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
         given(preferenceRepository.findAllByMember(mockMember)).willReturn(mockPreferences);
 
-        assertThrows(FoodException.class, () -> memberService.getMemberInfo(mockAuthentication));
+
+        // when
+        FoodException exception = assertThrows(FoodException.class, () -> memberService.getMemberInfo(mockAuthentication));
+
+        // then
+        assertEquals(Error.FOOD_NOT_FOUND, exception.getError());
     }
 
 
