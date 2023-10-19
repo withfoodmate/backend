@@ -62,7 +62,7 @@ public class GroupDto {
         private LocalDateTime createdDate;
         private Long chatRoomId;
 
-        public static DetailResponse fromEntity(FoodGroup foodGroup, ChatRoom chatRoom) {
+        public static DetailResponse createGroupDetailResponse(FoodGroup foodGroup, ChatRoom chatRoom) {
             return DetailResponse.builder()
                     .groupId(foodGroup.getId())
                     .memberId(foodGroup.getMember().getId())

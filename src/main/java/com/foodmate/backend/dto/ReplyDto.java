@@ -34,7 +34,7 @@ public class ReplyDto {
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime updatedDate;
 
-        public static Response fromEntity(Reply reply) {
+        public static Response createReplyResponse(Reply reply) {
             return Response.builder()
                     .replyId(reply.getId())
                     .memberId(reply.getMember().getId())
