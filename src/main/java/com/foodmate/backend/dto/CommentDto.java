@@ -17,6 +17,7 @@ public class CommentDto {
     @NotNull
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
     public static class Request {
         private String content;
     }

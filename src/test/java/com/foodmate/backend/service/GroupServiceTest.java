@@ -9,8 +9,11 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
+import com.foodmate.backend.dto.ReplyDto;
 import com.foodmate.backend.entity.ChatRoom;
+import com.foodmate.backend.entity.Comment;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
@@ -71,6 +74,7 @@ public class GroupServiceTest {
   public static final Long memberId2 = 2L;
   public static final Long foodId = 1L;
   public static final Long groupId = 1L;
+  public static final Long commentId = 1L;
 
   private static final String TITLE = "치킨 먹을 사람~";
   private static final String NAME = "치킨 모임";
@@ -83,6 +87,8 @@ public class GroupServiceTest {
   private static final String STORE_ADDRESS = "서울특별시 마포구 동교동 147-4";
   private static final String LATITUDE = "33.12112";
   private static final String LONGITUDE = "127.12112";
+  private static final String COMMENT = "댓글 내용";
+  private static final String REPLY = "대댓글 내용";
 
   @Test
   @DisplayName("모임 생성 성공")
@@ -467,6 +473,57 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("댓글 작성 성공")
+  void success_addComment() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.addComment(groupId, mockAuthentication, CommentDto.Request.builder()
+        .content(COMMENT)
+        .build()
+    );
+
+    //then
+    verify(commentRepository, times(1)).save(any());
+
+  }
+
+  @Test
+  @DisplayName("대댓글 작성 성공")
+  void success_addReply() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.addReply(groupId, commentId, mockAuthentication,
+        ReplyDto.Request.builder()
+            .content(REPLY)
+            .build()
+    );
+
+    //then
+    verify(replyRepository, times(1)).save(any());
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
@@ -516,6 +573,16 @@ public class GroupServiceTest {
         .storeName(STORE_NAME)
         .storeAddress(STORE_ADDRESS)
         .location(location)
+        .build();
+  }
+
+  private Comment createMockComment(Long commentId, FoodGroup mockGroup, Member mockMember) {
+    return Comment.builder()
+        .id(commentId)
+        .foodGroup(mockGroup)
+        .member(mockMember)
+        .content(COMMENT)
+        .createdDate(VALID_DATE.atTime(VALID_TIME))
         .build();
   }
 
