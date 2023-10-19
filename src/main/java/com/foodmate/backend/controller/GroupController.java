@@ -1,9 +1,6 @@
 package com.foodmate.backend.controller;
 
-import com.foodmate.backend.dto.CommentDto;
-import com.foodmate.backend.dto.GroupDto;
-import com.foodmate.backend.dto.ReplyDto;
-import com.foodmate.backend.dto.SearchedGroupDto;
+import com.foodmate.backend.dto.*;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.service.GroupService;
@@ -181,9 +178,9 @@ public class GroupController {
 
     // 내 근처 모임
     @GetMapping("/near")
-    public ResponseEntity<Page<SearchedGroupDto>> getNearbyGroupList(@RequestParam String latitude,
-                                                                     @RequestParam String longitude,
-                                                                     Pageable pageable) {
+    public ResponseEntity<Page<NearbyGroupDto>> getNearbyGroupList(@RequestParam String latitude,
+                                                                   @RequestParam String longitude,
+                                                                   Pageable pageable) {
         return ResponseEntity.ok(groupService.getNearbyGroupList(latitude, longitude, pageable));
     }
 

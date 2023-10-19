@@ -36,7 +36,7 @@ public class CommentDto {
         private LocalDateTime updatedDate;
         private List<ReplyDto.Response> replies;
 
-        public static Response fromEntity(Comment comment, List<ReplyDto.Response> replies) {
+        public static Response createCommentResponse(Comment comment, List<ReplyDto.Response> replies) {
             return Response.builder()
                     .commentId(comment.getId())
                     .memberId(comment.getMember().getId())

@@ -39,7 +39,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             "ORDER BY e.enrollDate ASC")
     Page<Enrollment> findByMyEnrollmentProcessedListWithStatus(@Param("id") Long readerId, @Param("status") EnrollmentStatus status, Pageable pageable);
 
-    // 로그인한 사용자가 참여한 모임 조회 ver. 1
+    // 로그인한 사용자가 참여한 모임 조회
     List<Enrollment> findAllByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
             Member member, EnrollmentStatus status, LocalDateTime start, LocalDateTime end);
 
@@ -47,14 +47,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
         return findAllByMemberAndStatusAndFoodGroupGroupDateTimeBetween(member, status, start, end).stream().map(
                 Enrollment -> Enrollment.getFoodGroup().getId()).collect(Collectors.toList());
     }
-
-    // 로그인한 사용자가 참여한 모임 조회 ver. 2
-    @Query("SELECT e.foodGroup.id " +
-            "FROM Enrollment e " +
-            "WHERE e.member.id = :memberId " +
-            "AND e.status = 'ACCEPT' " +
-            "AND e.foodGroup.groupDateTime BETWEEN :startDateTime AND :endDateTime")
-    List<Long> getAcceptedGroupIdList(Long memberId, LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     // WebSocketChannelInterceptor 에서 모임참여자 검증
     boolean existsByMemberIdAndFoodGroupAndStatus(Long memberId, FoodGroup foodGroup, EnrollmentStatus status);
