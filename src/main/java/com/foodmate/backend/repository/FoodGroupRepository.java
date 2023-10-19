@@ -1,5 +1,6 @@
 package com.foodmate.backend.repository;
 
+import com.foodmate.backend.dto.NearbyGroupDto;
 import com.foodmate.backend.dto.SearchedGroupDto;
 import com.foodmate.backend.entity.FoodGroup;
 import org.locationtech.jts.geom.Point;
@@ -71,12 +72,12 @@ public interface FoodGroupRepository extends JpaRepository<FoodGroup, Long> {
     Page<SearchedGroupDto> searchByFood(List<String> foodTypes, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     // GroupService - 내 근처 모임
-    @Query("SELECT new com.foodmate.backend.dto.SearchedGroupDto(fg) " +
+    @Query("SELECT new com.foodmate.backend.dto.NearbyGroupDto(fg) " +
             "FROM FoodGroup fg " +
             "WHERE fg.groupDateTime BETWEEN :start AND :end " +
             "AND fg.isDeleted IS NULL " +
             "AND FUNCTION('ST_Distance_Sphere', fg.location, :userLocation) < 5000 " +
             "ORDER BY FUNCTION('ST_Distance_Sphere', fg.location, :userLocation)")
-    Page<SearchedGroupDto> getNearbyGroupList(Point userLocation, LocalDateTime start, LocalDateTime end, Pageable pageable);
+    Page<NearbyGroupDto> getNearbyGroupList(Point userLocation, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
 }
