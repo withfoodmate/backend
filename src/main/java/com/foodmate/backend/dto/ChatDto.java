@@ -38,7 +38,7 @@ public class ChatDto {
                     .chatRoomName(foodGroup.getName())
                     .lastMessage(chatMessage == null ? null : chatMessage.getContent())
                     .lastMessageTime(chatMessage == null ? null : chatMessage.getCreateDateTime())
-                    .attendance(foodGroup.getAttendance())
+                    .attendance(chatRoom.getAttendance())
                     .count(count)
                     .build();
         }

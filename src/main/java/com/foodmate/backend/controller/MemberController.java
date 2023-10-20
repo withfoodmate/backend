@@ -41,10 +41,10 @@ public class MemberController {
      * 사용자에게 사진파일을 받아와 프로필 이미지 변경
      */
     @PatchMapping("/image")
-    public ResponseEntity<?> patchProfileImage(Authentication authentication,
+    public ResponseEntity<Void> patchProfileImage(Authentication authentication,
                                                     @RequestPart MultipartFile imageFile) throws IOException {
         memberService.patchProfileImage(authentication, imageFile);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -53,7 +53,7 @@ public class MemberController {
      *         아니면 true
      */
     @GetMapping("/email")
-    public ResponseEntity<Boolean> checkDuplicateEmail(@RequestBody MemberDto.emailRequest request){
+    public ResponseEntity<Boolean> checkDuplicateEmail(@RequestParam MemberDto.emailRequest request){
         return ResponseEntity.ok(memberService.checkDuplicateEmail(request.getEmail()));
     }
 
@@ -64,7 +64,7 @@ public class MemberController {
      *         아니면 true
      */
     @GetMapping("/nickname")
-    public ResponseEntity<Boolean> checkDuplicateNickname(@RequestBody MemberDto.nicknameRequest request){
+    public ResponseEntity<Boolean> checkDuplicateNickname(@RequestParam MemberDto.nicknameRequest request){
         return ResponseEntity.ok(memberService.checkDuplicateNickname(request.getNickname()));
     }
 
@@ -74,9 +74,9 @@ public class MemberController {
      * @return
      */
     @PostMapping("/logout")
-    public ResponseEntity<?>logoutMember(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void>logoutMember(HttpServletRequest request, HttpServletResponse response) {
         memberService.logoutMember(request, response);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -95,14 +95,14 @@ public class MemberController {
      * @throws IOException 사진 업로드 실패시
      */
     @PostMapping("/signup")
-    public ResponseEntity<?> createMember(@RequestPart MemberDto.CreateMemberRequest request,
+    public ResponseEntity<Void> createMember(@RequestPart MemberDto.CreateMemberRequest request,
                                                @RequestPart(value = "file", required = false) MultipartFile imageFile) throws IOException {
         if(imageFile == null){
             memberService.createDefaultImageMember(request); // 이미지가 없을 때
         } else {
             memberService.createMember(request, imageFile);  // 이미지가 있을 때
         }
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -110,9 +110,8 @@ public class MemberController {
      * @return
      */
     @GetMapping("/email-auth")
-    public boolean emailAuth (@RequestParam("id") String emailAuthKey){
-        boolean result = memberService.emailAuth(emailAuthKey);
-        return result;
+    public ResponseEntity<Boolean> emailAuth (@RequestParam("id") String emailAuthKey){
+        return ResponseEntity.ok(memberService.emailAuth(emailAuthKey));
     }
 
     /**
@@ -121,18 +120,18 @@ public class MemberController {
      * @return
      */
     @PostMapping("{memberId}/likes")
-    public ResponseEntity<?> toggleLikeForPost(@PathVariable Long memberId,
+    public ResponseEntity<Void> toggleLikeForPost(@PathVariable Long memberId,
                                                     Authentication authentication){
         memberService.toggleLikeForPost(memberId, authentication);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
      * 이메일, 패스워드 입력
      */
     @PostMapping("/signin")
-    public ResponseEntity<JwtTokenDto> login(@RequestBody Map<String, String> user) {
-        return ResponseEntity.ok(memberService.login(user));
+    public ResponseEntity<JwtTokenDto> login(@RequestBody MemberDto.loginRequest request) {
+        return ResponseEntity.ok(memberService.login(request));
     }
 
 
@@ -142,9 +141,9 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/password")
-    public ResponseEntity<?> changePassword(@RequestBody MemberDto.passwordUpdateRequest request, Authentication authentication) {
+    public ResponseEntity<Void> changePassword(@RequestBody MemberDto.passwordUpdateRequest request, Authentication authentication) {
         memberService.changePassword(request, authentication);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
 
@@ -156,7 +155,7 @@ public class MemberController {
      * @return 회원탈퇴 상태 호출
      */
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication,
+    public ResponseEntity<Void> deleteMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication,
                                                @RequestBody(required = false) MemberDto.deleteMemberRequest deleteMemberRequest) {
         if (deleteMemberRequest == null) {
             memberService.deleteKakaoMember(request, response, authentication);
@@ -164,7 +163,7 @@ public class MemberController {
         } else {
             memberService.deleteGeneralMember(request, response, authentication, deleteMemberRequest);
         }
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -174,8 +173,8 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/food")
-    public ResponseEntity<?> changePreferenceFood(@RequestBody MemberDto.changePreferenceFoodRequest request, Authentication authentication) {
+    public ResponseEntity<Void> changePreferenceFood(@RequestBody MemberDto.changePreferenceFoodRequest request, Authentication authentication) {
         memberService.changePreferenceFood(request, authentication);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,9 +1,6 @@
 package com.foodmate.backend.service;
 
-import com.foodmate.backend.dto.CommentDto;
-import com.foodmate.backend.dto.GroupDto;
-import com.foodmate.backend.dto.ReplyDto;
-import com.foodmate.backend.dto.SearchedGroupDto;
+import com.foodmate.backend.dto.*;
 import com.foodmate.backend.entity.*;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
@@ -72,7 +69,7 @@ public class GroupService {
         // 모임 저장
         foodGroupRepository.save(foodGroup);
 
-        // TODO 채팅룸 생성 - 그룹 채팅 기능 구현 후 보완할 것
+        // 채팅방 생성
         chatRoomRepository.save(new ChatRoom(foodGroup));
     }
 
@@ -84,7 +81,7 @@ public class GroupService {
         ChatRoom chatRoom = chatRoomRepository.findByFoodGroupId(groupId)
                 .orElseThrow(() -> new ChatException(Error.CHATROOM_NOT_FOUND));
 
-        return GroupDto.DetailResponse.fromEntity(group, chatRoom);
+        return GroupDto.DetailResponse.createGroupDetailResponse(group, chatRoom);
     }
 
     // 특정 모임 수정
@@ -294,11 +291,11 @@ public class GroupService {
 
             // 대댓글 DTO 로 변환 & 리스트에 추가
             for (Reply reply : replies) {
-                replyDTOs.add(ReplyDto.Response.fromEntity(reply));
+                replyDTOs.add(ReplyDto.Response.createReplyResponse(reply));
             }
 
             // 댓글 DTO 로 변환 (안에 대댓글 리스트 세팅)
-            return CommentDto.Response.fromEntity(comment, replyDTOs);
+            return CommentDto.Response.createCommentResponse(comment, replyDTOs);
         });
 
         return commentDTOs;
@@ -371,7 +368,7 @@ public class GroupService {
     }
 
     // 내 근처 모임
-    public Page<SearchedGroupDto> getNearbyGroupList(String latitude, String longitude, Pageable pageable) {
+    public Page<NearbyGroupDto> getNearbyGroupList(String latitude, String longitude, Pageable pageable) {
 
         Point userLocation = getPoint(latitude, longitude);
 
@@ -389,8 +386,9 @@ public class GroupService {
 
         LocalDateTime current = LocalDateTime.now();
 
-        return new GroupDto.AcceptedGroup(enrollmentRepository.getAcceptedGroupIdList(
-                member.getId(),
+        return new GroupDto.AcceptedGroup(enrollmentRepository.getAcceptedGroupList(
+                member,
+                EnrollmentStatus.ACCEPT,
                 current.plusMinutes(SEARCH_INTERVAL_MINUTE),
                 current.plusMonths(RESERVATION_RANGE_MONTH)));
     }

@@ -4,16 +4,22 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
+import com.foodmate.backend.dto.ReplyDto;
 import com.foodmate.backend.entity.ChatRoom;
+import com.foodmate.backend.entity.Comment;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
+import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.exception.EnrollmentException;
 import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.repository.ChatRoomRepository;
 import com.foodmate.backend.repository.CommentRepository;
@@ -23,7 +29,6 @@ import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.ReplyRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -66,8 +71,24 @@ public class GroupServiceTest {
   private GroupService groupService;
 
   public static final Long memberId1 = 1L;
+  public static final Long memberId2 = 2L;
   public static final Long foodId = 1L;
   public static final Long groupId = 1L;
+  public static final Long commentId = 1L;
+
+  private static final String TITLE = "치킨 먹을 사람~";
+  private static final String NAME = "치킨 모임";
+  private static final String CONTENT = "치킨 먹을 사람 구해요!";
+  private static final String TYPE = "치킨";
+  private static final LocalDate VALID_DATE = LocalDate.parse("2023-11-04");
+  private static final LocalTime VALID_TIME = LocalTime.parse("18:30");
+  private static final int MAX_PARTICIPANTS = 8;
+  private static final String STORE_NAME = "BBQ 홍대점";
+  private static final String STORE_ADDRESS = "서울특별시 마포구 동교동 147-4";
+  private static final String LATITUDE = "33.12112";
+  private static final String LONGITUDE = "127.12112";
+  private static final String COMMENT = "댓글 내용";
+  private static final String REPLY = "대댓글 내용";
 
   @Test
   @DisplayName("모임 생성 성공")
@@ -83,17 +104,17 @@ public class GroupServiceTest {
 
     //when
     groupService.addGroup(mockAuthentication, GroupDto.Request.builder()
-        .title("치킨 먹을 사람~")
-        .name("치킨 모임")
-        .content("치킨 먹을 사람 구해요!")
-        .food("치킨")
-        .date(LocalDate.parse("2023-11-04"))
-        .time(LocalTime.parse("18:30"))
-        .maximum(8)
-        .storeName("BBQ 홍대점")
-        .storeAddress("서울특별시 마포구 동교동 147-4")
-        .latitude("33.12112")
-        .longitude("127.12112")
+        .title(TITLE)
+        .name(NAME)
+        .content(CONTENT)
+        .food(TYPE)
+        .date(VALID_DATE)
+        .time(VALID_TIME)
+        .maximum(MAX_PARTICIPANTS)
+        .storeName(STORE_NAME)
+        .storeAddress(STORE_ADDRESS)
+        .latitude(LATITUDE)
+        .longitude(LONGITUDE)
         .build()
     );
 
@@ -119,17 +140,17 @@ public class GroupServiceTest {
     GroupException exception = assertThrows(GroupException.class,
         () -> groupService.addGroup(mockAuthentication,
             GroupDto.Request.builder()
-                .title("치킨 먹을 사람~")
-                .name("치킨 모임")
-                .content("치킨 먹을 사람 구해요!")
-                .food("치킨")
+                .title(TITLE)
+                .name(NAME)
+                .content(CONTENT)
+                .food(TYPE)
                 .date(LocalDate.parse("2022-10-04"))
-                .time(LocalTime.parse("18:30"))
-                .maximum(8)
-                .storeName("BBQ 홍대점")
-                .storeAddress("서울특별시 마포구 동교동 147-4")
-                .latitude("33.12112")
-                .longitude("127.12112")
+                .time(VALID_TIME)
+                .maximum(MAX_PARTICIPANTS)
+                .storeName(STORE_NAME)
+                .storeAddress(STORE_ADDRESS)
+                .latitude(LATITUDE)
+                .longitude(LONGITUDE)
                 .build()
         )
     );
@@ -200,6 +221,309 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("특정 모임 수정 성공")
+  void success_updateGroup() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+    given(foodRepository.findByType("치킨")).willReturn(Optional.of(mockFood));
+
+    //when
+    groupService.updateGroup(groupId, mockAuthentication, GroupDto.Request.builder()
+        .title(TITLE)
+        .name(NAME)
+        .content(CONTENT)
+        .food(TYPE)
+        .date(VALID_DATE)
+        .time(VALID_TIME)
+        .maximum(MAX_PARTICIPANTS)
+        .storeName("자담치킨 서울홍대점")
+        .storeAddress("서울 마포구 와우산로 140 1층")
+        .latitude("37.5537505")
+        .longitude("126.929225")
+        .build()
+    );
+
+    //then
+    verify(foodGroupRepository, times(1)).save(any());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 수정 실패 - 해당 모임 생성자만 수정 가능")
+  void fail_updateGroup_no_modify_permission_group() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+
+    given(foodGroupRepository.findById(anyLong())).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    GroupException exception = assertThrows(GroupException.class,
+        () -> groupService.updateGroup(groupId, mockAuthentication, GroupDto.Request.builder()
+            .title(TITLE)
+            .name(NAME)
+            .content(CONTENT)
+            .food(TYPE)
+            .date(VALID_DATE)
+            .time(VALID_TIME)
+            .maximum(MAX_PARTICIPANTS)
+            .storeName("자담치킨 서울홍대점")
+            .storeAddress("서울 마포구 와우산로 140 1층")
+            .latitude("37.5537505")
+            .longitude("126.929225")
+            .build()
+        )
+    );
+
+    //then
+    assertEquals(Error.NO_MODIFY_PERMISSION_GROUP, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 수정 실패 - 현재시간으로부터 한시간 이후 ~ 한달 이내의 모임만 생성 가능")
+  void fail_updateGroup_out_of_date_range() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(anyLong())).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+    given(foodRepository.findByType("치킨")).willReturn(Optional.of(mockFood));
+
+    //when
+    GroupException exception = assertThrows(GroupException.class,
+        () -> groupService.updateGroup(groupId, mockAuthentication,
+            GroupDto.Request.builder()
+                .title(TITLE)
+                .name(NAME)
+                .content(CONTENT)
+                .food(TYPE)
+                .date(LocalDate.parse("2022-10-04"))
+                .time(VALID_TIME)
+                .maximum(MAX_PARTICIPANTS)
+                .storeName("자담치킨 서울홍대점")
+                .storeAddress("서울 마포구 와우산로 140 1층")
+                .latitude("37.5537505")
+                .longitude("126.929225")
+                .build()
+        )
+    );
+
+    //then
+    assertEquals(Error.OUT_OF_DATE_RANGE, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 삭제 성공")
+  void success_deleteGroup() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.deleteGroup(groupId, mockAuthentication);
+
+    //then
+    verify(foodGroupRepository, times(1)).save(mockGroup);
+    verify(enrollmentRepository, times(1))
+        .changeStatusByGroupId(groupId, EnrollmentStatus.GROUP_CANCEL);
+    verify(chatRoomRepository, times(1)).deleteByFoodGroupId(groupId);
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 삭제 실패 - 해당 모임 생성자만 수정 가능")
+  void fail_deleteGroup_no_modify_permission_group() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    GroupException exception = assertThrows(GroupException.class,
+        () -> groupService.deleteGroup(groupId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.NO_DELETE_PERMISSION_GROUP, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 신청 성공")
+  void success_enrollInGroup() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    groupService.enrollInGroup(groupId, mockAuthentication);
+
+    //then
+    verify(enrollmentRepository, times(1)).save(any());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 신청 실패 - 본인이 생성한 모임일 경우")
+  void fail_enrollInGroup_cannot_apply_to_own_group() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    EnrollmentException exception = assertThrows(EnrollmentException.class,
+        () -> groupService.enrollInGroup(groupId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.CANNOT_APPLY_TO_OWN_GROUP, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 신청 실패 - 이미 신청 이력이 존재하는 경우")
+  void fail_enrollInGroup_enrollment_history_exists() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+    given(enrollmentRepository.existsByMemberAndFoodGroup(mockMember2,mockGroup)).willReturn(true);
+
+    //when
+    EnrollmentException exception = assertThrows(EnrollmentException.class,
+        () -> groupService.enrollInGroup(groupId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.ENROLLMENT_HISTORY_EXISTS, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("특정 모임 신청 실패 - 해당 모임 정원이 다 찬 경우")
+  void fail_enrollInGroup_group_full() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 8);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    EnrollmentException exception = assertThrows(EnrollmentException.class,
+        () -> groupService.enrollInGroup(groupId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.GROUP_FULL, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("댓글 작성 성공")
+  void success_addComment() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.addComment(groupId, mockAuthentication, CommentDto.Request.builder()
+        .content(COMMENT)
+        .build()
+    );
+
+    //then
+    verify(commentRepository, times(1)).save(any());
+
+  }
+
+  @Test
+  @DisplayName("대댓글 작성 성공")
+  void success_addReply() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.addReply(groupId, commentId, mockAuthentication,
+        ReplyDto.Request.builder()
+            .content(REPLY)
+            .build()
+    );
+
+    //then
+    verify(replyRepository, times(1)).save(any());
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
@@ -239,16 +563,26 @@ public class GroupServiceTest {
     return FoodGroup.builder()
         .id(groupId)
         .member(mockMember)
-        .title("치킨 먹을 사람~")
-        .name("치킨 모임")
-        .content("치킨 먹을 사람 구해요!")
+        .title(TITLE)
+        .name(NAME)
+        .content(CONTENT)
         .food(mockFood)
-        .groupDateTime(LocalDateTime.parse("2021-01-01T15:39:30"))
-        .maximum(8)
+        .groupDateTime(VALID_DATE.atTime(VALID_TIME))
+        .maximum(MAX_PARTICIPANTS)
         .attendance(attendance)
-        .storeName("BBQ 홍대점")
-        .storeAddress("서울특별시 마포구 동교동 147-4")
+        .storeName(STORE_NAME)
+        .storeAddress(STORE_ADDRESS)
         .location(location)
+        .build();
+  }
+
+  private Comment createMockComment(Long commentId, FoodGroup mockGroup, Member mockMember) {
+    return Comment.builder()
+        .id(commentId)
+        .foodGroup(mockGroup)
+        .member(mockMember)
+        .content(COMMENT)
+        .createdDate(VALID_DATE.atTime(VALID_TIME))
         .build();
   }
 
