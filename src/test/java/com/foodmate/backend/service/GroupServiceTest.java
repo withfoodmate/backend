@@ -647,6 +647,109 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("댓글 삭제 성공")
+  void success_deleteComment() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.deleteComment(groupId, commentId, mockAuthentication);
+
+    //then
+    verify(replyRepository, times(1)).deleteAllByComment(mockComment);
+    verify(commentRepository, times(1)).deleteById(commentId);
+
+  }
+
+  @Test
+  @DisplayName("댓글 삭제 실패 - 해당 댓글 작성자만 삭제 가능")
+  void fail_deleteComment_no_delete_permission_comment() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    CommentException exception = assertThrows(CommentException.class,
+        () -> groupService.deleteComment(groupId, commentId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.NO_DELETE_PERMISSION_COMMENT, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("대댓글 삭제 성공")
+  void success_deleteReply() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember);
+    Reply mockReply = createMockReply(replyId, mockComment, mockMember);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(replyRepository.findById(replyId)).willReturn(Optional.of(mockReply));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.deleteReply(groupId, commentId, replyId, mockAuthentication);
+
+    //then
+    verify(replyRepository, times(1)).deleteById(replyId);
+
+  }
+
+  @Test
+  @DisplayName("대댓글 삭제 실패 - 해당 대댓글 작성자만 삭제 가능")
+  void fail_deleteReply_no_delete_permission_reply() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember1);
+    Reply mockReply = createMockReply(replyId, mockComment, mockMember1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(replyRepository.findById(replyId)).willReturn(Optional.of(mockReply));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    ReplyException exception = assertThrows(ReplyException.class,
+        () -> groupService.deleteReply(groupId, commentId, replyId, mockAuthentication)
+    );
+
+    //then
+    assertEquals(Error.NO_DELETE_PERMISSION_REPLY, exception.getError());
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
