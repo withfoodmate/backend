@@ -17,10 +17,13 @@ import com.foodmate.backend.entity.Comment;
 import com.foodmate.backend.entity.Food;
 import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
+import com.foodmate.backend.entity.Reply;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.exception.CommentException;
 import com.foodmate.backend.exception.EnrollmentException;
 import com.foodmate.backend.exception.GroupException;
+import com.foodmate.backend.exception.ReplyException;
 import com.foodmate.backend.repository.ChatRoomRepository;
 import com.foodmate.backend.repository.CommentRepository;
 import com.foodmate.backend.repository.EnrollmentRepository;
@@ -75,6 +78,7 @@ public class GroupServiceTest {
   public static final Long foodId = 1L;
   public static final Long groupId = 1L;
   public static final Long commentId = 1L;
+  public static final Long replyId = 1L;
 
   private static final String TITLE = "치킨 먹을 사람~";
   private static final String NAME = "치킨 모임";
@@ -89,6 +93,8 @@ public class GroupServiceTest {
   private static final String LONGITUDE = "127.12112";
   private static final String COMMENT = "댓글 내용";
   private static final String REPLY = "대댓글 내용";
+  private static final String UPDATE_COMMENT = "수정된 댓글 내용";
+  private static final String UPDATE_REPLY = "수정된 대댓글 내용";
 
   @Test
   @DisplayName("모임 생성 성공")
@@ -524,6 +530,123 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("댓글 수정 성공")
+  void success_updateComment() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.updateComment(groupId, commentId, mockAuthentication,
+        CommentDto.Request.builder()
+            .content(UPDATE_COMMENT)
+            .build()
+    );
+
+    //then
+    verify(commentRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("댓글 수정 실패 - 해당 댓글 작성자만 수정 가능")
+  void fail_updateComment_no_modify_permission_comment() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    CommentException exception = assertThrows(CommentException.class,
+        () -> groupService.updateComment(groupId, commentId, mockAuthentication,
+            CommentDto.Request.builder()
+                .content(UPDATE_COMMENT)
+                .build()
+        )
+    );
+
+    //then
+    assertEquals(Error.NO_MODIFY_PERMISSION_COMMENT, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("대댓글 수정 성공")
+  void success_updateReply() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember);
+    Reply mockReply = createMockReply(replyId, mockComment, mockMember);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(replyRepository.findById(replyId)).willReturn(Optional.of(mockReply));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.updateReply(groupId, commentId, replyId, mockAuthentication,
+        ReplyDto.Request.builder()
+            .content(UPDATE_REPLY)
+            .build()
+    );
+
+    //then
+    verify(replyRepository, times(1)).save(any());
+
+  }
+
+  @Test
+  @DisplayName("대댓글 수정 실패 - 해당 대댓글 작성자만 수정 가능")
+  void fail_updateReply_no_modify_permission_reply() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember1 = createMockMember(memberId1);
+    Member mockMember2 = createMockMember(memberId2);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember1, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember1);
+    Reply mockReply = createMockReply(replyId, mockComment, mockMember1);
+
+    given(foodGroupRepository.findById(groupId)).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findById(commentId)).willReturn(Optional.of(mockComment));
+    given(replyRepository.findById(replyId)).willReturn(Optional.of(mockReply));
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember2));
+
+    //when
+    ReplyException exception = assertThrows(ReplyException.class,
+        () -> groupService.updateReply(groupId, commentId, replyId, mockAuthentication,
+            ReplyDto.Request.builder()
+                .content(UPDATE_REPLY)
+                .build()
+        )
+    );
+
+    //then
+    assertEquals(Error.NO_MODIFY_PERMISSION_REPLY, exception.getError());
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
@@ -586,4 +709,13 @@ public class GroupServiceTest {
         .build();
   }
 
+  private Reply createMockReply(Long replyId, Comment mockComment, Member mockMember) {
+    return Reply.builder()
+        .id(replyId)
+        .comment(mockComment)
+        .member(mockMember)
+        .content(REPLY)
+        .createdDate(VALID_DATE.atTime(VALID_TIME))
+        .build();
+  }
 }
