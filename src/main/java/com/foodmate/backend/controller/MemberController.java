@@ -177,4 +177,10 @@ public class MemberController {
         memberService.changePreferenceFood(request, authentication);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/resetPassword")
+    public ResponseEntity<Void> resetPassword(@RequestBody MemberDto.emailRequest request) {
+        memberService.resetPassword(request);
+        return ResponseEntity.ok().build();
+    }
 }
