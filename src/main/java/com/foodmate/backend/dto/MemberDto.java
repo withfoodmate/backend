@@ -1,10 +1,7 @@
 package com.foodmate.backend.dto;
 
 import com.foodmate.backend.entity.Member;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -13,18 +10,20 @@ import java.util.List;
 public class MemberDto {
 
     @Getter
+    @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     public static class emailRequest{
         private String email;
     }
 
+
     @Getter
+    @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     public static class nicknameRequest{
         private String nickname;
-
     }
 
     @Getter
