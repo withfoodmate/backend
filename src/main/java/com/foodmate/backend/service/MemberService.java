@@ -230,7 +230,7 @@ public class MemberService {
      */
     @Transactional
     public void createMember(MemberDto.CreateMemberRequest request, MultipartFile imageFile)  {
-        String uuid = UUID.randomUUID().toString();
+        String uuid = RandomStringMaker.randomStringMaker();
 
         Member member = Member.createGeneralMember(
                 request,
@@ -240,7 +240,7 @@ public class MemberService {
         memberRepository.save(member);
         processFoodPreferences(member, request.getFood()); // 선호음식 등록
         uploadProfileImage(member, imageFile); // 사진 업로드
-        sendMail(request, uuid); // 메일 전송
+        sendMailEmailKey(request.getEmail(), uuid); // 메일 전송
     }
 
     @Transactional
@@ -253,7 +253,7 @@ public class MemberService {
                 uuid);
         memberRepository.save(member);
         processFoodPreferences(member, request.getFood()); // 선호음식 등록
-        sendMail(request, uuid); // 메일 전송
+        sendMailEmailKey(request.getEmail(), uuid); // 메일 전송
     }
 
     public boolean emailAuth(String emailAuthKey) {
@@ -277,14 +277,22 @@ public class MemberService {
 
     /**
      * 인증 메일 전송 메서드
-     * @param request
+     * @param email
      * @param uuid
      */
-    private void sendMail(MemberDto.CreateMemberRequest request, String uuid){
+    private void sendMailEmailKey(String email, String uuid){
         mailComponents.sendMail(
-                request.getEmail(),
+                email,
                 EmailContents.WELCOME.getSubject(),
                 EmailContents.WELCOME.getText().replace("{uuid}", uuid)
+        );
+    }
+
+    private void sendMailResetPassword(String email, String uuid){
+        mailComponents.sendMail(
+                email,
+                EmailContents.RESET_PASSWORD.getSubject(),
+                EmailContents.RESET_PASSWORD.getText().replace("{uuid}", uuid)
         );
     }
 
@@ -428,4 +436,15 @@ public class MemberService {
         processFoodPreferences(member, request.getFood());
     }
 
+    @Transactional
+    public void resetPassword(MemberDto.emailRequest request) {
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        String resetPassword = RandomStringMaker.randomStringMaker();
+        sendMailResetPassword(request.getEmail(), resetPassword);
+
+        member.setPassword(BCrypt.hashpw(resetPassword, BCrypt.gensalt()));
+        memberRepository.save(member);
+    }
 }
