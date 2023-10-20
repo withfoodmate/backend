@@ -53,7 +53,7 @@ public class MemberController {
      *         아니면 true
      */
     @GetMapping("/email")
-    public ResponseEntity<Boolean> checkDuplicateEmail(@RequestBody MemberDto.emailRequest request){
+    public ResponseEntity<Boolean> checkDuplicateEmail(@RequestParam MemberDto.emailRequest request){
         return ResponseEntity.ok(memberService.checkDuplicateEmail(request.getEmail()));
     }
 
@@ -64,7 +64,7 @@ public class MemberController {
      *         아니면 true
      */
     @GetMapping("/nickname")
-    public ResponseEntity<Boolean> checkDuplicateNickname(@RequestBody MemberDto.nicknameRequest request){
+    public ResponseEntity<Boolean> checkDuplicateNickname(@RequestParam MemberDto.nicknameRequest request){
         return ResponseEntity.ok(memberService.checkDuplicateNickname(request.getNickname()));
     }
 
