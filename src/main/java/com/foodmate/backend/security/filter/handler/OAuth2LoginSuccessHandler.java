@@ -39,18 +39,16 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtTokenProvider.createRefreshToken();
 
         loginSuccess(response, accessToken, refreshToken, member);
+        String jsonResponse = "{\"accessToken\":\"" + accessToken + "\", \"refreshToken\":\"" + refreshToken + "\"}";
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write("{ ☆ 로그인 성공 ☆ }");
+        response.getWriter().write(jsonResponse);
 
     }
 
     private void loginSuccess(HttpServletResponse response, String accessToken, String refreshToken, Member member){
-        response.addHeader(jwtTokenProvider.getAccessHeader(), "Bearer " + accessToken);
-        response.addHeader(jwtTokenProvider.getRefreshHeader(), "Bearer " + refreshToken);
-
         jwtTokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
         jwtTokenProvider.updateRefreshToken(member.getEmail(), refreshToken);
     }
