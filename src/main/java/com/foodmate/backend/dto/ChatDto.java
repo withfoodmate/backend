@@ -28,9 +28,7 @@ public class ChatDto {
         private LocalDateTime lastMessageTime;
         private int attendance;
         private int count;
-
-
-
+        
         public static ChatDto.ChatRoomListResponse createChatRoomListResponse(
                 ChatRoom chatRoom, FoodGroup foodGroup, String lastMessage, LocalDateTime lastMessageTime, int count){
             return ChatRoomListResponse.builder()
@@ -42,7 +40,6 @@ public class ChatDto {
                     .count(count)
                     .build();
         }
-
     }
 
     @AllArgsConstructor
