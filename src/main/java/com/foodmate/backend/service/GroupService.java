@@ -137,9 +137,6 @@ public class GroupService {
 
         // 해당 모임에 신청한 모임신청목록들의 상태를 모임취소로 일괄 변경
         enrollmentRepository.changeStatusByGroupId(groupId, EnrollmentStatus.GROUP_CANCEL);
-
-        // TODO 채팅방 삭제 - 그룹 채팅 기능 구현 후 보완할 것
-        chatRoomRepository.deleteByFoodGroupId(groupId);
     }
 
     // 특정 모임 신청

@@ -14,4 +14,8 @@ public interface ChatMemberRepository extends JpaRepository<ChatMember, Long> {
     List<ChatMember> findByMember(Member member);
 
     List<ChatMember> findByChatRoom(ChatRoom chatRoom);
+
+    // 해당 채팅방에서 해당 멤버 삭제
+    void deleteByMemberAndChatRoom(Member member, ChatRoom chatRoom);
+
 }

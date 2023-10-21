@@ -42,7 +42,7 @@ public class WebSocketEventListener {
 
         String message = nickname + "님이 들어왔습니다.";
         sendingOperations.convertAndSend(destination, message);
-        chatMessageService.incrementAttendance(destination);
+        chatMessageService.incrementAttendance(destination, nickname);
     }
 
     // 채팅방 구독 취소
@@ -56,7 +56,7 @@ public class WebSocketEventListener {
 
         String message = nickname + "님이 나갔습니다.";
         sendingOperations.convertAndSend(destination, message);
-        chatMessageService.decrementAttendance(destination);
+        chatMessageService.decrementAttendance(destination, nickname);
     }
 
     // 연결 종료시
