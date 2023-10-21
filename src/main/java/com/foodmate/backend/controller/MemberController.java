@@ -5,7 +5,6 @@ import com.foodmate.backend.security.dto.JwtTokenDto;
 import com.foodmate.backend.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,7 +40,7 @@ public class MemberController {
      */
     @PatchMapping("/image")
     public ResponseEntity<Void> patchProfileImage(Authentication authentication,
-                                                    @RequestPart MultipartFile imageFile) throws IOException {
+                                                    @RequestPart MultipartFile imageFile){
         memberService.patchProfileImage(authentication, imageFile);
         return ResponseEntity.ok().build();
     }
@@ -53,7 +51,7 @@ public class MemberController {
      *         아니면 true
      */
     @GetMapping("/email")
-    public ResponseEntity<Boolean> checkDuplicateEmail(@RequestParam MemberDto.emailRequest request){
+    public ResponseEntity<Boolean> checkDuplicateEmail(@RequestParam("email") MemberDto.emailRequest request){
         return ResponseEntity.ok(memberService.checkDuplicateEmail(request.getEmail()));
     }
 
@@ -64,7 +62,7 @@ public class MemberController {
      *         아니면 true
      */
     @GetMapping("/nickname")
-    public ResponseEntity<Boolean> checkDuplicateNickname(@RequestParam MemberDto.nicknameRequest request){
+    public ResponseEntity<Boolean> checkDuplicateNickname(@RequestParam("nickname") MemberDto.nicknameRequest request){
         return ResponseEntity.ok(memberService.checkDuplicateNickname(request.getNickname()));
     }
 
@@ -96,7 +94,7 @@ public class MemberController {
      */
     @PostMapping("/signup")
     public ResponseEntity<Void> createMember(@RequestPart MemberDto.CreateMemberRequest request,
-                                               @RequestPart(value = "file", required = false) MultipartFile imageFile) throws IOException {
+                                               @RequestPart(value = "file", required = false) MultipartFile imageFile){
         if(imageFile == null){
             memberService.createDefaultImageMember(request); // 이미지가 없을 때
         } else {
