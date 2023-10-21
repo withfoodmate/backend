@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -56,16 +57,24 @@ public class ChatMessageService {
         Member member = memberRepository.findByNickname(nickname)
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
 
-        // ChatMember 에 현재 멤버 추가
-        chatMemberRepository.save(ChatMember.builder()
-                .member(member)
-                .chatRoom(chatRoom)
-                .lastReadTime(LocalDateTime.now())
-                .build());
+        Optional<ChatMember> optionalChatMember = chatMemberRepository.findByMemberAndChatRoom(member, chatRoom);
 
-        // ChatRoom 의 현재인원 +1
-        chatRoom.setAttendance(chatRoom.getAttendance() + 1);
-        chatRoomRepository.save(chatRoom);
+        if (optionalChatMember.isPresent()) {
+            ChatMember chatMember = optionalChatMember.get();
+            chatMember.setLastReadTime(LocalDateTime.now());
+            chatMemberRepository.save(chatMember);
+        } else {
+            // ChatMember 에 현재 멤버 추가
+            chatMemberRepository.save(ChatMember.builder()
+                    .member(member)
+                    .chatRoom(chatRoom)
+                    .lastReadTime(LocalDateTime.now())
+                    .build());
+
+            // ChatRoom 의 현재인원 +1
+            chatRoom.setAttendance(chatRoom.getAttendance() + 1);
+            chatRoomRepository.save(chatRoom);
+        }
     }
 
     @Transactional
