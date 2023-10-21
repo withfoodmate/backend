@@ -1,18 +1,23 @@
 package com.foodmate.backend.service;
 
 import com.foodmate.backend.dto.ChatMessageDto;
+import com.foodmate.backend.entity.ChatMember;
 import com.foodmate.backend.entity.ChatMessage;
 import com.foodmate.backend.entity.ChatRoom;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.ChatException;
 import com.foodmate.backend.exception.MemberException;
+import com.foodmate.backend.repository.ChatMemberRepository;
 import com.foodmate.backend.repository.ChatMessageRepository;
 import com.foodmate.backend.repository.ChatRoomRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -24,6 +29,7 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatMemberRepository chatMemberRepository;
 
     public ChatMessageDto.Response saveMessage(Long chatRoomId, Long memberId, ChatMessageDto.Request request) {
 
@@ -43,14 +49,36 @@ public class ChatMessageService {
         return ChatMessageDto.Response.createChatMessageResponse(member, request);
     }
 
-    public void incrementAttendance(String destination) {
+    @Transactional
+    public void incrementAttendance(String destination, String nickname) {
         ChatRoom chatRoom = getChatRoom(destination);
+
+        Member member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        // ChatMember 에 현재 멤버 추가
+        chatMemberRepository.save(ChatMember.builder()
+                .member(member)
+                .chatRoom(chatRoom)
+                .lastReadTime(LocalDateTime.now())
+                .build());
+
+        // ChatRoom 의 현재인원 +1
         chatRoom.setAttendance(chatRoom.getAttendance() + 1);
         chatRoomRepository.save(chatRoom);
     }
 
-    public void decrementAttendance(String destination) {
+    @Transactional
+    public void decrementAttendance(String destination, String nickname) {
         ChatRoom chatRoom = getChatRoom(destination);
+
+        Member member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        // ChatMember 에서 현재 멤버 삭제
+        chatMemberRepository.deleteByMemberAndChatRoom(member, chatRoom);
+
+        // ChatRoom 의 현재인원 -1
         chatRoom.setAttendance(chatRoom.getAttendance() - 1);
         chatRoomRepository.save(chatRoom);
     }
