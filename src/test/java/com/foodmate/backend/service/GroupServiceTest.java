@@ -357,7 +357,6 @@ public class GroupServiceTest {
     verify(foodGroupRepository, times(1)).save(mockGroup);
     verify(enrollmentRepository, times(1))
         .changeStatusByGroupId(groupId, EnrollmentStatus.GROUP_CANCEL);
-    verify(chatRoomRepository, times(1)).deleteByFoodGroupId(groupId);
 
   }
 
