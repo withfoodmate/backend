@@ -37,13 +37,11 @@ public class ChatRoomService {
         Member member = memberRepository.findByEmail(authentication.getName()).orElseThrow(
                 () -> new MemberException(Error.USER_NOT_FOUND)
         );
-
         List<ChatMember>  chatMembers = chatMemberRepository.findByMember(member);
 
         if(chatMembers == null || chatMembers.isEmpty()){
             throw new ChatException(Error.USER_NOT_IN_CHATROOM);
         }
-
         List<ChatDto.ChatRoomListResponse> chatRoomListResponses = new ArrayList<>();
         for(ChatMember chatMember : chatMembers) {
             Optional<ChatMessage> chatMessage = chatMessageRepository
