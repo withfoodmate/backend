@@ -11,6 +11,7 @@ import com.foodmate.backend.repository.EnrollmentRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,9 @@ public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final MemberRepository memberRepository;
+
+    @Value("${S3_GENERAL_IMAGE_PATH}")
+    private String defaultProfileImage;
 
     public Page<EnrollmentDto.myEnrollmentResponse> getMyEnrollment(String status, Authentication authentication, Pageable pageable) {
         // 현재 시간 가져오기
@@ -54,6 +58,36 @@ public class EnrollmentService {
         return enrollmentPage;
     }
 
+    public Page<EnrollmentDto.myEnrollmentResponse> getMyAllEnrollment(Authentication authentication, Pageable pageable) {
+        // 현재 시간 가져오기
+        LocalDateTime currentDate = LocalDateTime.now();
+
+        // 사용자 정보 조회
+        Member member = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        // 정렬 정보를 포함한 pageable 객체 생성
+        Pageable pageableWithSorting = PageRequest.of(
+                pageable.getPageNumber(), // 현재 페이지 번호
+                pageable.getPageSize(),   // 페이지 크기
+                Sort.by(Sort.Order.asc("foodGroupGroupDateTime")) // 정렬 정보
+        );
+
+        Page<EnrollmentDto.myEnrollmentResponse> enrollmentPage = enrollmentRepository.findByMemberAndFoodGroupGroupDateTimeBetween(
+                member,
+                currentDate.minusMonths(3),
+                currentDate.plusMonths(1),
+                pageableWithSorting);
+
+        for(EnrollmentDto.myEnrollmentResponse response : enrollmentPage) {
+            if(response.getFoodGroupMemberImage() == null) {
+                response.setFoodGroupMemberImage(defaultProfileImage);
+            }
+        }
+
+        return enrollmentPage;
+    }
+
 
     public Page<EnrollmentDto.myEnrollmentReceiveResponse> enrollmentList(String decision, Authentication authentication, Pageable pageable) {
 
@@ -74,6 +108,22 @@ public class EnrollmentService {
 
     }
 
+    public Page<EnrollmentDto.myReceiveEnrollmentResponse> allEnrollmentList(Authentication authentication, Pageable pageable) {
+
+        Member member = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        Page<EnrollmentDto.myReceiveEnrollmentResponse>  enrollmentsPage = enrollmentRepository.findByFoodGroupMember(member, pageable);
+
+        for(EnrollmentDto.myReceiveEnrollmentResponse response : enrollmentsPage) {
+            if(response.getMemberImage() == null) {
+                response.setMemberImage(defaultProfileImage);
+            }
+        }
+        return enrollmentsPage;
+
+
+    }
 
     public Enrollment acceptEnrollment(Long enrollmentId) {
 
@@ -114,4 +164,6 @@ public class EnrollmentService {
         enrollment.setStatus(EnrollmentStatus.CANCEL);
         enrollmentRepository.save(enrollment);
     }
+
+
 }
