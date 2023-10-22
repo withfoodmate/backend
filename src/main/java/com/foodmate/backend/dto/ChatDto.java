@@ -28,21 +28,18 @@ public class ChatDto {
         private LocalDateTime lastMessageTime;
         private int attendance;
         private int count;
-
-
-
+        
         public static ChatDto.ChatRoomListResponse createChatRoomListResponse(
-                ChatRoom chatRoom, FoodGroup foodGroup, ChatMessage chatMessage, int count){
+                ChatRoom chatRoom, FoodGroup foodGroup, String lastMessage, LocalDateTime lastMessageTime, int count){
             return ChatRoomListResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .chatRoomName(foodGroup.getName())
-                    .lastMessage(chatMessage == null ? null : chatMessage.getContent())
-                    .lastMessageTime(chatMessage == null ? null : chatMessage.getCreateDateTime())
+                    .lastMessage(lastMessage)
+                    .lastMessageTime(lastMessageTime)
                     .attendance(chatRoom.getAttendance())
                     .count(count)
                     .build();
         }
-
     }
 
     @AllArgsConstructor

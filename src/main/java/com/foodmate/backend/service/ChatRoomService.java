@@ -37,22 +37,26 @@ public class ChatRoomService {
         Member member = memberRepository.findByEmail(authentication.getName()).orElseThrow(
                 () -> new MemberException(Error.USER_NOT_FOUND)
         );
-
         List<ChatMember>  chatMembers = chatMemberRepository.findByMember(member);
 
         if(chatMembers == null || chatMembers.isEmpty()){
             throw new ChatException(Error.USER_NOT_IN_CHATROOM);
         }
-
         List<ChatDto.ChatRoomListResponse> chatRoomListResponses = new ArrayList<>();
         for(ChatMember chatMember : chatMembers) {
             Optional<ChatMessage> chatMessage = chatMessageRepository
                     .findTopByChatRoomAndCreateDateTimeAfterOrderByCreateDateTimeDesc(chatMember.getChatRoom(), chatMember.getInsertTime());
-
-            chatRoomListResponses.add(ChatDto.ChatRoomListResponse.createChatRoomListResponse(
-                    chatMember.getChatRoom(), chatMember.getChatRoom().getFoodGroup(), chatMessage.isEmpty() ? null : chatMessage.get(),
-                    chatMessageRepository.countByCreateDateTimeAfterAndChatRoom(chatMember.getLastReadTime(), chatMember.getChatRoom())
-            ));
+            if(chatMessage.isEmpty()){
+                chatRoomListResponses.add(ChatDto.ChatRoomListResponse.createChatRoomListResponse(
+                        chatMember.getChatRoom(), chatMember.getChatRoom().getFoodGroup(), "", chatMember.getInsertTime(),
+                        chatMessageRepository.countByCreateDateTimeAfterAndChatRoom(chatMember.getLastReadTime(), chatMember.getChatRoom())
+                ));
+            }else {
+                chatRoomListResponses.add(ChatDto.ChatRoomListResponse.createChatRoomListResponse(
+                        chatMember.getChatRoom(), chatMember.getChatRoom().getFoodGroup(), chatMessage.get().getContent(), chatMessage.get().getCreateDateTime(),
+                        chatMessageRepository.countByCreateDateTimeAfterAndChatRoom(chatMember.getLastReadTime(), chatMember.getChatRoom())
+                ));
+            }
         }
 
         chatRoomListResponses.sort(Comparator.comparing(ChatDto.ChatRoomListResponse::getLastMessageTime).reversed()); // 최신순 정렬
