@@ -46,7 +46,6 @@ public class ChatRoomService {
         for(ChatMember chatMember : chatMembers) {
             Optional<ChatMessage> chatMessage = chatMessageRepository
                     .findTopByChatRoomAndCreateDateTimeAfterOrderByCreateDateTimeDesc(chatMember.getChatRoom(), chatMember.getInsertTime());
-            System.out.println(chatMember.getInsertTime());
             if(chatMessage.isEmpty()){
                 chatRoomListResponses.add(ChatDto.ChatRoomListResponse.createChatRoomListResponse(
                         chatMember.getChatRoom(), chatMember.getChatRoom().getFoodGroup(), "", chatMember.getInsertTime(),
