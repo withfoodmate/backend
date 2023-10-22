@@ -50,7 +50,7 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.enrollmentList(decision, authentication, pageable));
     }
 
-    @GetMapping("/allReceive")
+    @GetMapping("/all-receive")
     public ResponseEntity<Page<EnrollmentDto.myReceiveEnrollmentResponse>> enrollmentList(Authentication authentication, Pageable pageable) {
         return ResponseEntity.ok(enrollmentService.allEnrollmentList(authentication, pageable));
     }
