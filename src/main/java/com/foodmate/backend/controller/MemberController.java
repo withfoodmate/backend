@@ -117,7 +117,7 @@ public class MemberController {
      * @param authentication 로그인한 사용자의 정보
      * @return
      */
-    @PostMapping("{memberId}/likes")
+    @PostMapping("/{memberId}/likes")
     public ResponseEntity<Void> toggleLikeForPost(@PathVariable Long memberId,
                                                     Authentication authentication){
         memberService.toggleLikeForPost(memberId, authentication);
