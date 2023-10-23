@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
+import com.foodmate.backend.dto.NearbyGroupDto;
 import com.foodmate.backend.dto.ReplyDto;
 import com.foodmate.backend.dto.SearchedGroupDto;
 import com.foodmate.backend.entity.ChatRoom;
@@ -982,6 +983,29 @@ public class GroupServiceTest {
 
     //then
     assertEquals(Error.FOOD_NOT_FOUND, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("내 근처 모임 성공")
+  void success_getNearbyGroupList() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<NearbyGroupDto> entities = new ArrayList<>();
+    Page<NearbyGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.getNearbyGroupList(any(), any(), any(), any())).willReturn(page);
+
+    //when
+    Page<NearbyGroupDto> response = groupService.getNearbyGroupList(LATITUDE, LONGITUDE, pageable);
+
+    //then
+    verify(foodGroupRepository, times(1))
+        .getNearbyGroupList(any(), any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
 
   }
 
