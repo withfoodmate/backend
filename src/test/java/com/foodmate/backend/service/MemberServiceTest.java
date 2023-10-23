@@ -2,6 +2,7 @@ package com.foodmate.backend.service;
 
 import com.foodmate.backend.dto.MemberDto;
 import com.foodmate.backend.entity.Food;
+import com.foodmate.backend.entity.Likes;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
 import com.foodmate.backend.enums.Error;
@@ -66,11 +67,9 @@ class MemberServiceTest {
 
         List<Preference> mockPreference = new ArrayList<>();
 
-        Long mockLikesCount = 32L;
 
         given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
         given(preferenceRepository.findAllByMember(mockMember)).willReturn(mockPreference);
-        given(likesRepository.countAllByLiked(mockMember)).willReturn(mockLikesCount);
 
         //when
         MemberDto.Response response = memberService.getMemberInfo(mockAuthentication);
@@ -80,7 +79,7 @@ class MemberServiceTest {
                 () -> assertEquals(mockMember.getId(), response.getMemberId()),
                 () -> assertEquals(mockMember.getEmail(), response.getEmail()),
                 () -> assertEquals(mockMember.getImage(), response.getImage()),
-                () -> assertEquals(mockLikesCount, response.getLikes()),
+                () -> assertEquals(mockMember.getLikes(), response.getLikes()),
                 () -> assertEquals(mockMember.getNickname(), response.getNickname()),
                 () -> assertNotNull(response.getFood()),
                 () -> assertTrue(response.getFood().isEmpty())
@@ -96,11 +95,9 @@ class MemberServiceTest {
         Member mockMember = createMockMember(memberId1);
         List<Preference> mockPreference = new ArrayList<>();
 
-        Long mockLikesCount = 32L;
 
         given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
         given(preferenceRepository.findAllByMember(mockMember)).willReturn(mockPreference);
-        given(likesRepository.countAllByLiked(mockMember)).willReturn(mockLikesCount);
         //when
         MemberDto.Response response = memberService.getMemberInfo(mockAuthentication);
 
@@ -109,7 +106,7 @@ class MemberServiceTest {
                 () -> assertEquals(mockMember.getId(), response.getMemberId()),
                 () -> assertEquals(mockMember.getEmail(), response.getEmail()),
                 () -> assertEquals(mockMember.getImage(), response.getImage()),
-                () -> assertEquals(mockLikesCount, response.getLikes()),
+                () -> assertEquals(mockMember.getLikes(), response.getLikes()),
                 () -> assertEquals(mockMember.getNickname(), response.getNickname()),
                 () -> assertNotNull(response.getFood()),
                 () -> assertTrue(response.getFood().isEmpty())
@@ -131,11 +128,9 @@ class MemberServiceTest {
         List<String> mockFoods = new ArrayList<>();
         mockFoods.add(mockFood.getType()); // 선호음식 추가
 
-        Long mockLikesCount = 32L;
 
         given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
         given(preferenceRepository.findAllByMember(mockMember)).willReturn(mockPreference);
-        given(likesRepository.countAllByLiked(mockMember)).willReturn(mockLikesCount);
         given(foodRepository.findById(mockFood.getId())).willReturn(Optional.of(mockFood)); // 음식을 찾을 수 있도록 설정
 
         // when
@@ -146,7 +141,7 @@ class MemberServiceTest {
                 () -> assertEquals(mockMember.getId(), response.getMemberId()),
                 () -> assertEquals(mockMember.getEmail(), response.getEmail()),
                 () -> assertEquals(mockMember.getImage(), response.getImage()),
-                () -> assertEquals(mockLikesCount, response.getLikes()),
+                () -> assertEquals(mockMember.getLikes(), response.getLikes()),
                 () -> assertEquals(mockMember.getNickname(), response.getNickname()),
                 () -> assertEquals(mockFoods, response.getFood())
         );
@@ -256,11 +251,7 @@ class MemberServiceTest {
         String nickname = "동현";
         Member mockMember = createMockMember(memberId1);
 
-        Long mockLikesCount = 32L;
-
         given(memberRepository.findByNickname(nickname)).willReturn(Optional.of(mockMember));
-        given(likesRepository.countAllByLiked(mockMember)).willReturn(mockLikesCount);
-
         // when
         MemberDto.Response response = memberService.getMemberInfoByNickname(nickname);
 
@@ -269,7 +260,7 @@ class MemberServiceTest {
                 () -> assertEquals(mockMember.getId(), response.getMemberId()),
                 () -> assertEquals(mockMember.getEmail(), response.getEmail()),
                 () -> assertEquals(mockMember.getImage(), response.getImage()),
-                () -> assertEquals(mockLikesCount, response.getLikes()),
+                () -> assertEquals(mockMember.getLikes(), response.getLikes()),
                 () -> assertEquals(mockMember.getNickname(), response.getNickname())
         );
 
@@ -307,6 +298,46 @@ class MemberServiceTest {
 
     }
 
+    @Test
+    @DisplayName("다른 유저 좋아요 성공")
+    void success_toggleLikeForPost() {
+        // given
+        Member mockLikedMember = createMockMember(1L);
+        Authentication mockAuthentication = createAuthentication();
+        Member mockLikerMember = createMockMember1(2L);
+        Long prevLikes = mockLikedMember.getLikes();
+
+        given(memberRepository.findById(1L)).willReturn(Optional.of(mockLikedMember));
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockLikerMember));
+        given(likesRepository.findByLikedAndLiker(mockLikedMember, mockLikerMember)).willReturn(Optional.empty());
+
+        // when
+        Long response =  memberService.toggleLikeForPost(1L, mockAuthentication);
+        // then
+        assertEquals(prevLikes + 1, response);
+    }
+
+    @Test
+    @DisplayName("다른 유저 좋아요 취소 성공")
+    void success_toggleCancelLikeForPost() {
+        // given
+        Member mockLikedMember = createMockMember(1L);
+        Authentication mockAuthentication = createAuthentication();
+        Member mockLikerMember = createMockMember1(2L);
+        Long prevLikes = mockLikedMember.getLikes();
+        Likes mockLikes = new Likes(1L,mockLikedMember, mockLikerMember);
+
+        given(memberRepository.findById(1L)).willReturn(Optional.of(mockLikedMember));
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockLikerMember));
+        given(likesRepository.findByLikedAndLiker(mockLikedMember, mockLikerMember)).willReturn(Optional.of(mockLikes));
+
+        // when
+        Long response =  memberService.toggleLikeForPost(1L, mockAuthentication);
+        // then
+        assertEquals(prevLikes - 1, response);
+    }
+
+
 
     private Authentication createAuthentication() {
 
@@ -324,6 +355,7 @@ class MemberServiceTest {
                 .id(memberId)
                 .email("dlaehdgus23@naver.com")
                 .nickname("동현")
+                .likes(32L)
                 .image(null)
                 .password("ehdgus1234")
                 .build();
@@ -334,10 +366,23 @@ class MemberServiceTest {
                 .id(memberId)
                 .email("dlaehdgus23@naver.com")
                 .nickname("동현")
+                .likes(32L)
                 .image("asdfsadfsda")
                 .password("ehdgus1234")
                 .build();
     }
+
+    private Member createMockMember1(Long memberId) {
+        return Member.builder()
+                .id(memberId)
+                .email("test@naver.com")
+                .nickname("test유저")
+                .likes(32L)
+                .image("ㅋㅊㅌㅋㅊㅌㅋ")
+                .password("qasdegtr")
+                .build();
+    }
+
 
     private Member createMockDeleteMember(Long memberId) {
         return Member.builder()
