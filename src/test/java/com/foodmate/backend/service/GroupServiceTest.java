@@ -1009,6 +1009,25 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("로그인한 사용자가 참여한 모임 조회 성공")
+  void success_getAcceptedGroupList() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.getAcceptedGroupList(mockAuthentication);
+
+    //then
+    verify(enrollmentRepository, times(1))
+        .getAcceptedGroupList(any(), any(), any(), any());
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
