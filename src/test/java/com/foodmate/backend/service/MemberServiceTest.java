@@ -12,6 +12,7 @@ import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.LikesRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.PreferenceRepository;
+import com.foodmate.backend.security.dto.JwtTokenDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
@@ -440,8 +442,59 @@ class MemberServiceTest {
 
 
 
+    @Test
+    @DisplayName("비밀번호 변경")
+    void success_changePassword(){
+        // given
+        MemberDto.passwordUpdateRequest mockRequest =
+                new MemberDto.passwordUpdateRequest("ehdgus1234", "newPassword");
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockMember(memberId1);
+        mockMember.setPassword(BCrypt.hashpw(mockMember.getPassword(), BCrypt.gensalt()));
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+        // when&then
+        memberService.changePassword(mockRequest, mockAuthentication);
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 실패 - 해당 유저 없음")
+    void fail_changePasswordUserNotFound(){
+        // given
+        MemberDto.passwordUpdateRequest mockRequest =
+                new MemberDto.passwordUpdateRequest("ehdgus1234", "newPassword");
+        Authentication mockAuthentication = createAuthentication();
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.empty());
+
+        // when
+        MemberException exception =
+                assertThrows(
+                        MemberException.class, () -> memberService.changePassword(mockRequest, mockAuthentication));
+
+        // then
+        assertEquals(Error.USER_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 실패 - 비밀번호 불일치")
+    void fail_changePasswordInvalidPassword(){
+        // given
+        MemberDto.passwordUpdateRequest mockRequest =
+                new MemberDto.passwordUpdateRequest("ehdgus123dsd4", "newPassword");
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockMember(memberId1);
+        mockMember.setPassword(BCrypt.hashpw(mockMember.getPassword(), BCrypt.gensalt()));
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
 
 
+        // when
+        MemberException exception =
+                assertThrows(
+                        MemberException.class, () -> memberService.changePassword(mockRequest, mockAuthentication));
+
+        // then
+        assertEquals(Error.PASSWORD_NOT_MATCH, exception.getError());
+    }
 
 
 
@@ -481,7 +534,7 @@ class MemberServiceTest {
     private Member createMockMember1(Long memberId) {
         return Member.builder()
                 .id(memberId)
-                .email("test@naver.com")
+                .email("test19@naver.com")
                 .nickname("test유저")
                 .likes(32L)
                 .image("ㅋㅊㅌㅋㅊㅌㅋ")
@@ -527,6 +580,10 @@ class MemberServiceTest {
                 .nickname("testNickName")
                 .food(null)
                 .build();
+    }
+
+    private MemberDto.loginRequest loginRequest() {
+        return new MemberDto.loginRequest("test19@naver.com", "ehdgus1234");
     }
 
 
