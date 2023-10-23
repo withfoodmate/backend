@@ -28,7 +28,7 @@ public class MemberController {
      * @return 사용자 본인 정보 조회
      */
     @GetMapping
-    public ResponseEntity<MemberDto.Response> getMemberInfo(Authentication authentication){
+    public ResponseEntity<MemberDto.myMemberInfoResponse> getMemberInfo(Authentication authentication){
         return ResponseEntity.ok(memberService.getMemberInfo(authentication));
     }
 
@@ -82,8 +82,9 @@ public class MemberController {
      * @return 다른 사람의 사용자 정보 가져오기
      */
     @GetMapping("/{nickname}")
-    public ResponseEntity<MemberDto.Response> getMemberInfoByNickname(@PathVariable String nickname){
-        return ResponseEntity.ok(memberService.getMemberInfoByNickname(nickname));
+    public ResponseEntity<MemberDto.otherMemberInfoResponse> getMemberInfoByNickname(
+            @PathVariable String nickname, Authentication authentication){
+        return ResponseEntity.ok(memberService.getMemberInfoByNickname(nickname, authentication));
     }
 
     /**
