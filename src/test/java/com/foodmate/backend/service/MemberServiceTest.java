@@ -380,6 +380,37 @@ class MemberServiceTest {
         assertEquals(prevLikes - 1, response);
     }
 
+    @Test
+    @DisplayName("다른 유저 좋아요 실패 - 로그인 유저 정보 없음")
+    void fail_toggleCancelLikeForPostLoginMemberNotFound() {
+        // given
+        Authentication mockAuthentication = createAuthentication();
+        Member mockLikerMember = createMockMember1(2L);
+
+        given(memberRepository.findById(1L)).willReturn(Optional.empty());
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockLikerMember));
+
+        // when
+        MemberException exception = assertThrows(MemberException.class, () -> memberService.toggleLikeForPost(1L, mockAuthentication));
+        // then
+        assertEquals(Error.USER_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    @DisplayName("다른 유저 좋아요 실패 - 상대 유저 정보 없음")
+    void fail_toggleCancelLikeForPostOtherMemberNotFound() {
+        // given
+        Member mockLikedMember = createMockMember(1L);
+        Authentication mockAuthentication = createAuthentication();
+
+        given(memberRepository.findById(1L)).willReturn(Optional.of(mockLikedMember));
+        // when
+        MemberException exception = assertThrows(MemberException.class, () -> memberService.toggleLikeForPost(1L, mockAuthentication));
+        // then
+        assertEquals(Error.USER_NOT_FOUND, exception.getError());
+    }
+
+
 
 
     private Authentication createAuthentication() {
