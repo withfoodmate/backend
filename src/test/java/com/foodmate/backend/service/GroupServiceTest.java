@@ -33,6 +33,8 @@ import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.ReplyRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,10 @@ import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -79,6 +85,9 @@ public class GroupServiceTest {
   public static final Long groupId = 1L;
   public static final Long commentId = 1L;
   public static final Long replyId = 1L;
+
+  public static final int pageNumber = 0;
+  public static final int pageSize = 20;
 
   private static final String TITLE = "치킨 먹을 사람~";
   private static final String NAME = "치킨 모임";
@@ -746,6 +755,72 @@ public class GroupServiceTest {
 
     //then
     assertEquals(Error.NO_DELETE_PERMISSION_REPLY, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("댓글 대댓글 전체 조회 성공")
+  void success_getComments() {
+
+    //given
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember);
+    Reply mockReply = createMockReply(replyId, mockComment, mockMember);
+
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+    List<Comment> comments = new ArrayList<>();
+    comments.add(mockComment);
+    Page<Comment> commentsPage = new PageImpl<>(comments, pageable, comments.size());
+
+    List<Reply> replies = new ArrayList<>();
+    replies.add(mockReply);
+
+    given(foodGroupRepository.findById(any())).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findAllByFoodGroup(any(), any())).willReturn(commentsPage);
+    given(replyRepository.findAllByComment(any())).willReturn(replies);
+
+    //when
+    Page<CommentDto.Response> response = groupService.getComments(groupId, pageable);
+
+    //then
+    Comment commentContent = commentsPage.getContent().get(0);
+    Reply replyContent = replies.get(0);
+    CommentDto.Response responseCommentContent = response.getContent().get(0);
+    ReplyDto.Response responseReplyContent = response.getContent().get(0).getReplies().get(0);
+
+    assertAll(
+        () -> assertEquals(commentContent.getId(),
+            responseCommentContent.getCommentId()),
+        () -> assertEquals(commentContent.getMember().getId(),
+            responseCommentContent.getMemberId()),
+        () -> assertEquals(commentContent.getMember().getNickname(),
+            responseCommentContent.getNickname()),
+        () -> assertEquals(commentContent.getMember().getImage(),
+            responseCommentContent.getImage()),
+        () -> assertEquals(commentContent.getContent(),
+            responseCommentContent.getContent()),
+        () -> assertEquals(commentContent.getCreatedDate(),
+            responseCommentContent.getCreatedDate()),
+        () -> assertEquals(commentContent.getUpdatedDate(),
+            responseCommentContent.getUpdatedDate()),
+        () -> assertEquals(replyContent.getId(),
+            responseReplyContent.getReplyId()),
+        () -> assertEquals(replyContent.getMember().getId(),
+            responseReplyContent.getMemberId()),
+        () -> assertEquals(replyContent.getMember().getNickname(),
+            responseReplyContent.getNickname()),
+        () -> assertEquals(replyContent.getMember().getImage(),
+            responseReplyContent.getImage()),
+        () -> assertEquals(replyContent.getContent(),
+            responseReplyContent.getContent()),
+        () -> assertEquals(replyContent.getCreatedDate(),
+            responseReplyContent.getCreatedDate()),
+        () -> assertEquals(replyContent.getUpdatedDate(),
+            responseReplyContent.getUpdatedDate())
+    );
 
   }
 
