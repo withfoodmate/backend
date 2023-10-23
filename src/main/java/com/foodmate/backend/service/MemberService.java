@@ -64,9 +64,9 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
 
         if(member.getImage() == null){
-            return MemberDto.Response.createMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
+            return MemberDto.Response.createMemberDtoResponse(member, findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.createMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
+        return MemberDto.Response.createMemberDtoResponse(member, findPreferences(member));
     }
 
     /**
@@ -202,9 +202,9 @@ public class MemberService {
             throw new MemberException(Error.DELETED_USER);
         }
         if(member.getImage() == null){
-            return MemberDto.Response.createMemberDtoResponse(member,likesRepository.countAllByLiked(member), findPreferences(member) , defaultProfileImage);
+            return MemberDto.Response.createMemberDtoResponse(member, findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.createMemberDtoResponse(member, likesRepository.countAllByLiked(member), findPreferences(member));
+        return MemberDto.Response.createMemberDtoResponse(member, findPreferences(member));
     }
 
     /**
@@ -324,6 +324,7 @@ public class MemberService {
      * @param authentication
      * @return 이미 좋아요 한 사람이면 좋아요 취소/ 아니면 좋아요 누름
      */
+    @Transactional
     public void toggleLikeForPost(Long memberId, Authentication authentication) {
         Member liked = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND)); // 좋아요 받은 사람
@@ -335,9 +336,12 @@ public class MemberService {
 
         if(optionalLikes.isPresent()){
             likesRepository.deleteById(optionalLikes.get().getId());
+            liked.setLikes(liked.getLikes() - 1);
         } else {
             likesRepository.save(Likes.makeLikes(liked, liker));
+            liked.setLikes(liked.getLikes() + 1);
         }
+        memberRepository.save(liked);
     }
 
         public JwtTokenDto login(MemberDto.loginRequest request) {
@@ -368,6 +372,7 @@ public class MemberService {
      * @param authentication 로그인한 사용자의 정보
      * @return
      */
+    @Transactional
     public void changePassword(MemberDto.passwordUpdateRequest request, Authentication authentication) {
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
