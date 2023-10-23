@@ -893,6 +893,29 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("거리순 조회 성공")
+  void success_searchByLocation() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.searchByLocation(any(), any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.searchByLocation(LATITUDE, LONGITUDE, pageable);
+
+    //then
+    verify(foodGroupRepository, times(1))
+        .searchByLocation(any(), any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
