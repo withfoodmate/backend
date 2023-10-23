@@ -68,7 +68,7 @@ public class MemberDto {
     @Getter
     @Builder
     @AllArgsConstructor
-    public static class Response{
+    public static class myMemberInfoResponse{
         private Long memberId;
         private String email;
         private String nickname;
@@ -76,8 +76,8 @@ public class MemberDto {
         private Long likes;
         List<String> food;
 
-        public static MemberDto.Response createMemberDtoResponse(Member member, List<String> food){
-            return Response.builder()
+        public static MemberDto.myMemberInfoResponse createMemberDtoResponse(Member member, List<String> food){
+            return myMemberInfoResponse.builder()
                     .memberId(member.getId())
                     .email(member.getEmail())
                     .nickname(member.getNickname())
@@ -87,14 +87,52 @@ public class MemberDto {
                     .build();
         }
 
-        public static MemberDto.Response createMemberDtoResponse(Member member,  List<String> food, String defaultImage){
-            return Response.builder()
+        public static MemberDto.myMemberInfoResponse createMemberDtoResponse(Member member,  List<String> food, String defaultImage){
+            return myMemberInfoResponse.builder()
                     .memberId(member.getId())
                     .email(member.getEmail())
                     .nickname(member.getNickname())
                     .image(defaultImage)
                     .likes(member.getLikes())
                     .food(food)
+                    .build();
+        }
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class otherMemberInfoResponse{
+        private Long memberId;
+        private String email;
+        private String nickname;
+        private String image;
+        private Long likes;
+        List<String> food;
+        boolean status;
+
+        public static MemberDto.otherMemberInfoResponse createMemberDtoResponse(Member member, List<String> food, boolean status){
+            return otherMemberInfoResponse.builder()
+                    .memberId(member.getId())
+                    .email(member.getEmail())
+                    .nickname(member.getNickname())
+                    .image(member.getImage())
+                    .likes(member.getLikes())
+                    .food(food)
+                    .status(status)
+                    .build();
+        }
+
+        public static MemberDto.otherMemberInfoResponse createMemberDtoResponse(Member member,  List<String> food, String defaultImage, boolean status){
+            return otherMemberInfoResponse.builder()
+                    .memberId(member.getId())
+                    .email(member.getEmail())
+                    .nickname(member.getNickname())
+                    .image(defaultImage)
+                    .likes(member.getLikes())
+                    .food(food)
+                    .status(status)
                     .build();
         }
     }
