@@ -12,7 +12,7 @@ import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.LikesRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.PreferenceRepository;
-import com.foodmate.backend.security.dto.JwtTokenDto;
+import org.geolatte.geom.M;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -494,6 +494,93 @@ class MemberServiceTest {
 
         // then
         assertEquals(Error.PASSWORD_NOT_MATCH, exception.getError());
+    }
+
+    @Test
+    @DisplayName("회원탈퇴 성공")
+    void success_deleteGeneralMember(){
+        // given
+        MockHttpServletRequest mockHttpServletRequest =
+                new MockHttpServletRequest();
+        MockHttpServletResponse mockHttpServletResponse =
+                new MockHttpServletResponse();
+        MemberDto.deleteMemberRequest deleteMemberRequest =
+                new MemberDto.deleteMemberRequest("ehdgus1234");
+
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockMember(memberId1);
+        mockMember.setPassword(BCrypt.hashpw(mockMember.getPassword(), BCrypt.gensalt()));
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+        // when
+        memberService.deleteGeneralMember(
+                mockHttpServletRequest,
+                mockHttpServletResponse,
+                mockAuthentication,
+                deleteMemberRequest
+        );
+
+    }
+
+    @Test
+    @DisplayName("회원탈퇴 실패 - 존재하는 유저 없음")
+    void fail_deleteGeneralMember(){
+        // given
+        MockHttpServletRequest mockHttpServletRequest =
+                new MockHttpServletRequest();
+        MockHttpServletResponse mockHttpServletResponse =
+                new MockHttpServletResponse();
+        MemberDto.deleteMemberRequest deleteMemberRequest =
+                new MemberDto.deleteMemberRequest("ehdgus1234");
+
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockMember(memberId1);
+        mockMember.setPassword(BCrypt.hashpw(mockMember.getPassword(), BCrypt.gensalt()));
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.empty());
+
+        // when
+        MemberException exception = assertThrows(MemberException.class, () ->
+                memberService.deleteGeneralMember(
+                        mockHttpServletRequest,
+                        mockHttpServletResponse,
+                        mockAuthentication,
+                        deleteMemberRequest
+                ));
+
+        // then
+        assertEquals(Error.USER_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    @DisplayName("회원탈퇴 실패 - 비밀번호 틀림")
+    void fail_deleteGeneralInvalidPassword(){
+        // given
+        MockHttpServletRequest mockHttpServletRequest =
+                new MockHttpServletRequest();
+        MockHttpServletResponse mockHttpServletResponse =
+                new MockHttpServletResponse();
+        MemberDto.deleteMemberRequest deleteMemberRequest =
+                new MemberDto.deleteMemberRequest("ehdgus123412");
+
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockMember(memberId1);
+        mockMember.setPassword(BCrypt.hashpw(mockMember.getPassword(), BCrypt.gensalt()));
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+        // when
+        MemberException exception = assertThrows(MemberException.class, () ->
+                memberService.deleteGeneralMember(
+                        mockHttpServletRequest,
+                        mockHttpServletResponse,
+                        mockAuthentication,
+                        deleteMemberRequest
+                ));
+
+        // then
+        assertEquals(Error.ACCESS_DENIED, exception.getError());
     }
 
 
