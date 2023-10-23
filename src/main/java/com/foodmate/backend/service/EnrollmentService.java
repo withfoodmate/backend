@@ -129,7 +129,7 @@ public class EnrollmentService {
 
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
-        enrollment.updateEnrollment(EnrollmentStatus.ACCEPT);
+        enrollment.updateEnrollmentStatus(EnrollmentStatus.ACCEPT);
         enrollmentRepository.save(enrollment);
 
         return enrollment;
@@ -139,7 +139,7 @@ public class EnrollmentService {
     public Enrollment refuseEnrollment(Long enrollmentId) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
-        enrollment.updateEnrollment(EnrollmentStatus.REFUSE);
+        enrollment.updateEnrollmentStatus(EnrollmentStatus.REFUSE);
         enrollmentRepository.save(enrollment);
         return enrollment;
     }
