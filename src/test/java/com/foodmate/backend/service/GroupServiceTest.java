@@ -24,6 +24,7 @@ import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.CommentException;
 import com.foodmate.backend.exception.EnrollmentException;
+import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.exception.ReplyException;
 import com.foodmate.backend.repository.ChatRoomRepository;
@@ -936,6 +937,51 @@ public class GroupServiceTest {
 
     assertNotNull(response);
     assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("메뉴별 조회 성공")
+  void success_searchByFood() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+    List<String> foods = new ArrayList<>();
+
+    given(foodGroupRepository.searchByFood(any(), any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.searchByFood(foods, pageable);
+
+    //then
+    verify(foodGroupRepository, times(1))
+        .searchByFood(any(), any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("메뉴별 조회 실패 - DB에 존재하지 않는 음식")
+  void fail_food_not_found() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<String> foods = new ArrayList<>();
+    foods.add("치킨피자");
+
+    given(foodRepository.existsByType("치킨피자")).willReturn(false);
+
+    //when
+    FoodException exception = assertThrows(FoodException.class,
+        () -> groupService.searchByFood(foods, pageable)
+    );
+
+    //then
+    assertEquals(Error.FOOD_NOT_FOUND, exception.getError());
 
   }
 
