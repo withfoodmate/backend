@@ -31,6 +31,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     Page<EnrollmentDto.myEnrollmentResponse> findByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
             Member member, EnrollmentStatus status, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
 
+    Page<EnrollmentDto.myEnrollmentResponse> findByMemberAndFoodGroupGroupDateTimeBetween(
+            Member member, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
+
     // 본인이 생성한 모든 모임의 요청 중 수락한 리스트 조회
     @Query("SELECT e FROM Enrollment e " +
             "JOIN e.foodGroup fg " +
@@ -38,6 +41,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             "AND e.status = :status " +
             "ORDER BY e.enrollDate ASC")
     Page<Enrollment> findByMyEnrollmentProcessedListWithStatus(@Param("id") Long readerId, @Param("status") EnrollmentStatus status, Pageable pageable);
+
+
+    Page<EnrollmentDto.myReceiveEnrollmentResponse> findByFoodGroupMember(Member member, Pageable pageable);
 
     // 로그인한 사용자가 참여한 모임 조회
     List<Enrollment> findAllByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
