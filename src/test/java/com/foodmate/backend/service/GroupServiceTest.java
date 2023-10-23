@@ -2,6 +2,7 @@ package com.foodmate.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -11,7 +12,9 @@ import static org.mockito.Mockito.verify;
 
 import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
+import com.foodmate.backend.dto.NearbyGroupDto;
 import com.foodmate.backend.dto.ReplyDto;
+import com.foodmate.backend.dto.SearchedGroupDto;
 import com.foodmate.backend.entity.ChatRoom;
 import com.foodmate.backend.entity.Comment;
 import com.foodmate.backend.entity.Food;
@@ -22,6 +25,7 @@ import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.CommentException;
 import com.foodmate.backend.exception.EnrollmentException;
+import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.exception.ReplyException;
 import com.foodmate.backend.repository.ChatRoomRepository;
@@ -33,6 +37,8 @@ import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.ReplyRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +49,10 @@ import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -79,6 +89,9 @@ public class GroupServiceTest {
   public static final Long groupId = 1L;
   public static final Long commentId = 1L;
   public static final Long replyId = 1L;
+
+  public static final int pageNumber = 0;
+  public static final int pageSize = 20;
 
   private static final String TITLE = "치킨 먹을 사람~";
   private static final String NAME = "치킨 모임";
@@ -746,6 +759,272 @@ public class GroupServiceTest {
 
     //then
     assertEquals(Error.NO_DELETE_PERMISSION_REPLY, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("댓글 대댓글 전체 조회 성공")
+  void success_getComments() {
+
+    //given
+    Member mockMember = createMockMember(memberId1);
+    Food mockFood = createMockFood(foodId);
+    FoodGroup mockGroup = createMockFoodGroup(groupId, mockMember, mockFood, 1);
+    Comment mockComment = createMockComment(commentId, mockGroup, mockMember);
+    Reply mockReply = createMockReply(replyId, mockComment, mockMember);
+
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+    List<Comment> comments = new ArrayList<>();
+    comments.add(mockComment);
+    Page<Comment> commentsPage = new PageImpl<>(comments, pageable, comments.size());
+
+    List<Reply> replies = new ArrayList<>();
+    replies.add(mockReply);
+
+    given(foodGroupRepository.findById(any())).willReturn(Optional.of(mockGroup));
+    given(commentRepository.findAllByFoodGroup(any(), any())).willReturn(commentsPage);
+    given(replyRepository.findAllByComment(any())).willReturn(replies);
+
+    //when
+    Page<CommentDto.Response> response = groupService.getComments(groupId, pageable);
+
+    //then
+    Comment commentContent = commentsPage.getContent().get(0);
+    Reply replyContent = replies.get(0);
+    CommentDto.Response responseCommentContent = response.getContent().get(0);
+    ReplyDto.Response responseReplyContent = response.getContent().get(0).getReplies().get(0);
+
+    assertAll(
+        () -> assertEquals(commentContent.getId(),
+            responseCommentContent.getCommentId()),
+        () -> assertEquals(commentContent.getMember().getId(),
+            responseCommentContent.getMemberId()),
+        () -> assertEquals(commentContent.getMember().getNickname(),
+            responseCommentContent.getNickname()),
+        () -> assertEquals(commentContent.getMember().getImage(),
+            responseCommentContent.getImage()),
+        () -> assertEquals(commentContent.getContent(),
+            responseCommentContent.getContent()),
+        () -> assertEquals(commentContent.getCreatedDate(),
+            responseCommentContent.getCreatedDate()),
+        () -> assertEquals(commentContent.getUpdatedDate(),
+            responseCommentContent.getUpdatedDate()),
+        () -> assertEquals(replyContent.getId(),
+            responseReplyContent.getReplyId()),
+        () -> assertEquals(replyContent.getMember().getId(),
+            responseReplyContent.getMemberId()),
+        () -> assertEquals(replyContent.getMember().getNickname(),
+            responseReplyContent.getNickname()),
+        () -> assertEquals(replyContent.getMember().getImage(),
+            responseReplyContent.getImage()),
+        () -> assertEquals(replyContent.getContent(),
+            responseReplyContent.getContent()),
+        () -> assertEquals(replyContent.getCreatedDate(),
+            responseReplyContent.getCreatedDate()),
+        () -> assertEquals(replyContent.getUpdatedDate(),
+            responseReplyContent.getUpdatedDate())
+    );
+
+  }
+
+  @Test
+  @DisplayName("검색 기능 성공")
+  void success_searchByKeyword() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.searchByKeyword(any(), any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.searchByKeyword(TITLE, pageable);
+
+    //then
+    verify(foodGroupRepository, times(1))
+        .searchByKeyword(any(), any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("오늘 모임 조회 성공")
+  void success_getTodayGroupList() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.searchByDate(any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.getTodayGroupList(pageable);
+
+    //then
+    verify(foodGroupRepository, times(1)).searchByDate(any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("전체 모임 조회 성공")
+  void success_getAllGroupList() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.getAllGroupList(any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.getAllGroupList(pageable);
+
+    //then
+    verify(foodGroupRepository, times(1)).getAllGroupList(any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("거리순 조회 성공")
+  void success_searchByLocation() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.searchByLocation(any(), any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.searchByLocation(LATITUDE, LONGITUDE, pageable);
+
+    //then
+    verify(foodGroupRepository, times(1))
+        .searchByLocation(any(), any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("날짜별 조회 성공")
+  void success_searchByDate() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.searchByDate(any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.searchByDate(
+        LocalDate.parse("2023-11-01"), LocalDate.parse("2023-11-05"), pageable);
+
+    //then
+    verify(foodGroupRepository, times(1)).searchByDate(any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("메뉴별 조회 성공")
+  void success_searchByFood() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+    List<String> foods = new ArrayList<>();
+
+    given(foodGroupRepository.searchByFood(any(), any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.searchByFood(foods, pageable);
+
+    //then
+    verify(foodGroupRepository, times(1))
+        .searchByFood(any(), any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("메뉴별 조회 실패 - DB에 존재하지 않는 음식")
+  void fail_food_not_found() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<String> foods = new ArrayList<>();
+    foods.add("치킨피자");
+
+    given(foodRepository.existsByType("치킨피자")).willReturn(false);
+
+    //when
+    FoodException exception = assertThrows(FoodException.class,
+        () -> groupService.searchByFood(foods, pageable)
+    );
+
+    //then
+    assertEquals(Error.FOOD_NOT_FOUND, exception.getError());
+
+  }
+
+  @Test
+  @DisplayName("내 근처 모임 성공")
+  void success_getNearbyGroupList() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<NearbyGroupDto> entities = new ArrayList<>();
+    Page<NearbyGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.getNearbyGroupList(any(), any(), any(), any())).willReturn(page);
+
+    //when
+    Page<NearbyGroupDto> response = groupService.getNearbyGroupList(LATITUDE, LONGITUDE, pageable);
+
+    //then
+    verify(foodGroupRepository, times(1))
+        .getNearbyGroupList(any(), any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
+  @Test
+  @DisplayName("로그인한 사용자가 참여한 모임 조회 성공")
+  void success_getAcceptedGroupList() {
+
+    //given
+    Authentication mockAuthentication = createAuthentication();
+    Member mockMember = createMockMember(memberId1);
+
+    given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+    //when
+    groupService.getAcceptedGroupList(mockAuthentication);
+
+    //then
+    verify(enrollmentRepository, times(1))
+        .getAcceptedGroupList(any(), any(), any(), any());
 
   }
 
