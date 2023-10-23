@@ -193,7 +193,7 @@ public class MemberService {
 
     /**
      * @param nickname
-     * @return 입력받은 email 회원 조회
+     * @return 입력받은 nickname 회원 조회
      */
     public MemberDto.otherMemberInfoResponse getMemberInfoByNickname(String nickname, Authentication authentication) {
         Member loginMember = memberRepository.findByEmail(authentication.getName())
