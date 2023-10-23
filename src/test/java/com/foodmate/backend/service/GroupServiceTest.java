@@ -2,6 +2,7 @@ package com.foodmate.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import com.foodmate.backend.dto.CommentDto;
 import com.foodmate.backend.dto.GroupDto;
 import com.foodmate.backend.dto.ReplyDto;
+import com.foodmate.backend.dto.SearchedGroupDto;
 import com.foodmate.backend.entity.ChatRoom;
 import com.foodmate.backend.entity.Comment;
 import com.foodmate.backend.entity.Food;
@@ -821,6 +823,29 @@ public class GroupServiceTest {
         () -> assertEquals(replyContent.getUpdatedDate(),
             responseReplyContent.getUpdatedDate())
     );
+
+  }
+
+  @Test
+  @DisplayName("검색 기능 성공")
+  void success_searchByKeyword() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.searchByKeyword(any(), any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.searchByKeyword(TITLE, pageable);
+
+    //then
+    verify(foodGroupRepository, times(1))
+        .searchByKeyword(any(), any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
 
   }
 
