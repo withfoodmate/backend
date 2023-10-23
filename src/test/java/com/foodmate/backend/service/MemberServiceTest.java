@@ -12,7 +12,6 @@ import com.foodmate.backend.repository.FoodRepository;
 import com.foodmate.backend.repository.LikesRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import com.foodmate.backend.repository.PreferenceRepository;
-import org.geolatte.geom.M;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -627,7 +626,81 @@ class MemberServiceTest {
         assertEquals(Error.USER_NOT_FOUND, exception.getError());
     }
 
+    @Test
+    @DisplayName("선호음식 변경 성공")
+    void success_changePreferenceFood() {
+        // given
+        MemberDto.changePreferenceFoodRequest changePreferenceFoodRequest =
+                new MemberDto.changePreferenceFoodRequest(List.of("치킨", "피자"));
 
+        Authentication mockAuthentication = createAuthentication();
+
+        Member mockMember = createMockMember(memberId1);
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+        given(foodRepository.findByType("치킨")).willReturn(Optional.of(new Food(1L, "치킨", "gsdfg")));
+        given(foodRepository.findByType("피자")).willReturn(Optional.of(new Food(2L, "피자", "test")));
+
+        // when
+        memberService.changePreferenceFood(changePreferenceFoodRequest, mockAuthentication);
+    }
+
+    @Test
+    @DisplayName("선호음식 변경 성공 - 선호음식 취소")
+    void success_changePreferenceFoodCancel() {
+        // given
+        MemberDto.changePreferenceFoodRequest changePreferenceFoodRequest =
+                new MemberDto.changePreferenceFoodRequest(List.of());
+
+        Authentication mockAuthentication = createAuthentication();
+
+        Member mockMember = createMockMember(memberId1);
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+        // when
+        memberService.changePreferenceFood(changePreferenceFoodRequest, mockAuthentication);
+    }
+
+    @Test
+    @DisplayName("선호음식 변경 실패 - 유저 없음")
+    void fail_changePreferenceFoodUserNotFound() {
+        // given
+        MemberDto.changePreferenceFoodRequest changePreferenceFoodRequest =
+                new MemberDto.changePreferenceFoodRequest(List.of("치킨", "피자"));
+
+        Authentication mockAuthentication = createAuthentication();
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.empty());
+
+        // when
+        MemberException exception = assertThrows(MemberException.class,
+                () -> memberService.changePreferenceFood(changePreferenceFoodRequest, mockAuthentication));
+
+        // then
+        assertEquals(Error.USER_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    @DisplayName("선호음식 변경 실패 - 해당 음식 없음")
+    void fail_changePreferenceFoodFoodNotFound() {
+        MemberDto.changePreferenceFoodRequest changePreferenceFoodRequest =
+                new MemberDto.changePreferenceFoodRequest(List.of("치킨", "피자"));
+
+        Authentication mockAuthentication = createAuthentication();
+
+        Member mockMember = createMockMember(memberId1);
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+        given(foodRepository.findByType("치킨")).willReturn(Optional.of(new Food(1L, "치킨", "gsdfg")));
+
+        // when
+        FoodException exception = assertThrows(FoodException.class,
+                () -> memberService.changePreferenceFood(changePreferenceFoodRequest, mockAuthentication));
+
+        // then
+        assertEquals(Error.FOOD_NOT_FOUND, exception.getError());
+    }
     private Authentication createAuthentication() {
 
         String email = "dlaehdgus23@naver.com";
