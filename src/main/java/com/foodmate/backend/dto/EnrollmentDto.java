@@ -2,16 +2,11 @@ package com.foodmate.backend.dto;
 
 import com.foodmate.backend.entity.Enrollment;
 import com.foodmate.backend.enums.EnrollmentStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Getter
 @NoArgsConstructor
@@ -19,6 +14,7 @@ import java.time.LocalTime;
 public class EnrollmentDto {
 
     @Getter
+    @Setter
     @AllArgsConstructor
     @Builder
     public static class myEnrollmentResponse {
@@ -38,6 +34,28 @@ public class EnrollmentDto {
 
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @Builder
+    public static class myReceiveEnrollmentResponse {
+        private Long id;
+        private Long foodGroupId;
+        private Long memberId;
+        private String memberNickname;
+        private String MemberImage;
+        private String foodGroupTitle;
+        private String foodGroupName;
+        private String foodGroupFoodType;
+        private LocalDateTime foodGroupGroupDateTime;
+        private int foodGroupMaximum;
+        private String foodGroupStoreName;
+        private String foodGroupStoreAddress;
+
+        @Enumerated(EnumType.STRING)
+        private EnrollmentStatus status;
+
+    }
     @Getter
     @AllArgsConstructor
     @Builder

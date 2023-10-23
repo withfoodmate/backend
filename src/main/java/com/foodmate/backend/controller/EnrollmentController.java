@@ -5,8 +5,6 @@ import com.foodmate.backend.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -17,24 +15,33 @@ import org.springframework.web.bind.annotation.*;
 public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
-    /**
-     * @param status // 신청상태
-     * @param authentication // 사용자 정보
-     * @param
-     * @return 신청상태에 맞는 신청정보를 가져옴
-     */
+
+//    /**
+//     * @param status // 신청상태
+//     * @param authentication // 사용자 정보
+//     * @param
+//     * @return 신청상태에 맞는 신청정보를 가져옴
+//     */
+//    @GetMapping("")
+//    public ResponseEntity<Page<EnrollmentDto.myEnrollmentResponse>> getMyEnrollment(
+//            @RequestParam String status,
+//            Authentication authentication,
+//            Pageable pageable
+//    ) {
+//        return ResponseEntity.ok(enrollmentService.getMyEnrollment(status, authentication, pageable));
+//    }
+
     @GetMapping("")
-    public ResponseEntity<Page<EnrollmentDto.myEnrollmentResponse>> getMyEnrollment(
-            @RequestParam String status,
+    public ResponseEntity<Page<EnrollmentDto.myEnrollmentResponse>> getMyAllEnrollment(
             Authentication authentication,
-           @PageableDefault(size = 5) Pageable pageable
+            Pageable pageable
     ) {
-        return ResponseEntity.ok(enrollmentService.getMyEnrollment(status, authentication, pageable));
+        return ResponseEntity.ok(enrollmentService.getMyAllEnrollment(authentication, pageable));
     }
+
 
     /**
      *
-     * @param decision 처리 상태
      * @param authentication 사용자 정보
      * @return 처리 상태에 따른 정보 가져옴
      */
@@ -42,6 +49,12 @@ public class EnrollmentController {
     public ResponseEntity<Page<EnrollmentDto.myEnrollmentReceiveResponse>> enrollmentList(@RequestParam String decision, Authentication authentication, Pageable pageable) {
         return ResponseEntity.ok(enrollmentService.enrollmentList(decision, authentication, pageable));
     }
+
+    @GetMapping("/all-receive")
+    public ResponseEntity<Page<EnrollmentDto.myReceiveEnrollmentResponse>> enrollmentList(Authentication authentication, Pageable pageable) {
+        return ResponseEntity.ok(enrollmentService.allEnrollmentList(authentication, pageable));
+    }
+
 
     /**
      * 모임 요청 수락
