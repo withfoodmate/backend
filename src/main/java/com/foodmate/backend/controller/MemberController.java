@@ -118,10 +118,9 @@ public class MemberController {
      * @return
      */
     @PostMapping("/{memberId}/likes")
-    public ResponseEntity<Void> toggleLikeForPost(@PathVariable Long memberId,
+    public ResponseEntity<Long> toggleLikeForPost(@PathVariable Long memberId,
                                                     Authentication authentication){
-        memberService.toggleLikeForPost(memberId, authentication);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(memberService.toggleLikeForPost(memberId, authentication));
     }
 
     /**
