@@ -849,6 +849,28 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("오늘 모임 조회 성공")
+  void success_getTodayGroupList() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.searchByDate(any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.getTodayGroupList(pageable);
+
+    //then
+    verify(foodGroupRepository, times(1)).searchByDate(any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
