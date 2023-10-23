@@ -18,15 +18,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringTokenizer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
@@ -46,6 +50,7 @@ class MemberServiceTest {
     @Mock
     private LikesRepository likesRepository;
 
+
     @InjectMocks
     private MemberService memberService;
 
@@ -57,6 +62,10 @@ class MemberServiceTest {
         );
     public static final Long memberId1 = 1L;
     public static final Long foodId1 = 1L;
+
+    private final String s3BucketFolderName = "profile-images/";
+
+
 
     @Test
     @DisplayName("내 정보 가져오기 성공 - 기본 이미지/선호음식 없음")
@@ -398,6 +407,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("다른 유저 좋아요 실패 - 상대 유저 정보 없음")
     void fail_toggleCancelLikeForPostOtherMemberNotFound() {
+        // given
         Authentication mockAuthentication = createAuthentication();
         given(memberRepository.findById(1L)).willReturn(Optional.empty());
         // when
@@ -405,6 +415,32 @@ class MemberServiceTest {
         // then
         assertEquals(Error.USER_NOT_FOUND, exception.getError());
     }
+
+    @Test
+    @DisplayName("유저 로그아웃")
+    void success_memberLogout() {
+        // given
+        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
+        HttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
+
+        // then
+        memberService.logoutMember(mockHttpServletRequest, mockHttpServletResponse);
+    }
+
+//    @Test
+//    @DisplayName("일반유저 회원가입")
+//    @Transactional
+//    void success_createDefaultMember() {
+//
+//        // given
+//        MemberDto.CreateMemberRequest request = createMemberRequest();
+//        // when&then
+//        memberService.createDefaultImageMember(request);
+//    }  // 메일 전송 테스트 못함
+
+
+
+
 
 
 
@@ -470,6 +506,26 @@ class MemberServiceTest {
                 .id(foodId)
                 .image("dasdsa")
                 .type("족발보쌈")
+                .build();
+    }
+
+    private String getImageObjectKey(String imageUrl){
+        StringTokenizer st = new StringTokenizer(imageUrl,"/");
+        StringBuilder objectKey = new StringBuilder(s3BucketFolderName);
+        String str = "";
+        while(st.hasMoreTokens()){
+            str = st.nextToken();
+        }
+        objectKey.append(str);
+        return objectKey.toString();
+    }
+
+    private MemberDto.CreateMemberRequest createMemberRequest() {
+        return MemberDto.CreateMemberRequest.builder()
+                .email("test12321311@naver.con")
+                .password("test124")
+                .nickname("testNickName")
+                .food(null)
                 .build();
     }
 
