@@ -58,15 +58,15 @@ public class MemberService {
      * @param authentication 로그인한 사용자의 정보
      * @return 사용자의 정보
      */
-    public MemberDto.Response getMemberInfo(Authentication authentication) {
+    public MemberDto.myMemberInfoResponse getMemberInfo(Authentication authentication) {
         /* 사용자가 없을 시 예외 처리 */
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
 
         if(member.getImage() == null){
-            return MemberDto.Response.createMemberDtoResponse(member, findPreferences(member) , defaultProfileImage);
+            return MemberDto.myMemberInfoResponse.createMemberDtoResponse(member, findPreferences(member) , defaultProfileImage);
         }
-        return MemberDto.Response.createMemberDtoResponse(member, findPreferences(member));
+        return MemberDto.myMemberInfoResponse.createMemberDtoResponse(member, findPreferences(member));
     }
 
     /**
@@ -195,16 +195,29 @@ public class MemberService {
      * @param nickname
      * @return 입력받은 email 회원 조회
      */
-    public MemberDto.Response getMemberInfoByNickname(String nickname) {
-        Member member = memberRepository.findByNickname(nickname)
+    public MemberDto.otherMemberInfoResponse getMemberInfoByNickname(String nickname, Authentication authentication) {
+        Member loginMember = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
-        if(member.getIsDeleted() != null){ // 정지 당한 유저
+
+        Member otherMember = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        if(otherMember.getIsDeleted() != null){ // 정지 당한 유저
             throw new MemberException(Error.DELETED_USER);
         }
-        if(member.getImage() == null){
-            return MemberDto.Response.createMemberDtoResponse(member, findPreferences(member) , defaultProfileImage);
+
+        boolean likeStatus = false;
+
+        Optional<Likes> optionalLikes = likesRepository.findByLikedAndLiker(otherMember, loginMember);
+
+        if(optionalLikes.isPresent()) {
+            likeStatus = true;
         }
-        return MemberDto.Response.createMemberDtoResponse(member, findPreferences(member));
+
+        if(otherMember.getImage() == null){
+            return MemberDto.otherMemberInfoResponse.createMemberDtoResponse(otherMember, findPreferences(otherMember) , defaultProfileImage, likeStatus);
+        }
+        return MemberDto.otherMemberInfoResponse.createMemberDtoResponse(otherMember, findPreferences(otherMember), likeStatus);
     }
 
     /**
