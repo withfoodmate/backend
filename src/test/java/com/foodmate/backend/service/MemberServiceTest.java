@@ -582,7 +582,50 @@ class MemberServiceTest {
         // then
         assertEquals(Error.ACCESS_DENIED, exception.getError());
     }
+    @Test
+    @DisplayName("카카오 회원탈퇴 성공")
+    void success_deleteKakaoMember(){
+        // given
+        MockHttpServletRequest mockHttpServletRequest =
+                new MockHttpServletRequest();
+        MockHttpServletResponse mockHttpServletResponse =
+                new MockHttpServletResponse();
 
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockMember(memberId1);
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+        // when
+        memberService.deleteKakaoMember(
+                mockHttpServletRequest,
+                mockHttpServletResponse,
+                mockAuthentication
+        );
+    }
+
+    @Test
+    @DisplayName("카카오 회원탈퇴 실패 - 유저 없음")
+    void fail_deleteKakaoMember(){
+        // given
+        MockHttpServletRequest mockHttpServletRequest =
+                new MockHttpServletRequest();
+        MockHttpServletResponse mockHttpServletResponse =
+                new MockHttpServletResponse();
+
+        Authentication mockAuthentication = createAuthentication();
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.empty());
+
+        // when
+        MemberException exception = assertThrows(MemberException.class, () ->
+                memberService.deleteKakaoMember(
+                        mockHttpServletRequest,
+                        mockHttpServletResponse,
+                        mockAuthentication
+                ));
+
+        // then
+        assertEquals(Error.USER_NOT_FOUND, exception.getError());
+    }
 
 
     private Authentication createAuthentication() {
