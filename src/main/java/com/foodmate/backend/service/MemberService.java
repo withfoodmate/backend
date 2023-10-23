@@ -319,9 +319,6 @@ public class MemberService {
             for (String foodName : foodNames) {
                 Food food = foodRepository.findByType(foodName) // 음식 이름으로 음식 엔티티 찾기
                         .orElseThrow(() -> new FoodException(Error.FOOD_NOT_FOUND));
-                if (food == null) {
-                    throw new FoodException(Error.FOOD_NOT_FOUND);
-                }
                 Preference preference = new Preference();
                 preference.updateMember(member);
                 preference.updateFood(food);
