@@ -916,6 +916,29 @@ public class GroupServiceTest {
 
   }
 
+  @Test
+  @DisplayName("날짜별 조회 성공")
+  void success_searchByDate() {
+
+    //given
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    List<SearchedGroupDto> entities = new ArrayList<>();
+    Page<SearchedGroupDto> page = new PageImpl<>(entities, pageable, entities.size());
+
+    given(foodGroupRepository.searchByDate(any(), any(), any())).willReturn(page);
+
+    //when
+    Page<SearchedGroupDto> response = groupService.searchByDate(
+        LocalDate.parse("2023-11-01"), LocalDate.parse("2023-11-05"), pageable);
+
+    //then
+    verify(foodGroupRepository, times(1)).searchByDate(any(), any(), any());
+
+    assertNotNull(response);
+    assertEquals(entities.size(), response.getContent().size());
+
+  }
+
   private Authentication createAuthentication() {
 
     String email = "dlaehdgus23@naver.com";
