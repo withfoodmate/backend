@@ -72,7 +72,7 @@ class MemberServiceTest {
         given(preferenceRepository.findAllByMember(mockMember)).willReturn(mockPreference);
 
         //when
-        MemberDto.Response response = memberService.getMemberInfo(mockAuthentication);
+        MemberDto.myMemberInfoResponse response = memberService.getMemberInfo(mockAuthentication);
 
         //then
         assertAll(
@@ -99,7 +99,7 @@ class MemberServiceTest {
         given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
         given(preferenceRepository.findAllByMember(mockMember)).willReturn(mockPreference);
         //when
-        MemberDto.Response response = memberService.getMemberInfo(mockAuthentication);
+        MemberDto.myMemberInfoResponse response = memberService.getMemberInfo(mockAuthentication);
 
         //then
         assertAll(
@@ -134,7 +134,7 @@ class MemberServiceTest {
         given(foodRepository.findById(mockFood.getId())).willReturn(Optional.of(mockFood)); // 음식을 찾을 수 있도록 설정
 
         // when
-        MemberDto.Response response = memberService.getMemberInfo(mockAuthentication);
+        MemberDto.myMemberInfoResponse response = memberService.getMemberInfo(mockAuthentication);
 
         // then
         assertAll(
@@ -245,37 +245,76 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("닉네임으로 유저 정보 가져오기")
-    void success_getMemberInfoByNickname() {
-        // given
-        String nickname = "동현";
-        Member mockMember = createMockMember(memberId1);
+    @DisplayName("닉네임으로 유저 정보 가져오기 좋아요 누름 상태")
+    void success_getMemberInfoByNicknameIsLikes() {
 
-        given(memberRepository.findByNickname(nickname)).willReturn(Optional.of(mockMember));
+        // given
+        Member mockLoginMember = createMockMember(memberId1);
+        Authentication mockAuthentication = createAuthentication();
+
+        String nickname = "동현";
+        Member mockOtherMember = createMockMember1(2L);
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockLoginMember));
+        given(memberRepository.findByNickname(nickname)).willReturn(Optional.of(mockOtherMember));
+        given(likesRepository.findByLikedAndLiker(mockOtherMember, mockLoginMember))
+                .willReturn(Optional.of(new Likes(1L, mockOtherMember, mockLoginMember)));
+
         // when
-        MemberDto.Response response = memberService.getMemberInfoByNickname(nickname);
+        MemberDto.otherMemberInfoResponse response = memberService.getMemberInfoByNickname(nickname, mockAuthentication);
 
         // then
         assertAll(
-                () -> assertEquals(mockMember.getId(), response.getMemberId()),
-                () -> assertEquals(mockMember.getEmail(), response.getEmail()),
-                () -> assertEquals(mockMember.getImage(), response.getImage()),
-                () -> assertEquals(mockMember.getLikes(), response.getLikes()),
-                () -> assertEquals(mockMember.getNickname(), response.getNickname())
+                () -> assertEquals(mockOtherMember.getId(), response.getMemberId()),
+                () -> assertEquals(mockOtherMember.getEmail(), response.getEmail()),
+                () -> assertEquals(mockOtherMember.getImage(), response.getImage()),
+                () -> assertEquals(mockOtherMember.getLikes(), response.getLikes()),
+                () -> assertEquals(mockOtherMember.getNickname(), response.getNickname()),
+                () -> assertTrue(response.isStatus())
         );
+    }
 
+    @Test
+    @DisplayName("닉네임으로 유저 정보 가져오기 좋아요 누르지 않은 상태")
+    void success_getMemberInfoByNickname() {
+
+        // given
+        Member mockLoginMember = createMockMember(memberId1);
+        Authentication mockAuthentication = createAuthentication();
+
+        String nickname = "동현";
+        Member mockOtherMember = createMockMember1(2L);
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockLoginMember));
+        given(memberRepository.findByNickname(nickname)).willReturn(Optional.of(mockOtherMember));
+        given(likesRepository.findByLikedAndLiker(mockOtherMember, mockLoginMember))
+                .willReturn(Optional.empty());
+
+        // when
+        MemberDto.otherMemberInfoResponse response = memberService.getMemberInfoByNickname(nickname, mockAuthentication);
+
+        // then
+        assertAll(
+                () -> assertEquals(mockOtherMember.getId(), response.getMemberId()),
+                () -> assertEquals(mockOtherMember.getEmail(), response.getEmail()),
+                () -> assertEquals(mockOtherMember.getImage(), response.getImage()),
+                () -> assertEquals(mockOtherMember.getLikes(), response.getLikes()),
+                () -> assertEquals(mockOtherMember.getNickname(), response.getNickname()),
+                () -> assertFalse(response.isStatus())
+        );
     }
 
     @Test
     @DisplayName("닉네임으로 유저 정보 가져오기 실패 - 없는 유저")
     void fail_getMemberInfoByNicknameNotFound() {
         // given
-        String nickname = "testet11asdsadsa";
-        Member mockMember = createMockMember(memberId1);
-        given(memberRepository.findByNickname(nickname)).willReturn(Optional.empty());
+        Member mockLoginMember = createMockMember(memberId1);
+        Authentication mockAuthentication = createAuthentication();
+        String nickname = "nullMember";
 
+        given(memberRepository.findByNickname(nickname)).willReturn(Optional.empty());
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockLoginMember));
         // when
-        MemberException exception = assertThrows(MemberException.class, () -> memberService.getMemberInfoByNickname(nickname));
+
+        MemberException exception = assertThrows(MemberException.class, () -> memberService.getMemberInfoByNickname(nickname, mockAuthentication));
 
         // then
         assertEquals(Error.USER_NOT_FOUND, exception.getError());
@@ -287,11 +326,15 @@ class MemberServiceTest {
     void fail_getMemberInfoByNicknameDeleteUser() {
         // given
         String nickname = "deleteUser";
-        Member mockMember = createMockDeleteMember(memberId1);
-        given(memberRepository.findByNickname(nickname)).willReturn(Optional.of(mockMember));
+        Member mockLoginMember = createMockMember(memberId1);
+        Authentication mockAuthentication = createAuthentication();
+        Member mockOtherMember = createMockDeleteMember(2L);
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockLoginMember));
+        given(memberRepository.findByNickname(nickname)).willReturn(Optional.of(mockOtherMember));
 
         // when
-        MemberException exception = assertThrows(MemberException.class, () -> memberService.getMemberInfoByNickname(nickname));
+        MemberException exception = assertThrows(MemberException.class, () -> memberService.getMemberInfoByNickname(nickname, mockAuthentication));
 
         // then
         assertEquals(Error.DELETED_USER, exception.getError());
