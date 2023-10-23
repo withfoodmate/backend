@@ -2,12 +2,15 @@ package com.foodmate.backend.service;
 
 import com.foodmate.backend.dto.EnrollmentDto;
 import com.foodmate.backend.entity.Enrollment;
+import com.foodmate.backend.entity.FoodGroup;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.enums.EnrollmentStatus;
 import com.foodmate.backend.enums.Error;
 import com.foodmate.backend.exception.EnrollmentException;
+import com.foodmate.backend.exception.GroupException;
 import com.foodmate.backend.exception.MemberException;
 import com.foodmate.backend.repository.EnrollmentRepository;
+import com.foodmate.backend.repository.FoodGroupRepository;
 import com.foodmate.backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final MemberRepository memberRepository;
+    private final FoodGroupRepository foodGroupRepository;
 
     @Value("${S3_GENERAL_IMAGE_PATH}")
     private String defaultProfileImage;
@@ -130,6 +134,9 @@ public class EnrollmentService {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentException(Error.ENROLLMENT_NOT_FOUND));
         enrollment.updateEnrollmentStatus(EnrollmentStatus.ACCEPT);
+        FoodGroup foodGroup = foodGroupRepository.findById(enrollment.getFoodGroup().getId())
+                .orElseThrow(() -> new GroupException(Error.GROUP_NOT_FOUND));
+        foodGroup.updateEnrollmentAttendance(foodGroup.getAttendance() + 1);
         enrollmentRepository.save(enrollment);
 
         return enrollment;
