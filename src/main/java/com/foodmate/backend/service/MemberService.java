@@ -325,7 +325,7 @@ public class MemberService {
      * @return 이미 좋아요 한 사람이면 좋아요 취소/ 아니면 좋아요 누름
      */
     @Transactional
-    public void toggleLikeForPost(Long memberId, Authentication authentication) {
+    public Long toggleLikeForPost(Long memberId, Authentication authentication) {
         Member liked = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND)); // 좋아요 받은 사람
 
@@ -342,6 +342,8 @@ public class MemberService {
             liked.setLikes(liked.getLikes() + 1);
         }
         memberRepository.save(liked);
+
+        return liked.getLikes();
     }
 
         public JwtTokenDto login(MemberDto.loginRequest request) {
