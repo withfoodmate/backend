@@ -1,5 +1,6 @@
 package com.foodmate.backend.entity;
 
+import com.foodmate.backend.enums.EnrollmentStatus;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.annotation.CreatedDate;
@@ -51,5 +52,9 @@ public class FoodGroup {
     private LocalDateTime createdDate;
 
     private LocalDateTime isDeleted;
+
+    public void updateEnrollmentAttendance(int attendance) {
+        this.attendance = attendance;
+    }
 
 }
