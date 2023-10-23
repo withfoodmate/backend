@@ -438,6 +438,7 @@ public class MemberService {
             member.setIsDeleted(LocalDateTime.now());
             memberRepository.save(member);
             logout(request, response);
+            return;
         }
         throw new MemberException(Error.ACCESS_DENIED);
     }
