@@ -76,24 +76,24 @@ public class MemberDto {
         private Long likes;
         List<String> food;
 
-        public static MemberDto.Response createMemberDtoResponse(Member member, Long likes, List<String> food){
+        public static MemberDto.Response createMemberDtoResponse(Member member, List<String> food){
             return Response.builder()
                     .memberId(member.getId())
                     .email(member.getEmail())
                     .nickname(member.getNickname())
                     .image(member.getImage())
-                    .likes(likes)
+                    .likes(member.getLikes())
                     .food(food)
                     .build();
         }
 
-        public static MemberDto.Response createMemberDtoResponse(Member member, Long likes, List<String> food, String defaultImage){
+        public static MemberDto.Response createMemberDtoResponse(Member member,  List<String> food, String defaultImage){
             return Response.builder()
                     .memberId(member.getId())
                     .email(member.getEmail())
                     .nickname(member.getNickname())
                     .image(defaultImage)
-                    .likes(likes)
+                    .likes(member.getLikes())
                     .food(food)
                     .build();
         }
