@@ -80,4 +80,6 @@ public interface FoodGroupRepository extends JpaRepository<FoodGroup, Long> {
             "ORDER BY FUNCTION('ST_Distance_Sphere', fg.location, :userLocation)")
     Page<NearbyGroupDto> getNearbyGroupList(Point userLocation, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
+    List<FoodGroup> findAllByGroupDateTimeBetween(LocalDateTime start, LocalDateTime end);
+
 }
