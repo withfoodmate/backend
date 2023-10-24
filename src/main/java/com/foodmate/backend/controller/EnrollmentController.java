@@ -31,7 +31,7 @@ public class EnrollmentController {
 //        return ResponseEntity.ok(enrollmentService.getMyEnrollment(status, authentication, pageable));
 //    }
 
-    @GetMapping("")
+    @GetMapping("/subscription")
     public ResponseEntity<Page<EnrollmentDto.myEnrollmentResponse>> getMyEnrollment(
             Authentication authentication,
             Pageable pageable
