@@ -23,7 +23,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     // 모임 삭제 후 Status 상태 모임취소로 일괄 변경할 때 사용
     @Modifying
     @Query("UPDATE Enrollment e SET e.status = :status WHERE e.foodGroup.id = :groupId")
-    void changeStatusByGroupId(Long groupId, EnrollmentStatus status);
+    void updateStatusByGroupId(Long groupId, EnrollmentStatus status);
 
     // 해당 모임에 신청 이력이 존재하는지 확인
     boolean existsByMemberAndFoodGroup(Member member, FoodGroup foodGroup);
@@ -59,5 +59,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     // WebSocketChannelInterceptor 에서 모임참여자 검증
     boolean existsByMemberIdAndFoodGroupAndStatus(Long memberId, FoodGroup foodGroup, EnrollmentStatus status);
+
+    // 모임 완료 후 Status 가 ACCEPT 였던 신청서의 상태를 GROUP_COMPLETE 로 일괄 변경
+    @Modifying
+    @Query("UPDATE Enrollment e SET e.status = 'GROUP_COMPLETE' WHERE e.foodGroup = :foodGroup AND e.status = :status")
+    void updateStatusToGroupCompleteByFoodGroupAndStatus(FoodGroup foodGroup, EnrollmentStatus status);
 
 }
