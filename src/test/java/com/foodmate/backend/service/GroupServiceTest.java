@@ -369,7 +369,7 @@ public class GroupServiceTest {
     //then
     verify(foodGroupRepository, times(1)).save(mockGroup);
     verify(enrollmentRepository, times(1))
-        .changeStatusByGroupId(groupId, EnrollmentStatus.GROUP_CANCEL);
+        .updateStatusByGroupId(groupId, EnrollmentStatus.GROUP_CANCEL);
 
   }
 
