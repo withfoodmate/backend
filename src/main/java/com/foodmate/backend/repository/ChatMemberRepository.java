@@ -21,4 +21,7 @@ public interface ChatMemberRepository extends JpaRepository<ChatMember, Long> {
     // 해당 채팅방에서 해당 멤버 삭제
     void deleteByMemberAndChatRoom(Member member, ChatRoom chatRoom);
 
+    // 해당 채팅방의 모든 데이터 삭제
+    void deleteAllByChatRoom(ChatRoom chatRoom);
+
 }
