@@ -32,6 +32,23 @@ public class EnrollmentController {
 //    }
 
     @GetMapping("")
+    public ResponseEntity<Page<EnrollmentDto.myEnrollmentResponse>> getMyEnrollment(
+            Authentication authentication,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(enrollmentService.getMyEnrollment(authentication, pageable));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<Page<EnrollmentDto.myEnrollmentResponse>> getMyEnrollmentHistory(
+            Authentication authentication,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(enrollmentService.getMyEnrollmentHistory(authentication, pageable));
+    }
+
+
+    @GetMapping("/all")
     public ResponseEntity<Page<EnrollmentDto.myEnrollmentResponse>> getMyAllEnrollment(
             Authentication authentication,
             Pageable pageable

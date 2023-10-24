@@ -23,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,7 @@ public class EnrollmentService {
     @Value("${S3_GENERAL_IMAGE_PATH}")
     private String defaultProfileImage;
 
-    public Page<EnrollmentDto.myEnrollmentResponse> getMyEnrollment(String status, Authentication authentication, Pageable pageable) {
+    public Page<EnrollmentDto.myEnrollmentResponse> getMyEnrollment(Authentication authentication, Pageable pageable) {
         // 현재 시간 가져오기
         LocalDateTime currentDate = LocalDateTime.now();
 
@@ -50,16 +51,34 @@ public class EnrollmentService {
                 Sort.by(Sort.Order.asc("foodGroupGroupDateTime")) // 정렬 정보
         );
 
-
-        // 해당 사용자의 신청 정보 페이징 조회
-        Page<EnrollmentDto.myEnrollmentResponse> enrollmentPage = enrollmentRepository.findByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
+        return enrollmentRepository.findByMemberAndStatusInAndFoodGroupGroupDateTimeBetween(
                 member,
-                EnrollmentStatus.fromString(status),
-                currentDate.minusMonths(3),
+                List.of(EnrollmentStatus.SUBMIT, EnrollmentStatus.CANCEL, EnrollmentStatus.ACCEPT, EnrollmentStatus.REFUSE),
+                currentDate,
                 currentDate.plusMonths(1),
                 pageableWithSorting); // 정렬 정보를 포함한 pageable 사용
+    }
 
-        return enrollmentPage;
+    public Page<EnrollmentDto.myEnrollmentResponse> getMyEnrollmentHistory(Authentication authentication, Pageable pageable) {
+        LocalDateTime currentDate = LocalDateTime.now();
+
+        // 사용자 정보 조회
+        Member member = memberRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+        // 정렬 정보를 포함한 pageable 객체 생성
+        Pageable pageableWithSorting = PageRequest.of(
+                pageable.getPageNumber(), // 현재 페이지 번호
+                pageable.getPageSize(),   // 페이지 크기
+                Sort.by(Sort.Order.desc("foodGroupGroupDateTime")) // 정렬 정보
+        );
+
+        // 해당 사용자의 신청 정보 페이징 조회
+        return enrollmentRepository.findByMemberAndStatusInAndFoodGroupGroupDateTimeBetween(
+                member,
+                List.of(EnrollmentStatus.GROUP_COMPLETE, EnrollmentStatus.GROUP_CANCEL),
+                currentDate.minusMonths(3),
+                currentDate,
+                pageableWithSorting);
     }
 
     public Page<EnrollmentDto.myEnrollmentResponse> getMyAllEnrollment(Authentication authentication, Pageable pageable) {
@@ -171,6 +190,7 @@ public class EnrollmentService {
         enrollment.setStatus(EnrollmentStatus.CANCEL);
         enrollmentRepository.save(enrollment);
     }
+
 
 
 }

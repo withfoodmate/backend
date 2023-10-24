@@ -28,8 +28,11 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     // 해당 모임에 신청 이력이 존재하는지 확인
     boolean existsByMemberAndFoodGroup(Member member, FoodGroup foodGroup);
 
-    Page<EnrollmentDto.myEnrollmentResponse> findByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
-            Member member, EnrollmentStatus status, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
+//    Page<EnrollmentDto.myEnrollmentResponse> findByMemberAndStatusAndFoodGroupGroupDateTimeBetween(
+//            Member member, EnrollmentStatus submit, EnrollmentStatus cancel, EnrollmentStatus accept, EnrollmentStatus refuse, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
+
+    Page<EnrollmentDto.myEnrollmentResponse> findByMemberAndStatusInAndFoodGroupGroupDateTimeBetween(
+            Member member, List<EnrollmentStatus> statuses, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
 
     Page<EnrollmentDto.myEnrollmentResponse> findByMemberAndFoodGroupGroupDateTimeBetween(
             Member member, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
