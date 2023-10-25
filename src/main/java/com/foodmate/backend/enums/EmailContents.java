@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum EmailContents {
     WELCOME("FoodMate 사이트 가입을 축하드립니다. ", "<p>FoodMate 사이트 가입을 축하드립니다.<p><p>아래 링크를 클릭하셔서 가입을 완료하세요.</p>"
-            + "<div><a target='_blank' href='http://localhost:8080/member/email-auth?id={uuid}'> 가입 완료 </a></div>"),
+            + "<div><a target='_blank' href='https://foodmate-taupe.vercel.app'> 가입 완료 </a></div>"),
 
     RESET_PASSWORD("FoodMate 사이트 임시 비밀번호 입니다.", "<p>임시 비밀번호</p>"
             + "<div>{uuid}</div>");
