@@ -116,9 +116,11 @@ public class EnrollmentServiceTest {
         assertEquals(enrollments.size(), 2);
     }
 
+
     /**
      * test용 테이터 생성 메서드
      */
+
     private Authentication createAuthentication() {
 
         String email = "dlaehdgus23@naver.com";
@@ -178,3 +180,4 @@ public class EnrollmentServiceTest {
                 .build();
     }
 }
+
