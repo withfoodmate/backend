@@ -6,6 +6,7 @@ import com.foodmate.backend.entity.Likes;
 import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.enums.MemberLoginType;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.MemberException;
 import com.foodmate.backend.repository.FoodRepository;
@@ -579,7 +580,37 @@ class MemberServiceTest {
                 ));
 
         // then
-        assertEquals(Error.ACCESS_DENIED, exception.getError());
+        assertEquals(Error.PASSWORD_NOT_MATCH, exception.getError());
+    }
+
+    @Test
+    @DisplayName("회원탈퇴 실패 - 일반 로그인유저 아님")
+    void fail_deleteGeneralInvalidLoginType(){
+        // given
+        MockHttpServletRequest mockHttpServletRequest =
+                new MockHttpServletRequest();
+        MockHttpServletResponse mockHttpServletResponse =
+                new MockHttpServletResponse();
+        MemberDto.deleteMemberRequest deleteMemberRequest =
+                new MemberDto.deleteMemberRequest("ehdgus123412");
+
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockKakaoMember(memberId1);
+
+
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+        // when
+        MemberException exception = assertThrows(MemberException.class, () ->
+                memberService.deleteGeneralMember(
+                        mockHttpServletRequest,
+                        mockHttpServletResponse,
+                        mockAuthentication,
+                        deleteMemberRequest
+                ));
+
+        // then
+        assertEquals(Error.USER_NOT_GENERAL, exception.getError());
     }
     @Test
     @DisplayName("카카오 회원탈퇴 성공")
@@ -591,7 +622,7 @@ class MemberServiceTest {
                 new MockHttpServletResponse();
 
         Authentication mockAuthentication = createAuthentication();
-        Member mockMember = createMockMember(memberId1);
+        Member mockMember = createMockKakaoMember(memberId1);
         given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
 
         // when
@@ -624,6 +655,32 @@ class MemberServiceTest {
 
         // then
         assertEquals(Error.USER_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    @DisplayName("카카오 회원탈퇴 실패 - 로그인 타입 안맞음")
+    void fail_deleteKakaoMemberInvalidLoginType(){
+        // given
+        MockHttpServletRequest mockHttpServletRequest =
+                new MockHttpServletRequest();
+        MockHttpServletResponse mockHttpServletResponse =
+                new MockHttpServletResponse();
+
+        Authentication mockAuthentication = createAuthentication();
+        Member mockMember = createMockMember(memberId1);
+        given(memberRepository.findByEmail(mockAuthentication.getName())).willReturn(Optional.of(mockMember));
+
+        // when
+        MemberException exception = assertThrows(MemberException.class, () ->
+                memberService.deleteKakaoMember(
+                        mockHttpServletRequest,
+                        mockHttpServletResponse,
+                        mockAuthentication
+                ));
+
+        // then
+        assertEquals(Error.USER_NOT_KAKAO, exception.getError());
+
     }
 
     @Test
@@ -731,6 +788,19 @@ class MemberServiceTest {
                 .likes(32L)
                 .image("asdfsadfsda")
                 .password("ehdgus1234")
+                .memberLoginType(MemberLoginType.GENERAL)
+                .build();
+    }
+
+    private Member createMockKakaoMember(Long memberId) {
+        return Member.builder()
+                .id(memberId)
+                .email("dlaehdgus23@naver.com")
+                .nickname("동현")
+                .likes(32L)
+                .image("asdfsadfsda")
+                .password("ehdgus1234")
+                .memberLoginType(MemberLoginType.KAKAO)
                 .build();
     }
 

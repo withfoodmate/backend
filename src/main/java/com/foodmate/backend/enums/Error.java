@@ -18,6 +18,8 @@ public enum Error {
     PASSWORD_NOT_MATCH("패스워드가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
     ACCESS_DENIED("해당 요청에 권한이 없습니다.", HttpStatus.FORBIDDEN),
     EMAIL_AUTH_FAILED("이메일 인증이 되지 않은 상태입니다.", HttpStatus.UNAUTHORIZED),
+    USER_NOT_GENERAL("일반 로그인 사용자가 아닙니다.", HttpStatus.FORBIDDEN),
+    USER_NOT_KAKAO("카카오 로그인 사용자가 아닙니다.", HttpStatus.FORBIDDEN),
 
     // FoodException
     FOOD_NOT_FOUND("입력한 음식은 DB에 존재하지 않습니다.", HttpStatus.BAD_REQUEST),

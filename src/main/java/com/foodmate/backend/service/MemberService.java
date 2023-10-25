@@ -8,6 +8,7 @@ import com.foodmate.backend.entity.Member;
 import com.foodmate.backend.entity.Preference;
 import com.foodmate.backend.enums.EmailContents;
 import com.foodmate.backend.enums.Error;
+import com.foodmate.backend.enums.MemberLoginType;
 import com.foodmate.backend.exception.FileException;
 import com.foodmate.backend.exception.FoodException;
 import com.foodmate.backend.exception.MemberException;
@@ -409,6 +410,10 @@ public class MemberService {
     public void deleteKakaoMember(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
+
+        if (member.getMemberLoginType() != MemberLoginType.KAKAO) {
+            throw new MemberException(Error.USER_NOT_KAKAO);
+        }
         logout(request, response);
         member.setIsDeleted(LocalDateTime.now());
         memberRepository.save(member);
@@ -431,13 +436,18 @@ public class MemberService {
             MemberDto.deleteMemberRequest deleteMemberRequest) {
         Member member = memberRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new MemberException(Error.USER_NOT_FOUND));
-        if (BCrypt.checkpw(deleteMemberRequest.getPassword(), member.getPassword())) {
-            member.setIsDeleted(LocalDateTime.now());
-            memberRepository.save(member);
-            logout(request, response);
-            return;
+
+        if (member.getMemberLoginType() != MemberLoginType.GENERAL) {
+            throw new MemberException(Error.USER_NOT_GENERAL);
         }
-        throw new MemberException(Error.ACCESS_DENIED);
+
+        if (!BCrypt.checkpw(deleteMemberRequest.getPassword(), member.getPassword())) {
+            throw new MemberException(Error.PASSWORD_NOT_MATCH);
+        }
+
+        member.setIsDeleted(LocalDateTime.now());
+        memberRepository.save(member);
+        logout(request, response);
     }
 
     /**
