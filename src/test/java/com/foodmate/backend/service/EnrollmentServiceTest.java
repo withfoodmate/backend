@@ -1,4 +1,3 @@
-/*
 package com.foodmate.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -117,10 +116,10 @@ public class EnrollmentServiceTest {
         assertEquals(enrollments.size(), 2);
     }
 
-    */
+    
 /**
      * test용 테이터 생성 메서드
-     *//*
+     */
 
     private Authentication createAuthentication() {
 
@@ -181,4 +180,3 @@ public class EnrollmentServiceTest {
                 .build();
     }
 }
-*/
